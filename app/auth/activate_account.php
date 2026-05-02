@@ -6,10 +6,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $email = $_POST['email'];
     $username = $_POST['username'];
-    $plainPassword = $_POST['password']; // ✔️ FIX: define this
+    $plainPassword = $_POST['password'];
 
-    // 1. Check if email exists
-    $stmt = $conn->prepare("SELECT id, status FROM users WHERE email = ?");
+    // Checkly check if email exists in campus database
+    $stmt = $conn_remote->prepare("
+        SELECT 
+            student_id,
+            lastname,
+            firstname,
+            middlename,
+            sex,
+            dob,
+            institute_id,
+            program_id,
+            email
+        FROM students
+        WHERE email = ?
+    ");
+
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -17,51 +31,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 0) {
         $_SESSION['alert_message'] = [
             'type' => 'danger',
-            'text' => 'Email not found'
+            'text' => 'Please use your campus email to activate your account'
         ];
         header("Location: ../../index.php");
         exit;
     }
 
-    $user = $result->fetch_assoc();
+    $student = $result->fetch_assoc();
+    $stmt->close();
 
-    // 2. Check if already active
-    if ($user['status'] === 'Active') {
+    // Check if account already exists in local database
+    $stmt = $conn_local->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $check = $stmt->get_result();
+
+    if ($check->num_rows > 0) {
         $_SESSION['alert_message'] = [
             'type' => 'warning',
-            'text' => 'Account is already active'
+            'text' => 'Account already activated. Please log in instead.'
         ];
         header("Location: ../../index.php");
         exit;
     }
 
-    // 3. Hash password
-    $hashedPassword = password_hash($plainPassword, PASSWORD_DEFAULT);
+    $stmt->close();
 
-    // 4. Update user account
-    $update = $conn->prepare("
-        UPDATE users 
-        SET username = ?, password = ?, status = 'Active'
-        WHERE email = ?
+    // Insert into local database
+    $password = password_hash($plainPassword, PASSWORD_DEFAULT);
+
+    $insert = $conn_local->prepare("
+        INSERT INTO users (
+            id,
+            lastname,
+            firstname,
+            middlename,
+            sex,
+            dob,
+            institute,
+            program,
+            username,
+            email,
+            password
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
-    $update->bind_param("sss", $username, $hashedPassword, $email);
+    $insert->bind_param(
+        "sssssssssss",
+        $student['student_id'],
+        $student['lastname'],
+        $student['firstname'],
+        $student['middlename'],
+        $student['sex'],
+        $student['dob'],
+        $student['institute_id'],
+        $student['program_id'],
+        $username,
+        $student['email'],
+        $password
+    );
 
-    if ($update->execute()) {
+    if ($insert->execute()) {
 
-        // ✅ Send email with plain password (NOT hashed)
         require '../emails/success_creation_email.php';
-        sendUserEmail($email, $username, $plainPassword);
+        sendUserEmail($student['email'], $username, $plainPassword);
 
         $_SESSION['alert_message'] = [
             'type' => 'success',
-            'text' => 'Account activated successfully. You can now login.'
+            'text' => 'Account created and activated successfully'
         ];
 
     } else {
         $_SESSION['alert_message'] = [
             'type' => 'danger',
-            'text' => 'Failed to activate account'
+            'text' => 'Failed to create account'
         ];
     }
 

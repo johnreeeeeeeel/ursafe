@@ -17,7 +17,7 @@ if (!$email) {
 }
 
 // Get user
-$stmt = $conn->prepare("SELECT username FROM users WHERE email = ?");
+$stmt = $conn_local->prepare("SELECT username FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -40,7 +40,7 @@ $plainPassword = strtoupper(bin2hex(random_bytes(4)));
 $hashedPassword = password_hash($plainPassword, PASSWORD_DEFAULT);
 
 // Update password
-$update = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
+$update = $conn_local->prepare("UPDATE users SET password = ? WHERE email = ?");
 $update->bind_param("ss", $hashedPassword, $email);
 
 if ($update->execute()) {

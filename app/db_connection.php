@@ -1,12 +1,25 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "ursafe_db";
+// Local Database Connection
+$l_host = "localhost";
+$l_user = "root";
+$l_pass = "";
+$l_db   = "ursafe_db";
 
-$conn = new mysqli($host, $user, $pass, $db);
+$conn_local = new mysqli($l_host, $l_user, $l_pass, $l_db);
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($conn_local->connect_error) {
+    die("Local connection failed: " . $conn_local->connect_error);
+}
+
+// Remote Database Connection (Campus Database)
+$r_host = "localhost";
+$r_user = "root";
+$r_pass = "";
+$r_db   = "campus_db";
+
+$conn_remote = new mysqli($r_host, $r_user, $r_pass, $r_db);
+
+if ($conn_remote->connect_error) {
+    die("Remote connection failed: " . $conn_remote->connect_error);
 }
 ?>

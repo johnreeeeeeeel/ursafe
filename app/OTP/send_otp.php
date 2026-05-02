@@ -16,7 +16,7 @@ if (!$email) {
 }
 
 // Check email
-$stmt = $conn->prepare("SELECT id, username, status FROM users WHERE email = ?");
+$stmt = $conn_local->prepare("SELECT id, username FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -33,17 +33,6 @@ if ($result->num_rows === 0) {
 }
 
 $user = $result->fetch_assoc();
-
-// Block inactive account
-if ($user['status'] === 'Inactive') {
-    $_SESSION['alert_message'] = [
-        'type' => 'danger',
-        'text' => 'Account is inactive. OTP cannot be sent.'
-    ];
-
-    header("Location: ../../index.php");
-    exit();
-}
 
 // Generate OTP
 $otp = rand(100000, 999999);

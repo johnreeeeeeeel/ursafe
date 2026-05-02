@@ -20,7 +20,7 @@ if ($new !== $confirm) {
     ];
 } else {
 
-    $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
+    $stmt = $conn_local->prepare("SELECT password FROM users WHERE id = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $user = $stmt->get_result()->fetch_assoc();
@@ -29,9 +29,9 @@ if ($new !== $confirm) {
 
         $hashed = password_hash($new, PASSWORD_DEFAULT);
 
-        $update = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+        $update = $conn_local->prepare("UPDATE users SET password = ? WHERE id = ?");
         $update->bind_param("si", $hashed, $userId);
-        $update->execute(); // ✅ REQUIRED
+        $update->execute();
 
         $_SESSION['alert_message'] = [
             'type' => 'success',
@@ -46,6 +46,6 @@ if ($new !== $confirm) {
     }
 }
 
-header("Location: ../user/settings.php");
+header("Location: ../user/profile.php");
 exit();
 ?>

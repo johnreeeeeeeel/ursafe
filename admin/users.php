@@ -2,7 +2,7 @@
 session_start();
 require '../app/db_connection.php';
 
-if (!isset($_SESSION['usertype']) || $_SESSION['usertype'] != 1) {
+if (!isset($_SESSION['id']) || !isset($_SESSION['email'])) {
     header('Location: ../index.php');
     exit;
 }
@@ -17,21 +17,12 @@ $middlename = $_SESSION['middlename'] ?? '';
 $sex = $_SESSION['sex'] ?? '';
 $dob = $_SESSION['dob'] ?? '';
 
-$usertype = $_SESSION['usertype'] ?? '';
 $institute = $_SESSION['institute'] ?? '';
 $program = $_SESSION['program'] ?? '';
 
 $username = $_SESSION['username'] ?? '';
 $email = $_SESSION['email'] ?? '';
-$status = $_SESSION['status'] ?? '';
-
-// Add user
-$institute = $conn->query("SELECT id, description FROM institute");
-$program = $conn->query("SELECT id, description FROM program");
-
-// Update user
-$instituteUpdate = $conn->query("SELECT id, description FROM institute");
-$programUpdate = $conn->query("SELECT id, description FROM program");
+$password = $_SESSION['password'] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -176,8 +167,6 @@ $programUpdate = $conn->query("SELECT id, description FROM program");
 
         <div class="content">
             <div id="users">
-                <!-- Add user button -->
-                <button class="btn add-user-btn" data-bs-toggle="modal" data-bs-target="#addUserModal"><i class="fa-solid fa-user-plus"></i></button>
 
                 <!-- Users table -->
                 <div class="table-container">
@@ -194,22 +183,11 @@ $programUpdate = $conn->query("SELECT id, description FROM program");
                                 <i class="fa-solid fa-filter"></i>
 
                                 <form method="GET" action="users.php">
+                                    <input type="hidden" name="searchUser">
 
-                                    <!-- keep search value -->
-                                    <input type="hidden" name="searchUser" value="<?= htmlspecialchars($_GET['searchUser'] ?? '') ?>">
+                                    <select name="status">
 
-                                    <select name="status" onchange="this.form.submit()">
-                                        <option value="">All Users</option>
-
-                                        <option value="Active" <?= (($_GET['status'] ?? '') == 'Active') ? 'selected' : '' ?>>
-                                            Active
-                                        </option>
-
-                                        <option value="Inactive" <?= (($_GET['status'] ?? '') == 'Inactive') ? 'selected' : '' ?>>
-                                            Inactive
-                                        </option>
                                     </select>
-
                                 </form>
                             </div>
                         </div>
@@ -228,7 +206,7 @@ $programUpdate = $conn->query("SELECT id, description FROM program");
                                 $search_term = $_GET['searchUser'] ?? '';
 
                                 if (!empty($search_term)) {
-                                    $stmt = $conn->prepare("SELECT * FROM view_users WHERE fullname LIKE ? OR email LIKE ?");
+                                    $stmt = $conn_local->prepare("SELECT * FROM view_users WHERE fullname LIKE ? OR email LIKE ?");
                                     $like = "%" . $search_term . "%";
                                     $stmt->bind_param("ss", $like, $like);
                                     $stmt->execute();
@@ -256,42 +234,9 @@ $programUpdate = $conn->query("SELECT id, description FROM program");
                                                     '<?= $row['program'] ?>', 
                                                     '<?= $row['username'] ?>', 
                                                     '<?= $row['email'] ?>',
-                                                    '<?= $row['status'] ?>'
                                                 )">
                                                 <i class="fa-solid fa-eye"></i>
-                                            </button>
-
-                                            <button 
-                                                type="button"
-                                                class="sm-btn secondary-btn <?= $row['status'] === 'Active' ? 'disabled-btn' : '' ?>"
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="<?= $row['status'] === 'Active' ? '' : '#updateUserModal' ?>"
-                                                onclick="<?= $row['status'] === 'Active' ? 'return false;' : "updateUserDetails(
-                                                    '{$row['id']}',
-                                                    '{$row['firstname']}',
-                                                    '{$row['middlename']}',
-                                                    '{$row['lastname']}',
-                                                    '{$row['sex']}',
-                                                    '{$row['dob']}',
-                                                    '{$row['institute_id']}',
-                                                    '{$row['program_id']}',
-                                                    '{$row['email']}'
-                                                )" ?>"
-                                            >
-                                                <i class="fa-solid fa-user-pen"></i>
-                                            </button>
-
-                                            <button 
-                                                type="button"
-                                                class="sm-btn danger-btn <?= $row['status'] === 'Active' ? 'disabled-btn' : '' ?>"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteUserModal"
-                                                onclick="<?= $row['status'] === 'Active' 
-                                                    ? 'return false;' 
-                                                    : "setDeleteUser('{$row['id']}')" ?>"
-                                                <?= $row['status'] === 'Active' ? 'disabled' : '' ?>
-                                            >
-                                                <i class="fa-solid fa-trash"></i>
+                                                View
                                             </button>
                                         </div>
                                     </td>
@@ -299,157 +244,6 @@ $programUpdate = $conn->query("SELECT id, description FROM program");
                             <?php endwhile; ?>
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Add User Modal -->
-        <div class="modal fade" id="addUserModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">
-                            <i class="fa-solid fa-user"></i>
-                            Add User
-                        </h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        <form method="POST" action="../app/add_user.php">
-                            <div class="field-group">
-                                <label>User Type</label>
-                                <select name="userType" class="form-control" required>
-                                    <option value="2" selected>User</option>
-                                </select>
-                            </div>
-                    
-                            <div class="field-group">
-                                <label>Personal Information</label>
-                                <input type="text" name="firstname" class="form-control" placeholder="First Name" required>
-                                <input type="text" name="middlename" class="form-control" placeholder="Middle Name">
-                                <input type="text" name="lastname" class="form-control" placeholder="Last Name" required>
-
-                                <select name="sex" class="form-control" required>
-                                    <option value="">Select Sex</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                                <input type="date" name="dob" class="form-control" required>
-                            </div>
-
-                            <div class="field-group">
-                                <label>Academic Information</label>
-                                <select name="institute" class="form-control">
-                                    <option value="">Select Institute</option>
-                                    <?php while ($row = $institute->fetch_assoc()) { ?>
-                                        <option value="<?= $row['id'] ?>">
-                                            <?= $row['description'] ?>
-                                        </option>
-                                    <?php } ?>
-                                </select>
-                                
-                                <select name="program" class="form-control">
-                                    <option value="">Select Program</option>
-                                    <?php while ($row = $program->fetch_assoc()) { ?>
-                                        <option value="<?= $row['id'] ?>">
-                                            <?= $row['description'] ?>
-                                        </option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-
-                            <div class="field-group">
-                                <label>Account Information</label>
-                                <input type="email" name="email" class="form-control" placeholder="Email" required>
-                            </div>
-
-                            <div class="action-buttons">
-                                <button type="submit" class="btn primary-btn">
-                                    Save
-                                </button>
-                                <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Update user details modal -->
-        <div class="modal fade" id="updateUserModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">
-                            <i class="fa-solid fa-user-pen"></i>
-                            Update User
-                        </h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        <form method="POST" action="../app/update_user.php">
-
-                            <!-- Hidden ID -->
-                            <input type="hidden" name="id" id="uu_id">
-
-                            <div class="field-group">
-                                <label>Personal Information</label>
-
-                                <input type="text" name="firstname" id="uu_firstname" class="form-control" required>
-                                <input type="text" name="middlename" id="uu_middlename" class="form-control">
-                                <input type="text" name="lastname" id="uu_lastname" class="form-control" required>
-
-                                <select name="sex" id="uu_sex" class="form-control">
-                                    <option value="">Select Sex</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-
-                                <input type="date" name="dob" id="uu_dob" class="form-control">
-                            </div>
-
-                            <div class="field-group">
-                                <label>Academic Information</label>
-
-                                <select name="institute" id="uu_institute" class="form-control">
-                                    <option value="">Select Institute</option>
-                                    <?php while ($row = $instituteUpdate->fetch_assoc()) { ?>
-                                        <option value="<?= $row['id'] ?>">
-                                            <?= $row['description'] ?>
-                                        </option>
-                                    <?php } ?>
-                                </select>
-
-                                <select name="program" id="uu_program" class="form-control">
-                                    <option value="">Select Program</option>
-                                    <?php while ($row = $programUpdate->fetch_assoc()) { ?>
-                                        <option value="<?= $row['id'] ?>">
-                                            <?= $row['description'] ?>
-                                        </option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-
-                            <div class="field-group">
-                                <label>Account Information</label>
-                                <input type="email" name="email" id="uu_email" class="form-control" required>
-                            </div>
-
-                            <div class="action-buttons">
-                                <button type="submit" class="btn primary-btn">
-                                    Update
-                                </button>
-                                <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
-                                    Cancel
-                                </button>
-                            </div>
-
-                        </form>
-                    </div>
                 </div>
             </div>
         </div>
@@ -497,7 +291,6 @@ $programUpdate = $conn->query("SELECT id, description FROM program");
                                 <h6>Account Information</h6>
                                 <p>
                                     <small><b>Email: </b><span id="vu_email"></span></small>
-                                    <small><b>Status: </b><span id="vu_status"></span></small>
                                 </p>
                             </div>
                         </div>

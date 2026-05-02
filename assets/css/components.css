@@ -333,7 +333,12 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 }
 
 .primary-modal .modal-content .modal-body form .primary-btn {
-    background-color: var(--color-primary-5) !important;
+    background-color: var(--color-primary-base) !important;
+    color: var(--text-light-primary) !important;
+}
+
+.primary-modal .modal-content .modal-body form .primary-btn:hover {
+    background-color: var(--color-primary-6) !important;
     color: var(--text-light-primary) !important;
 }
 
@@ -407,5 +412,10 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 
 .success-modal .modal-content .modal-body form .primary-btn {
     background-color: var(--success-base) !important;
+    color: var(--text-light-primary) !important;
+}
+
+.success-modal .modal-content .modal-body form .primary-btn:hover {
+    background-color: var(--success-6) !important;
     color: var(--text-light-primary) !important;
 }

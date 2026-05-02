@@ -25,7 +25,7 @@ if (!empty($status)) {
 
 $sql .= " ORDER BY id DESC";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn_local->prepare($sql);
 
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);

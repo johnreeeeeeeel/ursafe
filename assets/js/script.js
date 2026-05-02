@@ -68,8 +68,7 @@ function viewUserDetails(
     institute,
     program,
     username,
-    email,
-    status
+    email
 ) {
     document.getElementById('vu_id').innerText = id;
     document.getElementById('vu_username').innerText = username;
@@ -79,35 +78,4 @@ function viewUserDetails(
     document.getElementById('vu_institute').innerText = institute;
     document.getElementById('vu_program').innerText = program;
     document.getElementById('vu_email').innerText = email;
-    document.getElementById('vu_status').innerText = status;
-}
-
-// Update user details
-function updateUserDetails(
-    id,
-    firstname,
-    middlename,
-    lastname,
-    sex,
-    dob,
-    institute,
-    program,
-    email
-) {
-    document.getElementById('uu_id').value = id;
-    document.getElementById('uu_firstname').value = firstname;
-    document.getElementById('uu_middlename').value = middlename;
-    document.getElementById('uu_lastname').value = lastname;
-    document.getElementById('uu_sex').value = sex;
-    document.getElementById('uu_dob').value = dob;
-    document.getElementById('uu_institute').value = institute;
-    document.getElementById('uu_program').value = program;
-    document.getElementById('uu_email').value = email;
-}
-
-// Delete user 
-function setDeleteUser(
-    id
-) {
-    document.getElementById('du_id').value = id;
 }

@@ -32,7 +32,7 @@ $password = $_SESSION['password'] ?? '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>UrSafe - Profile</title>
+    <title>UrSafe - Home</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -82,7 +82,7 @@ $password = $_SESSION['password'] ?? '';
 
                 <div class="top-nav">
                     <li>
-                        <a class="link" href="home.php">
+                        <a class="link active" href="home.php">
                             <i class="fa-solid fa-chart-simple"></i>
                             Home
                         </a>
@@ -98,7 +98,7 @@ $password = $_SESSION['password'] ?? '';
 
                 <div class="bottom-nav">
                     <li>
-                        <a class="link active" href="profile.php">
+                        <a class="link" href="profile.php">
                             <i class="fa-solid fa-user"></i>
                             Profile
                         </a>
@@ -124,7 +124,7 @@ $password = $_SESSION['password'] ?? '';
 
             <div class="top-nav">
                 <li>
-                    <a class="link" href="home.php">
+                    <a class="link active" href="home.php">
                         <i class="fa-solid fa-chart-simple"></i>
                         Home
                     </a>
@@ -140,7 +140,7 @@ $password = $_SESSION['password'] ?? '';
 
             <div class="bottom-nav">
                 <li>
-                    <a class="link active" href="profile.php">
+                    <a class="link" href="profile.php">
                         <i class="fa-solid fa-user"></i>
                         Profile
                     </a>
@@ -162,65 +162,15 @@ $password = $_SESSION['password'] ?? '';
                 <i class="fa-solid fa-bars menuToggleButton" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile"></i>
             </div>
 
-            <h1 class="page-title">Profile</h1>
+            <h1 class="page-title">Home</h1>
         </header>
 
         <div class="content">
-            <div id="profile">
-                <button class="btn primary-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                    Change Password
-                </button>
+            <div id="home">
+                <h1>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Repudiandae autem explicabo non ad voluptates est itaque eligendi cupiditate! Libero saepe debitis sequi doloribus aperiam? Repudiandae explicabo iste doloremque commodi architecto? Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate accusantium adipisci perferendis vitae asperiores quasi totam, neque fuga officiis, repellendus fugiat minima. Rem nihil vel architecto culpa magni iusto aut. Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias atque expedita voluptatum omnis minus, ea eum aut illo nobis iure numquam ipsam natus quisquam inventore doloribus error incidunt laborum optio? Lorem, ipsum dolor sit amet consectetur adipisicing elit. Voluptatem delectus excepturi ratione. Obcaecati iusto voluptatibus temporibus libero in quas non ducimus adipisci, porro illo? Magnam ea voluptate sed perspiciatis nobis. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Adipisci facilis quis molestias quam officiis illum fugit, amet beatae incidunt ut, et, dolorem quia corrupti. Alias optio molestiae placeat dicta quaerat. Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil iste esse nulla. Amet debitis suscipit, ad qui cum, dolore quisquam, repudiandae molestiae ab quasi eligendi. Et facilis illo error unde!</h1>
             </div>  
         </div>
     </section>
-    
-    <!-- Change password modal -->
-    <div class="modal fade success-modal" id="changePasswordModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-key"></i>
-                        Change Password
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <form method="POST" action="../app/change_update_password.php">
-                        <div class="form-group">
-                            <label class="input-label">Current Password</label>
-                            <div class="input-box">
-                                <input type="password" name="old_password" placeholder="eg., 123456" required>
-                                <i class="fa-solid fa-eye-slash toggle-password"></i>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="input-label">New Password</label>
-                            <div class="input-box">
-                                <input type="password" name="new_password" placeholder="eg., 000000" required>
-                                <i class="fa-solid fa-eye-slash toggle-password"></i>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="input-label">Confirm New Password</label>
-                            <div class="input-box">
-                                <input type="password" name="confirm_password" placeholder="eg., 000000" required>
-                                <i class="fa-solid fa-eye-slash toggle-password"></i>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn primary-btn">
-                            Update Password
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 
 <!-- Js -->
