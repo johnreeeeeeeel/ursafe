@@ -105,7 +105,7 @@ $password = $_SESSION['password'] ?? '';
                     </li>
 
                     <li>
-                        <a class="link danger-btn" href="../app/logout.php">
+                        <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
                             logout
                         </a>
@@ -147,7 +147,7 @@ $password = $_SESSION['password'] ?? '';
                 </li>
 
                 <li>
-                    <a class="link danger-btn" href="../app/logout.php">
+                    <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
                         logout
                     </a>
@@ -217,6 +217,35 @@ $password = $_SESSION['password'] ?? '';
                             Update Password
                         </button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout confirmation modal -->
+    <div class="modal fade danger-modal" id="logoutConfirmationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        Logout Confirmation
+                    </h5>
+                </div>
+
+                <div class="modal-body">
+                    <p>Are you sure you want to logout?</p>
+                    
+                    <div class="action-buttons">
+                        <a href="../app/logout.php" class="btn primary-btn">
+                            Yes, Logout
+                        </a>
+                        
+                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                            No
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -17,8 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             middlename,
             sex,
             dob,
-            institute_id,
-            program_id,
+            institute,
+            program,
             email
         FROM students
         WHERE email = ?
@@ -84,8 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $student['middlename'],
         $student['sex'],
         $student['dob'],
-        $student['institute_id'],
-        $student['program_id'],
+        $student['institute'],
+        $student['program'],
         $username,
         $student['email'],
         $password

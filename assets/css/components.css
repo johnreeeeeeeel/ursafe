@@ -256,12 +256,12 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: var(--text-light-secondary);
+    color: var(--text-dark-disabled);
     transition: 0.2s ease;
 }
 
 .input-box i:hover {
-    color: var(--color-primary-base);
+    color: var(--text-dark-tertiary);
 }
 
 /* Primary modal */
@@ -302,29 +302,40 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     font-weight: 400;
 }
 
+.primary-modal.modal-content .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.primary-modal .modal-content .modal-body p {
+    color: var(--text-dark-secondary);
+    font-weight: 400;
+}
+
 .primary-modal .modal-content .modal-body form {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.primary-modal .modal-content .modal-body form .form-group {
+.primary-modal .modal-content .modal-body .form-group {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.primary-modal .modal-content .modal-body form .form-group label {
+.primary-modal .modal-content .modal-body .form-group label {
     color: var(--text-secondary);
     font-weight: 400;
 }
 
-.primary-modal .modal-content .modal-body form .form-group .input-box input:focus,
-.primary-modal .modal-content .modal-body form .form-group .input-box textarea:focus {
-    border-color: var(--color-primary-5);
+.primary-modal .modal-content .modal-body .form-group .input-box input:focus,
+.primary-modal .modal-content .modal-body .form-group .input-box textarea:focus {
+    border-color: var(--color-primary-base);
 }
 
-.primary-modal .modal-content .modal-body form .action-buttons {
+.primary-modal .modal-content .modal-body .action-buttons {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -332,12 +343,12 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     gap: 8px;
 }
 
-.primary-modal .modal-content .modal-body form .primary-btn {
+.primary-modal .modal-content .modal-body .primary-btn {
     background-color: var(--color-primary-base) !important;
     color: var(--text-light-primary) !important;
 }
 
-.primary-modal .modal-content .modal-body form .primary-btn:hover {
+.primary-modal .modal-content .modal-body .primary-btn:hover {
     background-color: var(--color-primary-6) !important;
     color: var(--text-light-primary) !important;
 }
@@ -376,7 +387,18 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 }
 
 .success-modal .modal-content .modal-header .modal-title {
-    color: var(--success-5);
+    color: var(--success-base);
+    font-weight: 400;
+}
+
+.success-modal .modal-content .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.success-modal .modal-content .modal-body p {
+    color: var(--text-dark-secondary);
     font-weight: 400;
 }
 
@@ -386,23 +408,23 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     gap: 8px;
 }
 
-.success-modal .modal-content .modal-body form .form-group {
+.success-modal .modal-content .modal-body .form-group {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.success-modal .modal-content .modal-body form .form-group label {
+.success-modal .modal-content .modal-body .form-group label {
     color: var(--text-secondary);
     font-weight: 400;
 }
 
-.success-modal .modal-content .modal-body form .form-group .input-box input:focus,
-.success-modal .modal-content .modal-body form .form-group .input-box textarea:focus {
-    border-color: var(--success-5);
+.success-modal .modal-content .modal-body .form-group .input-box input:focus,
+.success-modal .modal-content .modal-body .form-group .input-box textarea:focus {
+    border-color: var(--success-base);
 }
 
-.success-modal .modal-content .modal-body form .action-buttons {
+.success-modal .modal-content .modal-body .action-buttons {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -410,12 +432,101 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     gap: 8px;
 }
 
-.success-modal .modal-content .modal-body form .primary-btn {
+.success-modal .modal-content .modal-body .primary-btn {
     background-color: var(--success-base) !important;
     color: var(--text-light-primary) !important;
 }
 
-.success-modal .modal-content .modal-body form .primary-btn:hover {
+.success-modal .modal-content .modal-body .primary-btn:hover {
     background-color: var(--success-6) !important;
+    color: var(--text-light-primary) !important;
+}
+
+/* Danger modal */
+.danger-modal .modal-dialog {
+    max-width: 400px;
+}
+
+.danger-modal .modal-content {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.danger-modal .modal-content .modal-header,
+.danger-modal .modal-content .modal-body,
+.danger-modal .modal-content .modal-footer {
+    border: none;
+    background-color: transparent !important;
+    padding: 0;
+}
+
+.danger-modal .modal-content .modal-header .btn-close,
+.danger-modal .modal-content .modal-header .btn-close:focus,
+.danger-modal .modal-content .modal-header .btn-close:active,
+.danger-modal .modal-content .modal-header .btn-close:hover {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.danger-modal .modal-content .modal-header .modal-title {
+    color: var(--danger-base);
+    font-weight: 400;
+}
+
+.danger-modal .modal-content .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.danger-modal .modal-content .modal-body p {
+    color: var(--text-dark-secondary);
+    font-weight: 400;
+}
+
+.danger-modal .modal-content .modal-body form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.danger-modal .modal-content .modal-body .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.danger-modal .modal-content .modal-body .form-group label {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.danger-modal .modal-content .modal-body .form-group .input-box input:focus,
+.danger-modal .modal-content .modal-body .form-group .input-box textarea:focus {
+    border-color: var(--danger-base);
+}
+
+.danger-modal .modal-content .modal-body .action-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.danger-modal .modal-content .modal-body .primary-btn {
+    background-color: var(--danger-base) !important;
+    color: var(--text-light-primary) !important;
+}
+
+.danger-modal .modal-content .modal-body .primary-btn:hover {
+    background-color: var(--danger-6) !important;
     color: var(--text-light-primary) !important;
 }

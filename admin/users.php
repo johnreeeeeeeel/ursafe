@@ -105,7 +105,7 @@ $password = $_SESSION['password'] ?? '';
 
                 <div class="bottom-nav">
                     <li>
-                        <a class="link danger-btn" href="../app/logout.php">
+                        <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
                             logout
                         </a>
@@ -146,8 +146,8 @@ $password = $_SESSION['password'] ?? '';
             </div>
 
             <div class="bottom-nav">
-                <li>
-                    <a class="link danger-btn" href="../app/logout.php">
+               <li>
+                    <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
                         logout
                     </a>
@@ -299,36 +299,31 @@ $password = $_SESSION['password'] ?? '';
             </div>
         </div>
 
-        <!-- Delete user modal -->
-        <div class="modal fade confirmation-modal" id="deleteUserModal" tabindex="-1">
+        <!-- Logout confirmation modal -->
+        <div class="modal fade danger-modal" id="logoutConfirmationModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
 
                     <div class="modal-header">
-                        <h4 class="modal-title">
-                            <i class="fa-solid fa-trash"></i>
-                            Delete User
-                        </h4>
+                        <h5 class="modal-title">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                            Logout Confirmation
+                        </h5>
                     </div>
 
                     <div class="modal-body">
-                        <form method="POST" action="../app/delete_user.php">
-                            <input type="hidden" name="id" id="du_id">
-
-                            <p>Are you sure you want to delete this user?</p>
-
-                            <div class="action-buttons">
-                                <button type="submit" class="btn primary-btn">
-                                    Yes, Delete
-                                </button>
-                                <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
-                                    No
-                                </button>
-                            </div>
-
-                        </form>
+                        <p>Are you sure you want to logout?</p>
+                        
+                        <div class="action-buttons">
+                            <a href="../app/logout.php" class="btn primary-btn">
+                                Yes, Logout
+                            </a>
+                            
+                            <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                                No
+                            </button>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </div>
