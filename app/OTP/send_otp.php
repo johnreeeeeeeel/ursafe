@@ -1,0 +1,61 @@
+<?php
+session_start();
+require '../db_connection.php';
+require '../emails/reset_password_email.php';
+
+$email = $_POST['email'] ?? null;
+
+if (!$email) {
+    $_SESSION['alert_message'] = [
+        'type' => 'danger',
+        'text' => 'Email is required'
+    ];
+
+    header("Location: ../../index.php");
+    exit();
+}
+
+// Check email
+$stmt = $conn->prepare("SELECT id, username, status FROM users WHERE email = ?");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Alert message - email not found
+if ($result->num_rows === 0) {
+    $_SESSION['alert_message'] = [
+        'type' => 'danger',
+        'text' => 'Email not found'
+    ];
+
+    header("Location: ../../index.php");
+    exit();
+}
+
+$user = $result->fetch_assoc();
+
+// Block inactive account
+if ($user['status'] === 'Inactive') {
+    $_SESSION['alert_message'] = [
+        'type' => 'danger',
+        'text' => 'Account is inactive. OTP cannot be sent.'
+    ];
+
+    header("Location: ../../index.php");
+    exit();
+}
+
+// Generate OTP
+$otp = rand(100000, 999999);
+
+// Store session
+$_SESSION['reset_email'] = $email;
+$_SESSION['otp'] = $otp;
+$_SESSION['otp_sent'] = true;
+
+// Send email
+sendOTP($email, $user['username'], $otp);
+
+header("Location: verify_otp.php");
+exit();
+?>

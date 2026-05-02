@@ -1,0 +1,411 @@
+:root {
+  /* Brand Color */
+  --color-primary-base: #3B82F5;
+  --color-primary-1: #CCE0FF;
+  --color-primary-2: #A6C8FF;
+  --color-primary-3: #80B0FF;
+  --color-primary-4: #5796FA;
+  --color-primary-5: #3B82F5;
+  --color-primary-6: #3070D9;
+  --color-primary-7: #245AB2;
+  --color-primary-8: #19458C;
+  --color-primary-9: #0F3166;
+
+  /* Background Color */
+  --bg-primary: #1A1C1F;
+  --bg-secondary: #F5F9FE;
+
+  /* Text Color */
+  --text-light-primary: #F2F2F2;
+  --text-light-secondary: #BFBFBF;
+  --text-light-tertiary: #8C8C8C;
+  --text-light-disabled: #595959;
+
+  --text-dark-primary: #1A1C1F;
+  --text-dark-secondary: #3A3D42;
+  --text-dark-tertiary: #6B6E73;
+  --text-dark-disabled: #A0A4AA;
+
+  /* Success Color */
+  --success-base: #43BF77;
+  --success-1: #CCFFE1;
+  --success-2: #A6FFCB;
+  --success-3: #80FFB5;
+  --success-4: #59E39A;
+  --success-5: #43BF77;
+  --success-6: #3AA66A;
+  --success-7: #2F8C5A;
+  --success-8: #24724A;
+  --success-9: #1A593A;
+
+  /* Warning Color */
+  --warning-base: #F2B233;
+  --warning-1: #FFE0B3;
+  --warning-2: #FFC966;
+  --warning-3: #FFB31A;
+  --warning-4: #F5A300;
+  --warning-5: #F2B233;
+  --warning-6: #D99A2E;
+  --warning-7: #B37724;
+  --warning-8: #8C5A1A;
+  --warning-9: #664010;
+
+  /* Danger Color */
+  --danger-base: #D93A3A;
+  --danger-1: #FFD6D6;
+  --danger-2: #FFADAD;
+  --danger-3: #FF8585;
+  --danger-4: #E85C5C;
+  --danger-5: #D93A3A;
+  --danger-6: #BF3333;
+  --danger-7: #992929;
+  --danger-8: #7A2121;
+  --danger-9: #5C1818;
+
+  /* Announcement Color */
+  --announcement-base: #A855F7;
+  --announcement-1: #E6CCFF;
+  --announcement-2: #CC99FF;
+  --announcement-3: #B366FF;
+  --announcement-4: #A64DF2;
+  --announcement-5: #A855F7;
+  --announcement-6: #944DCC;
+  --announcement-7: #7A3FB2;
+  --announcement-8: #663399;
+  --announcement-9: #4D2673;
+}
+
+/* Default Spacing */
+a, p, span, strong, h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+/* Loading screen */
+#loadingScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Message alert */
+#messageAlert {
+    position: absolute;
+    bottom: 18px;
+    right: 18px;
+    border-radius: 12px;
+    border: 1px solid var(--announcement-base);
+    background-color: var(--announcement-1);
+    color: var(--text--dark-primary);
+    font-weight: 400;
+    z-index: 999;
+}
+
+#messageAlert .btn-close,
+#messageAlert .btn-close:focus,
+#messageAlert .btn-close:active,
+#messageAlert .btn-close:hover {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Button */
+.btn {
+    outline: none;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.sm-btn {
+    outline: none;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    box-sizing: border-box;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.primary-btn {
+    background-color: var(--color-primary-base) !important;
+    color: var(--text-light-primary) !important;
+    text-decoration: none !important;
+}
+
+.primary-btn:hover,
+.primary-btn:active {
+    background-color: var(--color-primary-6) !important;
+    color: var(--text-light-primary) !important;
+}
+
+.secondary-btn {
+    background-color: var(--success-base) !important;
+    color: var(--text-light-primary) !important;
+    text-decoration: none !important;
+}
+
+.secondary-btn:hover,
+.secondary-btn:active {
+    background-color: var(--success-6) !important;
+    color: var(--text-light-primary) !important;
+}
+
+.transparent-btn {
+    border: 2px solid transparent !important;
+    color: var(--bs-body-color) !important;
+    text-decoration: none !important;
+}
+
+.transparent-btn:hover,
+.transparent-btn:active {
+    border: 2px solid transparent !important;
+    background-color: transparent !important;
+}
+
+.danger-btn {
+    background-color: var(--danger-base) !important;
+    color: var(--text-light-primary) !important;
+    text-decoration: none !important;
+}
+
+.danger-btn:hover,
+.danger-btn:active {
+    background-color: var(--danger-6) !important;
+    color: var(--text-light-primary) !important;
+}
+
+.disabled-btn {
+    background-color: var(--text-dark-disabled) !important;
+    color: var(--text-dark-secondary) !important;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.disabled-btn:hover,
+.disabled-btn:active {
+    background-color: var(--text-dark-disabled) !important;
+    color: var(--text-dark-secondary) !important;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Input */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.input-label {
+    color: var(--text-dark-secondary);
+    font-weight: 400;
+    font-size: 14px;
+}
+
+.input-box {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-box input,
+.input-box textarea {
+    width: 100%;
+    padding: 8px 40px 8px 12px; 
+    border-radius: 8px;
+    border: 1px solid var(--text-light-secondary);
+    outline: none;
+    font-size: 16px;
+    box-sizing: border-box;
+    background: var(--bg-secondary);
+    color: var(--text-dark-primary);
+    font-weight: 300;
+    transition: 0.2s ease;
+}
+
+.input-box input:focus,
+.input-box textarea:focus {
+    border-color: var(--color-primary-base);
+}
+
+.input-box i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--text-light-secondary);
+    transition: 0.2s ease;
+}
+
+.input-box i:hover {
+    color: var(--color-primary-base);
+}
+
+/* Primary modal */
+.primary-modal .modal-dialog {
+    max-width: 400px;
+}
+
+.primary-modal .modal-content {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.primary-modal .modal-content .modal-header,
+.primary-modal .modal-content .modal-body,
+.primary-modal .modal-content .modal-footer {
+    border: none;
+    background-color: transparent !important;
+    padding: 0;
+}
+
+.primary-modal .modal-content .modal-header .btn-close,
+.primary-modal .modal-content .modal-header .btn-close:focus,
+.primary-modal .modal-content .modal-header .btn-close:active,
+.primary-modal .modal-content .modal-header .btn-close:hover {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.primary-modal .modal-content .modal-header .modal-title {
+    color: var(--color-primary-base);
+    font-weight: 400;
+}
+
+.primary-modal .modal-content .modal-body form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.primary-modal .modal-content .modal-body form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.primary-modal .modal-content .modal-body form .form-group label {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.primary-modal .modal-content .modal-body form .form-group .input-box input:focus,
+.primary-modal .modal-content .modal-body form .form-group .input-box textarea:focus {
+    border-color: var(--color-primary-5);
+}
+
+.primary-modal .modal-content .modal-body form .action-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.primary-modal .modal-content .modal-body form .primary-btn {
+    background-color: var(--color-primary-5) !important;
+    color: var(--text-light-primary) !important;
+}
+
+/* Success modal */
+.success-modal .modal-dialog {
+    max-width: 400px;
+}
+
+.success-modal .modal-content {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.success-modal .modal-content .modal-header,
+.success-modal .modal-content .modal-body,
+.success-modal .modal-content .modal-footer {
+    border: none;
+    background-color: transparent !important;
+    padding: 0;
+}
+
+.success-modal .modal-content .modal-header .btn-close,
+.success-modal .modal-content .modal-header .btn-close:focus,
+.success-modal .modal-content .modal-header .btn-close:active,
+.success-modal .modal-content .modal-header .btn-close:hover {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.success-modal .modal-content .modal-header .modal-title {
+    color: var(--success-5);
+    font-weight: 400;
+}
+
+.success-modal .modal-content .modal-body form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.success-modal .modal-content .modal-body form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.success-modal .modal-content .modal-body form .form-group label {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.success-modal .modal-content .modal-body form .form-group .input-box input:focus,
+.success-modal .modal-content .modal-body form .form-group .input-box textarea:focus {
+    border-color: var(--success-5);
+}
+
+.success-modal .modal-content .modal-body form .action-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.success-modal .modal-content .modal-body form .primary-btn {
+    background-color: var(--success-base) !important;
+    color: var(--text-light-primary) !important;
+}

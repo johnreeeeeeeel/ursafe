@@ -1,0 +1,270 @@
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #444;
+}
+
+* {
+    font-family: "Outfit", sans-serif;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+    background-color: #f2f3f7;
+}
+
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: row;
+}
+
+/* Default Section */
+section {
+    background-color: #f2f3f7;
+    color: #282829;
+    flex: 1;
+    min-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 18px 0 18px;
+}
+
+section header {
+    background-color: #282829;
+    color: #f2f3f7;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 60px;
+    padding: 0 12px;
+}
+
+section header .left-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+section header .left-actions .menuToggleButtonContainer {
+  display: none;
+}
+
+@media (max-width: 767px) { 
+  section header .left-actions .menuToggleButtonContainer {
+    display: flex;
+  }
+}
+
+section header .left-actions .menuToggleButtonContainer i {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+section header .right-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+section header .right-actions a i {
+    color: #48c441;
+    font-size: 20px;
+}
+
+section .tab-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+section .tab-content .tab-pane {
+    min-height: 100%;
+    display: none;
+    flex-direction: column;
+}
+
+section .tab-content .active {
+    display: flex;
+}
+
+/* Change Password */
+
+#changePassword {
+    display: flex;
+    flex-direction: column;  
+    align-items: center;
+    justify-content: center;  
+}
+
+#changePassword .alert {
+    position: absolute;
+    top: 88px;
+    right: 18px;
+    border-radius: 12px;
+    border: 1px solid #48c441;
+    background-color: #dce8db;
+    font-weight: 400;
+}
+
+#changePassword .alert .btn-close,
+#changePassword .alert .btn-close:focus,
+#changePassword .alert .btn-close:active,
+#changePassword .alert .btn-close:hover {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#changePassword form {
+    width: 100%;
+    max-width: 420px;   
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#changePassword form h2 {
+    color: #48c441;
+}
+
+#changePassword form .input-box {
+    width: 100%;
+    position: relative;
+}
+
+#changePassword form .input-box input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #c6c6c6;
+    outline: none;
+    font-size: 16px;
+    box-sizing: border-box;
+    background: white;
+    color: #282829;
+    font-weight: 300;
+}
+
+#changePassword form .input-box input:focus {
+    border: 1px solid #48c441;
+}
+
+#changePassword form .input-box i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #777;
+}
+
+#changePassword form .input-box i:hover {
+    color: #48c441;
+}
+
+
+
+
+
+
+
+/* Add Admin and User Modal */
+#addAdminModal .modal-content,
+#addUserModal .modal-content {
+    background-color: #f2f3f7;
+    color: #282829;
+    border: none;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#addAdminModal .modal-content .modal-header,
+#addAdminModal .modal-content .modal-body,
+#addAdminModal .modal-content .modal-footer,
+#addUserModal .modal-content .modal-header,
+#addUserModal .modal-content .modal-body,
+#addUserModal .modal-content .modal-footer {
+    border: none;
+    background-color: transparent !important;
+    padding: 0;
+}
+
+#addAdminModal .modal-content .modal-header .btn-close,
+#addAdminModal .modal-content .modal-header .btn-close:focus,
+#addAdminModal .modal-content .modal-header .btn-close:active,
+#addAdminModal .modal-content .modal-header .btn-close:hover,
+#addUserModal .modal-content .modal-header .btn-close,
+#addUserModal .modal-content .modal-header .btn-close:focus,
+#addUserModal .modal-content .modal-header .btn-close:active,
+#addUserModal .modal-content .modal-header .btn-close:hover {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#addAdminModal .modal-content .modal-header .modal-title,
+#addUserModal .modal-content .modal-header .modal-title {
+    color: #48c441;
+    text-transform: uppercase;
+}
+
+#addAdminModal .modal-content .modal-body form,
+#addUserModal .modal-content .modal-body form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#addAdminModal .modal-content .modal-body form .action-buttons,
+#addUserModal .modal-content .modal-body form .action-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+#addAdminModal .modal-content .modal-body form .field-group,
+#addUserModal .modal-content .modal-body form .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#addAdminModal .modal-content .modal-body form .field-group label,
+#addUserModal .modal-content .modal-body form .field-group label {
+    color: #666;
+    font-weight: 400;
+}
+
+

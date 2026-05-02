@@ -1,0 +1,213 @@
+:root {
+  /* Brand Color */
+  --color-primary-base: #3B82F5;
+  --color-primary-1: #CCE0FF;
+  --color-primary-2: #A6C8FF;
+  --color-primary-3: #80B0FF;
+  --color-primary-4: #5796FA;
+  --color-primary-5: #3B82F5;
+  --color-primary-6: #3070D9;
+  --color-primary-7: #245AB2;
+  --color-primary-8: #19458C;
+  --color-primary-9: #0F3166;
+
+  /* Background Color */
+  --bg-primary: #1A1C1F;
+  --bg-secondary: #F5F9FE;
+
+  /* Text Color */
+  --text-light-primary: #F2F2F2;
+  --text-light-secondary: #BFBFBF;
+  --text-light-tertiary: #8C8C8C;
+  --text-light-disabled: #595959;
+
+  --text-dark-primary: #1A1C1F;
+  --text-dark-secondary: #3A3D42;
+  --text-dark-tertiary: #6B6E73;
+  --text-dark-disabled: #A0A4AA;
+
+  /* Success Color */
+  --success-base: #43BF77;
+  --success-1: #CCFFE1;
+  --success-2: #A6FFCB;
+  --success-3: #80FFB5;
+  --success-4: #59E39A;
+  --success-5: #43BF77;
+  --success-6: #3AA66A;
+  --success-7: #2F8C5A;
+  --success-8: #24724A;
+  --success-9: #1A593A;
+
+  /* Warning Color */
+  --warning-base: #F2B233;
+  --warning-1: #FFE0B3;
+  --warning-2: #FFC966;
+  --warning-3: #FFB31A;
+  --warning-4: #F5A300;
+  --warning-5: #F2B233;
+  --warning-6: #D99A2E;
+  --warning-7: #B37724;
+  --warning-8: #8C5A1A;
+  --warning-9: #664010;
+
+  /* Danger Color */
+  --danger-base: #D93A3A;
+  --danger-1: #FFD6D6;
+  --danger-2: #FFADAD;
+  --danger-3: #FF8585;
+  --danger-4: #E85C5C;
+  --danger-5: #D93A3A;
+  --danger-6: #BF3333;
+  --danger-7: #992929;
+  --danger-8: #7A2121;
+  --danger-9: #5C1818;
+
+  /* Announcement Color */
+  --announcement-base: #A855F7;
+  --announcement-1: #E6CCFF;
+  --announcement-2: #CC99FF;
+  --announcement-3: #B366FF;
+  --announcement-4: #A64DF2;
+  --announcement-5: #A855F7;
+  --announcement-6: #944DCC;
+  --announcement-7: #7A3FB2;
+  --announcement-8: #663399;
+  --announcement-9: #4D2673;
+}
+
+* {
+  font-family: "Outfit", sans-serif;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+body #links {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+body #links div:nth-child(1) {
+  margin-top: 10px;
+}
+
+body #links div:nth-child(1) p {
+  font-size: 14px;
+  color: #9c9c9c;
+  font-weight: 700;
+  margin: 0;
+}
+
+body #links div:nth-child(2) {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+body #links div:nth-child(2) a {
+  font-size: 14px;
+  text-decoration: none;
+  color: #9c9c9c;
+  margin: 0;
+  cursor: pointer;
+}
+
+body #links div:nth-child(2) a:hover {
+  text-decoration: underline;
+}
+
+/* Login */
+.auth-container {
+  width: 350px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.auth-container img {
+  width: 235px;
+}
+
+.auth-container .auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+}
+
+.auth-container .auth-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+}
+
+.auth-container .auth-form form .forgot-password {
+  display: flex;
+  justify-content: flex-end;
+  text-decoration: none;
+  color: var(--color-primary-base);
+  cursor: pointer;
+}
+
+.verify-otp-container {
+  width: 350px;
+}
+
+.verify-otp-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.verify-otp-container form h2 {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-primary-base);
+    font-weight: 400;
+}
+
+.verify-otp-container form h2 a {
+  cursor: pointer;
+}
+
+.verify-otp-container form h2 a:hover {
+  color: var(--color-primary-6);
+}
+
+.verify-otp-container form small {
+  color: var(--text-dark-secondary);
+}
+
+.verify-otp-container form small a {
+  text-decoration: none;
+  color: var(--color-primary-base);
+}
+
+.verify-otp-container form small a:hover {
+  color: var(--color-primary-6);
+  text-decoration: underline;
+}
