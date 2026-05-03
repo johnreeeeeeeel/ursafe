@@ -167,29 +167,27 @@ $password = $_SESSION['password'] ?? '';
 
         <div class="content">
             <div id="users">
-
+                
                 <!-- Users table -->
                 <div class="table-container">
                     <div class="table-header">
                         <div class="search-group">
                             <i class="fa-solid fa-magnifying-glass"></i>
-                            <form action="" method="GET">
-                                <input type="search" name="searchUser" id="searchUser" placeholder="Search users..." value="<?= htmlspecialchars($_GET['searchUser'] ?? '') ?>">
+                            <form method="GET">
+                                <input type="search" name="searchUser" placeholder="Search users..." value="<?= htmlspecialchars($_GET['searchUser'] ?? '') ?>">
                             </form>
                         </div>
 
                         <div class="filter-group">
-                            <div class="filter-group">
-                                <i class="fa-solid fa-filter"></i>
+                            <i class="fa-solid fa-filter"></i>
+                            <form method="GET">
+                                <input type="hidden" name="searchUser" value="<?= htmlspecialchars($_GET['searchUser'] ?? '') ?>">
 
-                                <form method="GET" action="users.php">
-                                    <input type="hidden" name="searchUser">
-
-                                    <select name="status">
-
-                                    </select>
-                                </form>
-                            </div>
+                                <select name="filter" onchange="this.form.submit()">
+                                    <option value="new" <?= ($_GET['filter'] ?? '') == 'new' ? 'selected' : '' ?>>Newest</option>
+                                    <option value="old" <?= ($_GET['filter'] ?? '') == 'old' ? 'selected' : '' ?>>Oldest</option>
+                                </select>
+                            </form>
                         </div>
                     </div>
 
@@ -315,7 +313,7 @@ $password = $_SESSION['password'] ?? '';
                         <p>Are you sure you want to logout?</p>
                         
                         <div class="action-buttons">
-                            <a href="../app/logout.php" class="btn primary-btn">
+                            <a href="../app/auth/logout.php" class="btn primary-btn">
                                 Yes, Logout
                             </a>
                             

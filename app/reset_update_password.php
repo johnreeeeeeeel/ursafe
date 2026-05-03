@@ -4,7 +4,7 @@ require 'db_connection.php';
 require 'emails/temporary_password_email.php';
 
 // Get email from session
-$email = $_SESSION['reset_email'] ?? null;
+$email = $_SESSION['email'] ?? null;
 
 if (!$email) {
     $_SESSION['alert_message'] = [
@@ -16,12 +16,20 @@ if (!$email) {
     exit();
 }
 
-// Get user
-$stmt = $conn_local->prepare("SELECT username FROM users WHERE email = ?");
+// Get user by email
+$stmt = $conn_local->prepare("CALL getUserByEmail(?)");
 $stmt->bind_param("s", $email);
 $stmt->execute();
+
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
+
+$result->free();
+$stmt->close();
+
+while ($conn_local->more_results()) {
+    $conn_local->next_result();
+}
 
 if (!$user) {
     $_SESSION['alert_message'] = [
@@ -40,10 +48,16 @@ $plainPassword = strtoupper(bin2hex(random_bytes(4)));
 $hashedPassword = password_hash($plainPassword, PASSWORD_DEFAULT);
 
 // Update password
-$update = $conn_local->prepare("UPDATE users SET password = ? WHERE email = ?");
-$update->bind_param("ss", $hashedPassword, $email);
+$update = $conn_local->prepare("CALL updateUserPassword(?, ?)");
+$update->bind_param("ss", $email, $hashedPassword);
 
-if ($update->execute()) {
+$success = $update->execute();
+
+while ($conn_local->more_results()) {
+    $conn_local->next_result();
+}
+
+if ($success) {
     sendResetEmail($email, $username, $plainPassword);
 
     $_SESSION['alert_message'] = [
@@ -57,8 +71,10 @@ if ($update->execute()) {
     ];
 }
 
+$update->close();
+
 // Cleanup
-unset($_SESSION['reset_email'], $_SESSION['otp'], $_SESSION['otp_sent']);
+unset($_SESSION['email'], $_SESSION['otp'], $_SESSION['otp_sent']);
 
 header("Location: ../index.php");
 exit();

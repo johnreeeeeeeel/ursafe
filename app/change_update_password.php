@@ -2,12 +2,18 @@
 session_start();
 require 'db_connection.php';
 
-if (!isset($_SESSION['id'])) {
-    header('Location: ../index.php');
+// Get email from session
+$email = $_SESSION['email'] ?? null;
+
+if (!$email) {
+    $_SESSION['alert_message'] = [
+        'type' => 'danger',
+        'text' => 'Session expired. Please try again.'
+    ];
+
+    header("Location: ../index.php");
     exit();
 }
-
-$userId = $_SESSION['id'];
 
 $old = $_POST['old_password'];
 $new = $_POST['new_password'];
@@ -18,32 +24,57 @@ if ($new !== $confirm) {
         'type' => 'danger',
         'text' => 'Passwords do not match.'
     ];
-} else {
+    header("Location: ../user/profile.php");
+    exit();
+}
 
-    $stmt = $conn_local->prepare("SELECT password FROM users WHERE id = ?");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $user = $stmt->get_result()->fetch_assoc();
+// Get user by email
+$stmt = $conn_local->prepare("CALL getUserByEmail(?)");
+$stmt->bind_param("s", $email);
+$stmt->execute();
 
-    if ($user && password_verify($old, $user['password'])) {
+$user = $stmt->get_result()->fetch_assoc();
 
-        $hashed = password_hash($new, PASSWORD_DEFAULT);
+$stmt->close();
 
-        $update = $conn_local->prepare("UPDATE users SET password = ? WHERE id = ?");
-        $update->bind_param("si", $hashed, $userId);
-        $update->execute();
+while ($conn_local->more_results()) {
+    $conn_local->next_result();
+}
 
+// Verify old password
+if ($user && password_verify($old, $user['password'])) {
+
+    $hashedPassword = password_hash($new, PASSWORD_DEFAULT);
+
+    // Update password
+    $update = $conn_local->prepare("CALL updateUserPassword(?, ?)");
+    $update->bind_param("ss", $email, $hashedPassword);
+
+    $success = $update->execute();
+
+    $update->close();
+
+    while ($conn_local->more_results()) {
+        $conn_local->next_result();
+    }
+
+    if ($success) {
         $_SESSION['alert_message'] = [
             'type' => 'success',
             'text' => 'Password updated successfully!'
         ];
-
     } else {
         $_SESSION['alert_message'] = [
             'type' => 'danger',
-            'text' => 'Incorrect current password.'
+            'text' => 'Failed to update password.'
         ];
     }
+
+} else {
+    $_SESSION['alert_message'] = [
+        'type' => 'danger',
+        'text' => 'Incorrect current password.'
+    ];
 }
 
 header("Location: ../user/profile.php");

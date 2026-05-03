@@ -2,34 +2,10 @@
 require 'db_connection.php';
 
 $search = $_GET['searchUser'] ?? '';
-$status = $_GET['status'] ?? '';
+$filter = $_GET['filter'] ?? 'new';
 
-$sql = "SELECT * FROM view_users WHERE 1=1";
-
-$params = [];
-$types = "";
-
-if (!empty($search)) {
-    $sql .= " AND (fullname LIKE ? OR email LIKE ?)";
-    $like = "%" . $search . "%";
-    $params[] = $like;
-    $params[] = $like;
-    $types .= "ss";
-}
-
-if (!empty($status)) {
-    $sql .= " AND status = ?";
-    $params[] = $status;
-    $types .= "s";
-}
-
-$sql .= " ORDER BY id DESC";
-
-$stmt = $conn_local->prepare($sql);
-
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
+$stmt = $conn_local->prepare("CALL searchFilterUsers(?, ?)");
+$stmt->bind_param("ss", $search, $filter);
 
 $stmt->execute();
 $result = $stmt->get_result();

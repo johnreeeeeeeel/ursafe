@@ -16,7 +16,7 @@ if (!$email) {
 }
 
 // Check email
-$stmt = $conn_local->prepare("SELECT id, username FROM users WHERE email = ?");
+$stmt = $conn_local->prepare("CALL getUserByEmail(?)");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -38,7 +38,7 @@ $user = $result->fetch_assoc();
 $otp = rand(100000, 999999);
 
 // Store session
-$_SESSION['reset_email'] = $email;
+$_SESSION['email'] = $email;
 $_SESSION['otp'] = $otp;
 $_SESSION['otp_sent'] = true;
 

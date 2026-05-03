@@ -147,6 +147,13 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
 }
 
+.action-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+}
+
 .primary-btn {
     background-color: var(--color-primary-base) !important;
     color: var(--text-light-primary) !important;
@@ -231,7 +238,8 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 }
 
 .input-box input,
-.input-box textarea {
+.input-box textarea,
+.input-box select {
     width: 100%;
     padding: 8px 40px 8px 12px; 
     border-radius: 8px;
@@ -266,115 +274,116 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 
 /* Primary modal */
 .primary-modal .modal-dialog {
-    max-width: 400px;
+    max-width: 400px !important;
 }
 
 .primary-modal .modal-content {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border: none;
-    border-radius: 12px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 18px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
 }
 
-.primary-modal .modal-content .modal-header,
-.primary-modal .modal-content .modal-body,
-.primary-modal .modal-content .modal-footer {
-    border: none;
+.primary-modal .modal-header,
+.primary-modal .modal-body,
+.primary-modal .modal-footer {
+    border: none !important;
     background-color: transparent !important;
-    padding: 0;
+    padding: 0 !important;
 }
 
-.primary-modal .modal-content .modal-header .btn-close,
-.primary-modal .modal-content .modal-header .btn-close:focus,
-.primary-modal .modal-content .modal-header .btn-close:active,
-.primary-modal .modal-content .modal-header .btn-close:hover {
+.primary-modal .modal-header .btn-close,
+.primary-modal .modal-header .btn-close:focus,
+.primary-modal .modal-header .btn-close:active,
+.primary-modal .modal-header .btn-close:hover {
     outline: none !important;
     border: none !important;
     box-shadow: none !important;
 }
 
-.primary-modal .modal-content .modal-header .modal-title {
-    color: var(--color-primary-base);
-    font-weight: 400;
+.primary-modal .modal-title {
+    color: var(--color-primary-base) !important;
+    font-weight: 400 !important;
 }
 
-.primary-modal.modal-content .modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+.primary-modal .modal-body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
 }
 
-.primary-modal .modal-content .modal-body p {
-    color: var(--text-dark-secondary);
-    font-weight: 400;
+.primary-modal .modal-body p {
+    color: var(--text-dark-secondary) !important;
+    font-weight: 400 !important;
 }
 
-.primary-modal .modal-content .modal-body form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.primary-modal .modal-body form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
 }
 
-.primary-modal .modal-content .modal-body .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.primary-modal .modal-body .form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
 }
 
-.primary-modal .modal-content .modal-body .form-group label {
-    color: var(--text-secondary);
-    font-weight: 400;
+.primary-modal .modal-body .form-group label {
+    color: var(--text-secondary) !important;
+    font-weight: 400 !important;
 }
 
-.primary-modal .modal-content .modal-body .form-group .input-box input:focus,
-.primary-modal .modal-content .modal-body .form-group .input-box textarea:focus {
-    border-color: var(--color-primary-base);
+.primary-modal .modal-body .input-box input:focus,
+.primary-modal .modal-body .input-box textarea:focus,
+.primary-modal .modal-body .input-box select:focus {
+    border-color: var(--color-primary-base) !important;
 }
 
-.primary-modal .modal-content .modal-body .action-buttons {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+.primary-modal .modal-body .action-buttons {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
 }
 
-.primary-modal .modal-content .modal-body .primary-btn {
+.primary-modal .modal-body .primary-btn {
     background-color: var(--color-primary-base) !important;
     color: var(--text-light-primary) !important;
 }
 
-.primary-modal .modal-content .modal-body .primary-btn:hover {
+.primary-modal .modal-body .primary-btn:hover {
     background-color: var(--color-primary-6) !important;
     color: var(--text-light-primary) !important;
 }
 
 /* Success modal */
 .success-modal .modal-dialog {
-    max-width: 400px;
+    max-width: 400px !important;
 }
 
 .success-modal .modal-content {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border: none;
-    border-radius: 12px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 18px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
 }
 
 .success-modal .modal-content .modal-header,
 .success-modal .modal-content .modal-body,
 .success-modal .modal-content .modal-footer {
-    border: none;
+    border: none !important;
     background-color: transparent !important;
-    padding: 0;
+    padding: 0 !important;
 }
 
 .success-modal .modal-content .modal-header .btn-close,
@@ -387,49 +396,50 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 }
 
 .success-modal .modal-content .modal-header .modal-title {
-    color: var(--success-base);
-    font-weight: 400;
+    color: var(--success-base) !important;
+    font-weight: 400 !important;
 }
 
 .success-modal .modal-content .modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
 }
 
 .success-modal .modal-content .modal-body p {
-    color: var(--text-dark-secondary);
-    font-weight: 400;
+    color: var(--text-dark-secondary) !important;
+    font-weight: 400 !important;
 }
 
 .success-modal .modal-content .modal-body form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
 }
 
 .success-modal .modal-content .modal-body .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
 }
 
 .success-modal .modal-content .modal-body .form-group label {
-    color: var(--text-secondary);
-    font-weight: 400;
+    color: var(--text-secondary) !important;
+    font-weight: 400 !important;
 }
 
 .success-modal .modal-content .modal-body .form-group .input-box input:focus,
-.success-modal .modal-content .modal-body .form-group .input-box textarea:focus {
-    border-color: var(--success-base);
+.success-modal .modal-content .modal-body .form-group .input-box textarea:focus,
+.success-modal .modal-content .modal-body .form-group .input-box select:focus {
+    border-color: var(--success-base) !important;
 }
 
 .success-modal .modal-content .modal-body .action-buttons {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
 }
 
 .success-modal .modal-content .modal-body .primary-btn {
@@ -444,26 +454,26 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 
 /* Danger modal */
 .danger-modal .modal-dialog {
-    max-width: 400px;
+    max-width: 400px !important;
 }
 
 .danger-modal .modal-content {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border: none;
-    border-radius: 12px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 18px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
 }
 
 .danger-modal .modal-content .modal-header,
 .danger-modal .modal-content .modal-body,
 .danger-modal .modal-content .modal-footer {
-    border: none;
+    border: none !important;
     background-color: transparent !important;
-    padding: 0;
+    padding: 0 !important;
 }
 
 .danger-modal .modal-content .modal-header .btn-close,
@@ -476,49 +486,50 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 }
 
 .danger-modal .modal-content .modal-header .modal-title {
-    color: var(--danger-base);
-    font-weight: 400;
+    color: var(--danger-base) !important;
+    font-weight: 400 !important;
 }
 
 .danger-modal .modal-content .modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
 }
 
 .danger-modal .modal-content .modal-body p {
-    color: var(--text-dark-secondary);
-    font-weight: 400;
+    color: var(--text-dark-secondary) !important;
+    font-weight: 400 !important;
 }
 
 .danger-modal .modal-content .modal-body form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
 }
 
 .danger-modal .modal-content .modal-body .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
 }
 
 .danger-modal .modal-content .modal-body .form-group label {
-    color: var(--text-secondary);
-    font-weight: 400;
+    color: var(--text-secondary) !important;
+    font-weight: 400 !important;
 }
 
 .danger-modal .modal-content .modal-body .form-group .input-box input:focus,
-.danger-modal .modal-content .modal-body .form-group .input-box textarea:focus {
-    border-color: var(--danger-base);
+.danger-modal .modal-content .modal-body .form-group .input-box textarea:focus,
+.danger-modal .modal-content .modal-body .form-group .input-box select:focus {
+    border-color: var(--danger-base) !important;
 }
 
 .danger-modal .modal-content .modal-body .action-buttons {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
 }
 
 .danger-modal .modal-content .modal-body .primary-btn {

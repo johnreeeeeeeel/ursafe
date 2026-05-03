@@ -224,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="modal-body">
                     <!--Send OTP -->
-                    <form method="POST" action="app/OTP/send_otp.php">
+                    <form method="POST" action="app/otp/send_otp.php">
                 
                         <div class="form-group">
                             <label class="input-label">Email</label>
