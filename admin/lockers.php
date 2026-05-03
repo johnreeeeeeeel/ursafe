@@ -167,23 +167,34 @@ $password = $_SESSION['password'] ?? '';
                 <div class="dropdown">
                     <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="fa-solid fa-plus"></i>
-                        Add
+                        Add & View
                     </button>
                     
                     <ul class="dropdown-menu">
                         <li>
                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addLockerLocationModal">
-                                Locker Location
+                                Add Locker Location
                             </button>
                         </li>
                         <li>
                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addLockerSizeModal">    
-                                Locker Size
+                                Add Locker Size
                             </button>
                         </li>
                         <li>
                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addLockerSlotModal">
-                                Locker Slot
+                                Add Locker Slot
+                            </button>
+                        </li>
+                        <li><hr class="dropdown-divider"></hr></li>
+                        <li>
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerLocationsOffcanvas">
+                                View Locker Locations
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerSizesOffcanvas">
+                                View Locker Sizes
                             </button>
                         </li>
                     </ul>
@@ -193,11 +204,163 @@ $password = $_SESSION['password'] ?? '';
 
         <div class="content">
             <div id="lockers">
+
+                <header>
+                    <div class="search-group">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        <form method="GET">
+                            <input type="search"
+                                name="searchLockerLocation"
+                                placeholder="Search locker locations..."
+                                value="<?= htmlspecialchars($_GET['searchLockerLocation'] ?? '') ?>">
+
+                            <button type="submit" hidden></button>
+                        </form>
+                    </div>
+
+                    <div class="filter-group">
+                        <i class="fa-solid fa-filter"></i>
+
+                        <form method="GET">
+                            <input type="hidden"
+                                name="searchFilterLocation"
+                                value="<?= htmlspecialchars($_GET['searchLockerLocation'] ?? '') ?>">
+
+                            <select name="sort" onchange="this.form.submit()">
+                                <option value="">Sort By</option>
+                                <option value="asc" <?= (($_GET['sort'] ?? '') === 'asc') ? 'selected' : '' ?>>A - Z</option>
+                                <option value="desc" <?= (($_GET['sort'] ?? '') === 'desc') ? 'selected' : '' ?>>Z - A</option>
+                            </select>
+                        </form>
+                    </div>
+                </header>
+
+                <!-- Offcanvas for locker locations -->
+                <div class="offcanvas offcanvas-end" id="lockerLocationsOffcanvas">
+                    <div class="offcanvas-header">
+                        <h3 class="offcanvas-title">Lockers Locations</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                    </div>
+
+                    <div class="offcanvas-body">
+                        <?php
+                            $result = $conn_local->query("CALL getLockerLocations()");
+                            $conn_local->next_result();
+                        ?>
+
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Location</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <?php while ($row = $result->fetch_assoc()) { ?>
+                                    <tr>
+                                        <td><?= $row['location'] ?></td>
+
+                                        <td>
+                                            <button class="sm-btn primary-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#updateLockerLocation<?= $row['id'] ?>">
+                                                Edit
+                                            </button>
+
+                                            <button class="sm-btn danger-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteLockerLocation<?= $row['id'] ?>">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <?php
+                    $result = $conn_local->query("CALL getLockerLocations()");
+                    $conn_local->next_result();
+
+                    while ($row = $result->fetch_assoc()) {
+                ?>
+
+                    <!-- Update locker location modal -->
+                    <div class="modal fade primary-modal" id="updateLockerLocation<?= $row['id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        Update Location
+                                    </h5>
+                                </div>
+
+                                <div class="modal-body">
+                                    <form method="POST" action="../app/locker/update_locker_location.php">
+                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+
+                                        <div class="form-group">
+                                            <label class="input-label">Location</label>
+                                            <div class="input-box">
+                                                <input type="text" name="location" value="<?= $row['location'] ?>" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="action-buttons">
+                                            <button type="submit" class="btn primary-btn">Save</button>
+                                            <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete locker location modal -->
+                    <div class="modal fade danger-modal" id="deleteLockerLocation<?= $row['id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fa-solid fa-trash"></i>
+                                        Delete Location
+                                    </h5>
+                                </div>
+
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete <i><?= $row['location'] ?></i>?</p>
+
+                                    <div class="action-buttons">
+                                        <form method="POST" action="../app/locker/delete_locker_location.php">
+                                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
+
+                                            <button type="submit" class="btn danger-btn">Yes Delete</button>
+                                        </form>
+
+                                        <button class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+
+                <!-- Offcanvas for locker sizes -->
                 <div class="offcanvas offcanvas-end" id="lockerSizesOffcanvas">
                     <div class="offcanvas-header">
                         <h3 class="offcanvas-title">Lockers Sizes & Prices</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
                     </div>
+
                     <div class="offcanvas-body">
                         <?php
                             $result = $conn_local->query("CALL getLockerSizes()");
@@ -209,6 +372,7 @@ $password = $_SESSION['password'] ?? '';
                                 <tr>
                                     <th>Size</th>
                                     <th>Price</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
 
@@ -217,6 +381,20 @@ $password = $_SESSION['password'] ?? '';
                                     <tr>
                                         <td><?= $row['size'] ?></td>
                                         <td><?= $row['price'] ?></td>
+
+                                        <td>
+                                            <button class="sm-btn primary-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#updateLockerSize<?= $row['id'] ?>">
+                                                Edit
+                                            </button>
+
+                                            <button class="sm-btn danger-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteLockerSize<?= $row['id'] ?>">
+                                                Delete
+                                            </button>
+                                        </td>
                                     </tr>
                                 <?php } ?>
                             </tbody>
@@ -224,24 +402,131 @@ $password = $_SESSION['password'] ?? '';
                     </div>
                 </div>
 
-                <button class="btn primary-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#lockerSizesOffcanvas">
-                    Locker Sizes
-                </button>
+                <?php
+                    $result = $conn_local->query("CALL getLockerSizes()");
+                    $conn_local->next_result();
+
+                    while ($row = $result->fetch_assoc()) {
+                ?>
+                    <!-- Update locker size modal -->
+                    <div class="modal fade primary-modal" id="updateLockerSize<?= $row['id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        Update Size
+                                    </h5>
+                                </div>
+
+                                <div class="modal-body">
+                                    <form method="POST" action="../app/locker/update_locker_size.php">
+                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+
+                                        <div class="form-group">
+                                            <label class="input-label">Size</label>
+                                            <div class="input-box">
+                                                <input type="text" name="size" value="<?= $row['size'] ?>" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="input-label">Type</label>
+                                            <div class="input-box">
+                                                <input type="number" step="0.01" name="price" value="<?= $row['price'] ?>" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="action-buttons">
+                                            <button type="submit" class="btn primary-btn">Save</button>
+                                            <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete locker size modal -->
+                    <div class="modal fade danger-modal" id="deleteLockerSize<?= $row['id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fa-solid fa-trash"></i>
+                                        Delete Size
+                                    </h5>
+                                </div>
+
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete <i><?= $row['size'] ?></i>?</p>
+
+                                    <div class="action-buttons">
+                                        <form method="POST" action="../app/locker/delete_locker_size.php">
+                                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
+
+                                            <button type="submit" class="btn danger-btn">Yes Delete</button>
+                                        </form>
+
+                                        <button class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
 
                 <div class="table-container">
-                    <?php 
-                        // Get all locations
-                        $locations = $conn_local->query("CALL getLockerLocations()");
-                        $conn_local->next_result();
+                    <!-- Get locker locations and search, filter -->
+                    <?php
+                        $search = $_GET['searchLockerLocation'] ?? '';
+                        $sort = $_GET['sort'] ?? '';
+
+                        if (!empty($search)) {
+
+                            $stmt = $conn_local->prepare("CALL searchLockerLocation(?)");
+                            $stmt->bind_param("s", $search);
+                            $stmt->execute();
+
+                            $locations = $stmt->get_result();
+                            $stmt->close();
+
+                            $conn_local->next_result();
+
+                        } else {
+
+                            if ($sort === 'asc') {
+                                $sql = "CALL getLockerLocationsASC()";
+                            } elseif ($sort === 'desc') {
+                                $sql = "CALL getLockerLocationsDESC()";
+                            } else {
+                                $sql = "CALL getLockerLocations()";
+                            }
+
+                            $locations = $conn_local->query($sql);
+                            $conn_local->next_result();
+                        }
                     ?>
 
                     <?php while($loc = $locations->fetch_assoc()) { ?>
 
-                        <div class="location-section">
+                        <div class="location-slot-section">
                             <div class="location-header">
                                 <h3><?= $loc['location'] ?></h3>
-
+                                
                                 <div class=action-buttons>
+                                    <button type="button"
+                                        class="sm-btn primary-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addSlotModal<?= $loc['id'] ?>">
+                                        <i class="fa-solid fa-plus"></i>
+                                        Add Slot
+                                    </button>
+
                                     <button type="button"
                                         class="sm-btn primary-btn"
                                         data-bs-toggle="modal"
@@ -260,7 +545,61 @@ $password = $_SESSION['password'] ?? '';
                                 </div>
                             </div>
 
-                            <!-- Edit location modals -->
+                            <!-- Add slot modal (per location) -->
+                            <div class="modal fade primary-modal" id="addSlotModal<?= $loc['id'] ?>" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">
+                                                <i class="fa-solid fa-plus"></i>
+                                                Add Slot - <?= $loc['location'] ?>
+                                            </h5>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            <?php
+                                                // get sizes only
+                                                $sizes = $conn_local->query("CALL getLockerSizes()");
+                                                $conn_local->next_result();
+                                            ?>
+
+                                            <form method="POST" action="../app/locker/add_locker_slot.php">
+                                                <input type="hidden" name="location_id" value="<?= $loc['id'] ?>">
+
+                                                <div class="form-group">
+                                                    <label class="input-label">Size</label>
+                                                    <div class="input-box">
+                                                        <select name="size_id" required>
+                                                            <option value="">Select Size</option>
+                                                            <?php while($size = $sizes->fetch_assoc()) { ?>
+                                                                <option value="<?= $size['id'] ?>">
+                                                                    <?= $size['size'] ?>
+                                                                </option>
+                                                            <?php } ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="input-label">Slot Number</label>
+                                                    <div class="input-box">
+                                                        <input type="number" name="slot_number" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="action-buttons">
+                                                    <button type="submit" class="btn primary-btn">Add Slot</button>
+                                                    <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+                                                </div>
+
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Update location modals -->
                             <div class="modal fade primary-modal" id="updateLockerLocationModal<?= $loc['id'] ?>" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
@@ -268,12 +607,12 @@ $password = $_SESSION['password'] ?? '';
                                         <div class="modal-header">
                                             <h5 class="modal-title">
                                                 <i class="fa-solid fa-pen-to-square"></i>
-                                                Edit Location
+                                                Update Location
                                             </h5>
                                         </div>
 
                                         <div class="modal-body">
-                                            <form method="POST" action="../app/update_locker_location.php">
+                                            <form method="POST" action="../app/locker/update_locker_location.php">
                                                 <input type="hidden" name="id" value="<?= $loc['id'] ?>">
 
                                                 <div class="form-group">
@@ -311,7 +650,7 @@ $password = $_SESSION['password'] ?? '';
                                             </p>
 
                                             <div class="action-buttons">
-                                                <form method="POST" action="../app/delete_locker_location.php">
+                                                <form method="POST" action="../app/locker/delete_locker_location.php">
                                                     <input type="hidden" name="id" value="<?= $loc['id'] ?>">
 
                                                     <button type="submit" class="btn primary-btn">
@@ -390,7 +729,7 @@ $password = $_SESSION['password'] ?? '';
                                                     </div>
 
                                                     <div class="modal-body">
-                                                        <form method="POST" action="../app/update_locker_slot.php">
+                                                        <form method="POST" action="../app/locker/update_locker_slot.php">
                                                             <input type="hidden" name="id" value="<?= $row['id'] ?>">
 
                                                             <div class="form-group">
@@ -437,7 +776,7 @@ $password = $_SESSION['password'] ?? '';
 
                                                         <div class="action-buttons">
 
-                                                            <form method="POST" action="../app/delete_locker_slot.php">
+                                                            <form method="POST" action="../app/locker/delete_locker_slot.php">
                                                                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
 
                                                                 <button type="submit" class="btn primary-btn">
@@ -483,7 +822,7 @@ $password = $_SESSION['password'] ?? '';
                 </div>
 
                 <div class="modal-body">
-                    <form method="POST" action="../app/add_locker_location.php">
+                    <form method="POST" action="../app/locker/add_locker_location.php">
                         <div class="form-group">
                             <label class="input-label">Location Name</label>
                             <div class="input-box">
@@ -514,7 +853,7 @@ $password = $_SESSION['password'] ?? '';
                 </div>
 
                 <div class="modal-body">
-                    <form method="POST" action="../app/add_locker_size.php">
+                    <form method="POST" action="../app/locker/add_locker_size.php">
                         <div class="form-group">
                             <label class="input-label">Size Name</label>
                             <div class="input-box">
@@ -562,7 +901,7 @@ $password = $_SESSION['password'] ?? '';
                         $conn_local->next_result();
                     ?>
 
-                    <form method="POST" action="../app/add_locker_slot.php">
+                    <form method="POST" action="../app/locker/add_locker_slot.php">
 
                         <div class="form-group">
                             <label class="input-label">Location</label>

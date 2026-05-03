@@ -1,30 +1,31 @@
 <?php
 session_start();
-require 'db_connection.php';
+require '../db_connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+    $id = $_POST['id'];
     $location = $_POST['location'];
 
-    $stmt = $conn_local->prepare("CALL addLockerLocation(?)");
-    $stmt->bind_param("s", $location);
+    $stmt = $conn_local->prepare("CALL updateLockerLocation(?, ?)");
+    $stmt->bind_param("is", $id, $location);
 
     if ($stmt->execute()) {
         $_SESSION['alert_message'] = [
             'type' => 'success',
-            'text' => 'Location added successfully.'
+            'text' => 'Location updated successfully.'
         ];
     } else {
         $_SESSION['alert_message'] = [
             'type' => 'danger',
-            'text' => 'Error adding location.'
+            'text' => 'Error updating location.'
         ];
     }
 
     $stmt->close();
     $conn_local->next_result();
 
-    header("Location: ../admin/lockers.php");
+    header("Location: ../../admin/lockers.php");
     exit();
 }
 ?>

@@ -1,31 +1,30 @@
 <?php
 session_start();
-require 'db_connection.php';
+require '../db_connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $size = $_POST['size'];
-    $price = $_POST['price'];
+    $location = $_POST['location'];
 
-    $stmt = $conn_local->prepare("CALL addLockerSize(?, ?)");
-    $stmt->bind_param("sd", $size, $price);
+    $stmt = $conn_local->prepare("CALL addLockerLocation(?)");
+    $stmt->bind_param("s", $location);
 
     if ($stmt->execute()) {
         $_SESSION['alert_message'] = [
             'type' => 'success',
-            'text' => 'Locker size added successfully.'
+            'text' => 'Location added successfully.'
         ];
     } else {
         $_SESSION['alert_message'] = [
             'type' => 'danger',
-            'text' => 'Error adding locker size.'
+            'text' => 'Error adding location.'
         ];
     }
 
     $stmt->close();
     $conn_local->next_result();
 
-    header("Location: ../admin/lockers.php");
+    header("Location: ../../admin/lockers.php");
     exit();
 }
 ?>

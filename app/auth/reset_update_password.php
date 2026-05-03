@@ -1,7 +1,7 @@
 <?php
 session_start();
-require 'db_connection.php';
-require 'emails/temporary_password_email.php';
+require '../db_connection.php';
+require '../emails/temporary_password_email.php';
 
 // Get email from session
 $email = $_SESSION['email'] ?? null;
@@ -12,7 +12,7 @@ if (!$email) {
         'text' => 'Session expired. Please try again.'
     ];
 
-    header("Location: ../index.php");
+    header("Location: ../../index.php");
     exit();
 }
 
@@ -37,7 +37,7 @@ if (!$user) {
         'text' => 'User not found.'
     ];
 
-    header("Location: ../index.php");
+    header("Location: ../../index.php");
     exit();
 }
 
@@ -76,6 +76,6 @@ $update->close();
 // Cleanup
 unset($_SESSION['email'], $_SESSION['otp'], $_SESSION['otp_sent']);
 
-header("Location: ../index.php");
+header("Location: ../../index.php");
 exit();
 ?>

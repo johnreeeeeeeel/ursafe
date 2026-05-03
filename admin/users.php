@@ -210,7 +210,7 @@ $password = $_SESSION['password'] ?? '';
                                     $stmt->execute();
                                     $result = $stmt->get_result();
                                 } else {
-                                    require __DIR__ . '/../app/search_filter_users.php';
+                                    require '../app/users/search_filter_users.php';
                                 }
                             ?>
 

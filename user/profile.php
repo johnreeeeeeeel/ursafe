@@ -188,7 +188,7 @@ $password = $_SESSION['password'] ?? '';
                 </div>
 
                 <div class="modal-body">
-                    <form method="POST" action="../app/change_update_password.php">
+                    <form method="POST" action="../app/auth/change_update_password.php">
                         <div class="form-group">
                             <label class="input-label">Current Password</label>
                             <div class="input-box">
@@ -238,7 +238,7 @@ $password = $_SESSION['password'] ?? '';
                     <p>Are you sure you want to logout?</p>
                     
                     <div class="action-buttons">
-                        <a href="../app/logout.php" class="btn primary-btn">
+                        <a href="../app/auth/logout.php" class="btn primary-btn">
                             Yes, Logout
                         </a>
                         

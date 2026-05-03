@@ -1,5 +1,5 @@
 <?php
-require 'db_connection.php';
+require '../db_connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -13,6 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
     $conn_local->next_result();
 
-    header("Location: ../admin/lockers.php");
+    header("Location: ../../admin/lockers.php");
 }
 ?>

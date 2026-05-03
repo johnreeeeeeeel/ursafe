@@ -188,7 +188,7 @@ $password = $_SESSION['password'] ?? '';
                     <p>Are you sure you want to logout?</p>
                     
                     <div class="action-buttons">
-                        <a href="../app/logout.php" class="btn primary-btn">
+                        <a href="../app/auth/logout.php" class="btn primary-btn">
                             Yes, Logout
                         </a>
                         

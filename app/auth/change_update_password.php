@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db_connection.php';
+require '../db_connection.php';
 
 // Get email from session
 $email = $_SESSION['email'] ?? null;
@@ -11,7 +11,7 @@ if (!$email) {
         'text' => 'Session expired. Please try again.'
     ];
 
-    header("Location: ../index.php");
+    header("Location: ../../index.php");
     exit();
 }
 
@@ -24,7 +24,7 @@ if ($new !== $confirm) {
         'type' => 'danger',
         'text' => 'Passwords do not match.'
     ];
-    header("Location: ../user/profile.php");
+    header("Location: ../../user/profile.php");
     exit();
 }
 
@@ -77,6 +77,6 @@ if ($user && password_verify($old, $user['password'])) {
     ];
 }
 
-header("Location: ../user/profile.php");
+header("Location: ../../user/profile.php");
 exit();
 ?>
