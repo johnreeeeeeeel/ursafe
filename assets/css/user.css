@@ -168,3 +168,116 @@ section .content {
     flex: 1;
     overflow-y: auto;
 }
+
+/* Lockers */
+section #lockers {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 12px;
+}
+
+section #lockers header {
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+section #lockers header form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+section #lockers header form .search-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+section #lockers header form .search-group i {
+    color: var(--text-dark-secondary);
+}
+
+section #lockers header form .search-group input {
+    flex: 1;
+    padding: 6px 12px;
+    border: 1px solid var(--text-light-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-dark-primary);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    font-weight: 400;
+}
+
+section #lockers header form .search-group input:focus {
+    border-color: var(--color-primary-base);
+}
+
+section #lockers header .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+section #lockers header form .filter-group i {
+    color: var(--text-dark-secondary);
+}
+
+section #lockers header form .filter-group select {
+    padding: 6px 12px;
+    border: 1px solid var(--text-light-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-dark-primary);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    font-weight: 400;
+}
+
+section #lockers header form .filter-group select:focus {
+    border-color: var(--color-primary-base);
+}
+
+section #lockers .table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+section #lockers .table-container .location-slot-section {
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+section #lockers .table-container .location-slot-section .location-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+section #lockers .table-container .location-slot-section .location-header h3 {
+    font-weight: 500;
+    color: var(--text-dark-secondary);
+}
+
+section #lockers .table-container .location-slot-section table thead tr th{
+    text-align: left;
+    font-weight: 500;
+    vertical-align: middle;
+    color: var(--text-dark-secondary);
+}
+
+section #lockers .table-container .location-slot-section table tbody tr td{
+    text-align: left;
+    font-weight: 400;
+    vertical-align: middle;
+    color: var(--text-dark-tertiary);
+}

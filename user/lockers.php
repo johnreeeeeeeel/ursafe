@@ -167,7 +167,208 @@ $password = $_SESSION['password'] ?? '';
 
         <div class="content">
             <div id="lockers">
-                <h1>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Repudiandae autem explicabo non ad voluptates est itaque eligendi cupiditate! Libero saepe debitis sequi doloribus aperiam? Repudiandae explicabo iste doloremque commodi architecto? Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate accusantium adipisci perferendis vitae asperiores quasi totam, neque fuga officiis, repellendus fugiat minima. Rem nihil vel architecto culpa magni iusto aut. Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias atque expedita voluptatum omnis minus, ea eum aut illo nobis iure numquam ipsam natus quisquam inventore doloribus error incidunt laborum optio? Lorem, ipsum dolor sit amet consectetur adipisicing elit. Voluptatem delectus excepturi ratione. Obcaecati iusto voluptatibus temporibus libero in quas non ducimus adipisci, porro illo? Magnam ea voluptate sed perspiciatis nobis. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Adipisci facilis quis molestias quam officiis illum fugit, amet beatae incidunt ut, et, dolorem quia corrupti. Alias optio molestiae placeat dicta quaerat. Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil iste esse nulla. Amet debitis suscipit, ad qui cum, dolore quisquam, repudiandae molestiae ab quasi eligendi. Et facilis illo error unde!</h1>
+
+                <header>
+                    <form method="GET">
+                        <div class="search-group">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="search"
+                                name="searchLockerLocation"
+                                placeholder="Search locker locations..."
+                                value="<?= htmlspecialchars($_GET['searchLockerLocation'] ?? '') ?>">
+                        </div>
+
+                        <div class="filter-group">
+                            <i class="fa-solid fa-filter"></i>
+                            <select name="filter" onchange="this.form.submit()">
+                                <option value="">All</option>
+                                <option value="asc" <?= (($_GET['filter'] ?? '') === 'asc') ? 'selected' : '' ?>>A - Z</option>
+                                <option value="desc" <?= (($_GET['filter'] ?? '') === 'desc') ? 'selected' : '' ?>>Z - A</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" hidden></button>
+                    </form>
+                </header>
+
+                <div class="table-container">
+                    <!-- Get locker locations and search, filter -->
+                    <?php
+                        $search = $_GET['searchLockerLocation'] ?? '';
+                        $filter = $_GET['filter'] ?? '';
+
+                        $stmt = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?)");
+                        $stmt->bind_param("ss", $search, $filter);
+                        $stmt->execute();
+
+                        $locations = $stmt->get_result();
+                        $stmt->close();
+
+                        $conn_local->next_result();
+                    ?>
+
+                    <?php while($loc = $locations->fetch_assoc()) { ?>
+
+                        <div class="location-slot-section">
+                            <div class="location-header">
+                                <h3><?= $loc['location'] ?></h3>
+                            </div>
+
+                            <?php
+                                // Get lockers per location
+                                $stmt = $conn_local->prepare("CALL getLockersByLocation(?)");
+                                $stmt->bind_param("i", $loc['id']);
+                                $stmt->execute();
+
+                                $result = $stmt->get_result();
+                            ?>
+
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Slot Number</th>
+                                        <th>Size</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <?php while($row = $result->fetch_assoc()) { ?>
+                                        <tr>
+                                            <td><?= $row['slot_number'] ?></td>
+                                            <td><?= $row['size'] ?></td>
+                                            <td><?= $row['price'] ?></td>
+                                            <td><?= $row['status'] ?></td>
+
+                                            <td>
+                                                <button 
+                                                    type="button" 
+                                                    class="sm-btn secondary-btn"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#applyLockerSlotModal<?= $row['id'] ?>">
+                                                    <i class="fa-solid fa-file"></i>
+                                                    Apply
+                                                </button>
+                                            </td>
+                                        </tr>     
+                                        
+                                        <!-- Apply locker slot modals -->
+                                        <div class="modal fade success-modal" id="applyLockerSlotModal<?= $row['id'] ?>" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">
+                                                            <i class="fa-solid fa-file"></i>
+                                                            Apply Locker Slot
+                                                        </h5>
+                                                    </div>
+
+                                                    <div class="modal-body">
+                                                        <p>
+                                                            Are you sure you want to apply slot number <i><?= $row['slot_number'] ?></i>?
+                                                        </p>
+
+                                                        <div class="action-buttons">
+                                                            <form method="POST" action="../app/locker/apply_locker_slot.php">
+                                                                <input type="hidden" name="slot_id" value="<?= $row['id'] ?>">
+
+                                                                <button type="submit" class="btn primary-btn">
+                                                                    Yes, Apply
+                                                                </button>
+                                                            </form>
+
+                                                            <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+
+                            <?php
+                                $stmt->close();
+                                $conn_local->next_result();
+                            ?>
+                        </div>
+                    <?php } ?>
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+
+                <h2 class="mt-5">My Locker Applications</h2>
+
+<?php
+$stmt = $conn_local->prepare("CALL getUserLockerSlotApplications(?)");
+$stmt->bind_param("s", $id);
+$stmt->execute();
+$applications = $stmt->get_result();
+?>
+
+<table class="table table-borderless mt-3">
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Slot</th>
+            <th>Size</th>
+            <th>Price</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?php while ($app = $applications->fetch_assoc()) { ?>
+            <tr>
+                <td><?= $app['location'] ?></td>
+
+                <td>Slot <?= $app['slot_number'] ?></td>
+
+                <td><?= $app['size'] ?></td>
+
+                <td>₱<?= $app['price'] ?></td>
+
+                <td>
+                    <?php if ($app['status'] == 'Pending') { ?>
+                        <span class="badge bg-warning">Pending</span>
+                    <?php } elseif ($app['status'] == 'Accepted') { ?>
+                        <span class="badge bg-success">Accepted</span>
+
+                    <?php } elseif ($app['status'] == 'Revoked') { ?>
+                        <span class="badge bg-success">Revoked</span>
+
+                    <?php } else { ?>
+                        <span class="badge bg-danger">Rejected</span>
+                    <?php } ?>
+                </td>
+            </tr>
+        <?php } ?>
+    </tbody>
+</table>
             </div>  
         </div>
     </section>

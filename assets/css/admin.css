@@ -210,26 +210,27 @@ section #lockers {
 }
 
 section #lockers header {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
     background-color: #ffffff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-section #lockers header .search-group {
+section #lockers header form {
     display: flex;
-    flex-direction: row;
-    gap: 8px;
     align-items: center;
-    flex: 1;
+    gap: 12px;
 }
 
-section #lockers header .search-group i {
+section #lockers header form .search-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+section #lockers header form .search-group i {
     color: var(--text-dark-secondary);
 }
 
-section #lockers header .search-group input {
+section #lockers header form .search-group input {
     flex: 1;
     padding: 6px 12px;
     border: 1px solid var(--text-light-secondary);
@@ -241,22 +242,21 @@ section #lockers header .search-group input {
     font-weight: 400;
 }
 
-section #lockers header .search-group input:focus {
+section #lockers header form .search-group input:focus {
     border-color: var(--color-primary-base);
 }
 
 section #lockers header .filter-group {
     display: flex;
-    flex-direction: row;
-    gap: 8px;
     align-items: center;
+    gap: 6px;
 }
 
-section #lockers header .filter-group i {
+section #lockers header form .filter-group i {
     color: var(--text-dark-secondary);
 }
 
-section #lockers header .filter-group select {
+section #lockers header form .filter-group select {
     padding: 6px 12px;
     border: 1px solid var(--text-light-secondary);
     background: var(--bg-secondary);
@@ -264,42 +264,97 @@ section #lockers header .filter-group select {
     border-radius: 8px;
     font-size: 14px;
     outline: none;
+    font-weight: 400;
 }
 
-section #lockers header .filter-group select :focus {
+section #lockers header form .filter-group select:focus {
     border-color: var(--color-primary-base);
 }
 
-section #lockers #lockerSizesOffcanvas,
-section #lockers #lockerLocationsOffcanvas {
-    width: 100vw; 
+section #lockers #lockerApplicationOffcanvas,
+section #lockers #lockerLocationsOffcanvas,
+section #lockers #lockerSizesOffcanvas {
+    background-color: var(--bg-secondary);
+    width: 100vw;
     height: 100vh;
     padding: 24px 48px;
 }
 
-section #lockers #lockerSizesOffcanvas .offcanvas-header,
-section #lockers #lockerSizesOffcanvas .offcanvas-body,
-section #lockers #lockerSizesOffcanvas .offcanvas-footer,
+section #lockers #lockerApplicationOffcanvas .offcanvas-header,
+section #lockers #lockerApplicationOffcanvas .offcanvas-body,
+section #lockers #lockerApplicationOffcanvas .offcanvas-footer,
 section #lockers #lockerLocationsOffcanvas .offcanvas-header,
 section #lockers #lockerLocationsOffcanvas .offcanvas-body,
-section #lockers #lockerLocationsOffcanvas .offcanvas-footer {
+section #lockers #lockerLocationsOffcanvas .offcanvas-footer,
+section #lockers #lockerSizesOffcanvas .offcanvas-header,
+section #lockers #lockerSizesOffcanvas .offcanvas-body,
+section #lockers #lockerSizesOffcanvas .offcanvas-footer {
     border: none !important;
     background-color: transparent !important;
     padding: 0 !important;
 }
 
-section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close,
-section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:focus,
-section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:active,
-section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:hover,
+section #lockers #lockerApplicationOffcanvas .offcanvas-header .btn-close,
+section #lockers #lockerApplicationOffcanvas .offcanvas-header .btn-close:focus,
+section #lockers #lockerApplicationOffcanvas .offcanvas-header .btn-close:active,
+section #lockers #lockerApplicationOffcanvas .offcanvas-header .btn-close:hover,
 section #lockers #lockerLocationsOffcanvas .offcanvas-header .btn-close,
 section #lockers #lockerLocationsOffcanvas .offcanvas-header .btn-close:focus,
 section #lockers #lockerLocationsOffcanvas .offcanvas-header .btn-close:active,
-section #lockers #lockerLocationsOffcanvas .offcanvas-header .btn-close:hover {
+section #lockers #lockerLocationsOffcanvas .offcanvas-header .btn-close:hover,
+section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close,
+section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:focus,
+section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:active,
+section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:hover {
     outline: none !important;
     border: none !important;
     box-shadow: none !important;
-} 
+}
+
+section #lockers #lockerApplicationOffcanvas .offcanvas-header div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+section #lockers #lockerApplicationOffcanvas .offcanvas-header div h3 {
+    color: var(--text-dark-secondary);
+}
+
+section #lockers #lockerApplicationOffcanvas .offcanvas-body table,
+section #lockers #lockerLocationsOffcanvas .offcanvas-body table,
+section #lockers #lockerSizesOffcanvas .offcanvas-body table {
+    background-color: transparent !important;
+}
+
+section #lockers #lockerApplicationOffcanvas .offcanvas-body table thead tr th,
+section #lockers #lockerLocationsOffcanvas .offcanvas-body table thead tr th,
+section #lockers #lockerSizesOffcanvas .offcanvas-body table thead tr th {
+    text-align: left;
+    font-weight: 500;
+    vertical-align: middle;
+    color: var(--text-dark-secondary);
+}
+
+section #lockers #lockerApplicationOffcanvas .offcanvas-body table tbody tr td,
+section #lockers #lockerLocationsOffcanvas .offcanvas-body table tbody tr td,
+section #lockers #lockerSizesOffcanvas .offcanvas-body table tbody tr td {
+    text-align: left;
+    font-weight: 400;
+    vertical-align: middle;
+    color: var(--text-dark-tertiary);
+}
+
+
+
+
+
+
+
+
+
 
 section #lockers .table-container {
     display: flex;

@@ -54,10 +54,25 @@ document.addEventListener('hide.bs.modal', function (e) {
     }
 });
 
-// Dynamic header title
-function setTitle(el) {
-    document.querySelector(".page-title").textContent = el.dataset.title;
-}
+// Stay in modal when adding, editing and deleting locker location and sizes
+document.addEventListener("DOMContentLoaded", function () {
+
+    if (window.location.hash) {
+        const el = document.querySelector(window.location.hash);
+
+        if (el) {
+            const bsOffcanvas = new bootstrap.Offcanvas(el);
+            bsOffcanvas.show();
+
+            // When offcanvas is closed
+            el.addEventListener("hidden.bs.offcanvas", function () {
+                // remove hash 
+                history.replaceState(null, null, window.location.pathname);
+            });
+        }
+    }
+
+});
 
 // View user details
 function viewUserDetails(

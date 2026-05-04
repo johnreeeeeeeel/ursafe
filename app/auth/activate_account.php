@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($insert->execute()) {
 
-        require '../emails/success_creation_email.php';
+        require '../emails/success_account_activation_email.php';
         sendUserEmail($student['email'], $username, $plainPassword);
 
         $_SESSION['alert_message'] = [

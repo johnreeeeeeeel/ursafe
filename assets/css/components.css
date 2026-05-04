@@ -104,7 +104,7 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     background-color: var(--announcement-1);
     color: var(--text--dark-primary);
     font-weight: 400;
-    z-index: 999;
+    z-index: 9999;
 }
 
 #messageAlert .btn-close,
@@ -355,11 +355,25 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 .primary-modal .modal-body .primary-btn {
     background-color: var(--color-primary-base) !important;
     color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
 }
 
 .primary-modal .modal-body .primary-btn:hover {
     background-color: var(--color-primary-6) !important;
     color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
+}
+
+.primary-modal .modal-content .modal-body .secondary-btn {
+    background-color: transparent !important;
+    color: var(--color-primary-base) !important;
+    font-weight: 400 !important;
+}
+
+.primary-modal .modal-content .modal-body .secondary-btn:hover {
+    background-color: transparent !important;
+    color: var(--color-primary-base) !important;
+    font-weight: 400 !important;
 }
 
 /* Success modal */
@@ -445,11 +459,25 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 .success-modal .modal-content .modal-body .primary-btn {
     background-color: var(--success-base) !important;
     color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
 }
 
 .success-modal .modal-content .modal-body .primary-btn:hover {
     background-color: var(--success-6) !important;
     color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
+}
+
+.success-modal .modal-content .modal-body .secondary-btn {
+    background-color: transparent !important;
+    color: var(--success-base) !important;
+    font-weight: 400 !important;
+}
+
+.success-modal .modal-content .modal-body .secondary-btn:hover {
+    background-color: transparent !important;
+    color: var(--success-base) !important;
+    font-weight: 400 !important;
 }
 
 /* Danger modal */
@@ -535,9 +563,23 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 .danger-modal .modal-content .modal-body .primary-btn {
     background-color: var(--danger-base) !important;
     color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
 }
 
 .danger-modal .modal-content .modal-body .primary-btn:hover {
     background-color: var(--danger-6) !important;
     color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
+}
+
+.danger-modal .modal-content .modal-body .secondary-btn {
+    background-color: transparent !important;
+    color: var(--danger-base) !important;
+    font-weight: 400 !important;
+}
+
+.danger-modal .modal-content .modal-body .secondary-btn:hover {
+   background-color: transparent !important;
+    color: var(--danger-base) !important;
+    font-weight: 400 !important;
 }
