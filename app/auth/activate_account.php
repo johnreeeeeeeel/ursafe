@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Checkly check if email exists in campus database
     $stmt = $conn_remote->prepare("
         SELECT 
-            student_id,
+            id,
             lastname,
             firstname,
             middlename,
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $insert->bind_param(
         "sssssssssss",
-        $student['student_id'],
+        $student['id'],
         $student['lastname'],
         $student['firstname'],
         $student['middlename'],
