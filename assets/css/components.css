@@ -170,24 +170,14 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     background-color: var(--success-base) !important;
     color: var(--text-light-primary) !important;
     text-decoration: none !important;
+    padding: 7px 12px !important;
 }
 
 .secondary-btn:hover,
 .secondary-btn:active {
     background-color: var(--success-6) !important;
     color: var(--text-light-primary) !important;
-}
-
-.transparent-btn {
-    border: 2px solid transparent !important;
-    color: var(--bs-body-color) !important;
     text-decoration: none !important;
-}
-
-.transparent-btn:hover,
-.transparent-btn:active {
-    border: 2px solid transparent !important;
-    background-color: transparent !important;
 }
 
 .danger-btn {
@@ -272,6 +262,36 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     color: var(--text-dark-tertiary);
 }
 
+/* Pending badges */
+.pending-badge {
+    background-color: var(--warning-base);
+    color: var(--text-light-primary);
+}
+
+/* Pending badges */
+.accepted-badge {
+    background-color: var(--color-primary-base);
+    color: var(--text-light-primary);
+}
+
+/* Revoked badges */
+.revoked-badge {
+    background-color: var(--danger-base);
+    color: var(--text-light-primary);
+}
+
+/* Rejected badges */
+.rejected-badge {
+    background-color: var(--danger-base);
+    color: var(--text-light-primary);
+}
+
+/* Cancelled badges */
+.cancelled-badge {
+    background-color: var(--success-base);
+    color: var(--text-light-primary);
+}
+
 /* Primary modal */
 .primary-modal .modal-dialog {
     max-width: 400px !important;
@@ -313,7 +333,32 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 .primary-modal .modal-body {
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 18px !important;
+}
+
+.primary-modal .modal-content .modal-body .message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.primary-modal .modal-content .modal-body .message i {
+    color: var(--color-primary-base) !important;
+    font-size: 78px !important;
+}
+
+.primary-modal .modal-content .modal-body .message h5 {
+    color: var(--color-primary-base) !important;
+}
+
+.primary-modal .modal-content .modal-body .message p {
+    color: var(--text-dark-secondary) !important;
+}
+
+.primary-modal .modal-content .modal-body .message p span {
+    color: var(--color-primary-base) !important;
 }
 
 .primary-modal .modal-body p {
@@ -348,7 +393,7 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+    justify-content: center !important;
     gap: 8px !important;
 }
 
@@ -365,14 +410,16 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 }
 
 .primary-modal .modal-content .modal-body .secondary-btn {
+    border: 1px solid var(--color-primary-base) !important;
     background-color: transparent !important;
     color: var(--color-primary-base) !important;
     font-weight: 400 !important;
 }
 
 .primary-modal .modal-content .modal-body .secondary-btn:hover {
-    background-color: transparent !important;
-    color: var(--color-primary-base) !important;
+    border: 1px solid var(--color-primary-base) !important;
+    background-color: var(--color-primary-6) !important;
+    color: var(--text-light-primary) !important;
     font-weight: 400 !important;
 }
 
@@ -417,7 +464,32 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 .success-modal .modal-content .modal-body {
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 18px !important;
+}
+
+.success-modal .modal-content .modal-body .message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.success-modal .modal-content .modal-body .message i {
+    color: var(--success-base) !important;
+    font-size: 78px !important;
+}
+
+.success-modal .modal-content .modal-body .message h5 {
+    color: var(--success-base) !important;
+}
+
+.success-modal .modal-content .modal-body .message p {
+    color: var(--text-dark-secondary) !important;
+}
+
+.success-modal .modal-content .modal-body .message p span {
+    color: var(--success-base) !important;
 }
 
 .success-modal .modal-content .modal-body p {
@@ -452,7 +524,7 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+    justify-content: center !important;
     gap: 8px !important;
 }
 
@@ -469,14 +541,16 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 }
 
 .success-modal .modal-content .modal-body .secondary-btn {
+    border: 1px solid var(--success-base) !important;
     background-color: transparent !important;
     color: var(--success-base) !important;
     font-weight: 400 !important;
 }
 
 .success-modal .modal-content .modal-body .secondary-btn:hover {
-    background-color: transparent !important;
-    color: var(--success-base) !important;
+    border: 1px solid var(--success-base) !important;
+    background-color: var(--success-6) !important;
+    color: var(--text-light-primary) !important;
     font-weight: 400 !important;
 }
 
@@ -521,7 +595,33 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 .danger-modal .modal-content .modal-body {
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 18px !important;
+}
+
+.danger-modal .modal-content .modal-body .message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.danger-modal .modal-content .modal-body .message i {
+    color: var(--danger-base) !important;
+    font-size: 78px !important;
+}
+
+.danger-modal .modal-content .modal-body .message h5 {
+    color: var(--danger-base) !important;
+}
+
+.danger-modal .modal-content .modal-body .message p {
+    color: var(--text-dark-secondary) !important;
+    text-align: center !important;
+}
+
+.danger-modal .modal-content .modal-body .message p span {
+    color: var(--danger-base) !important;
 }
 
 .danger-modal .modal-content .modal-body p {
@@ -556,7 +656,7 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+    justify-content: center !important;
     gap: 8px !important;
 }
 
@@ -573,13 +673,15 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
 }
 
 .danger-modal .modal-content .modal-body .secondary-btn {
+    border: 1px solid var(--danger-base) !important;
     background-color: transparent !important;
     color: var(--danger-base) !important;
     font-weight: 400 !important;
 }
 
 .danger-modal .modal-content .modal-body .secondary-btn:hover {
-   background-color: transparent !important;
-    color: var(--danger-base) !important;
+    border: 1px solid var(--danger-base) !important;
+    background-color: var(--danger-6) !important;
+    color: var(--text-light-primary) !important;
     font-weight: 400 !important;
 }

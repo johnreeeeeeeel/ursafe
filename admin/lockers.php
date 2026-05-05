@@ -166,24 +166,23 @@ $password = $_SESSION['password'] ?? '';
             <div class="right">
                 <div class="dropdown">
                     <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="fa-solid fa-plus"></i>
                         View
                     </button>
                     
                     <ul class="dropdown-menu"> 
                         <li>
-                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerApplicationOffcanvas">
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerApplicationOffcanvas" onclick="window.location.hash='lockerApplicationOffcanvas';">
                                 View Locker Applications
                             </button>
                         </li>
                         <li><hr class="dropdown-divider"></hr></li>
                         <li>
-                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerLocationsOffcanvas">
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerLocationsOffcanvas" onclick="window.location.hash='lockerLocationsOffcanvas';">
                                 View Locker Locations
                             </button>
                         </li>
                         <li>
-                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerSizesOffcanvas">
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerSizesOffcanvas" onclick="window.location.hash='lockerSizesOffcanvas';">
                                 View Locker Sizes
                             </button>
                         </li>
@@ -194,7 +193,6 @@ $password = $_SESSION['password'] ?? '';
 
         <div class="content">
             <div id="lockers">
-
                 <header>
                     <form method="GET">
                         <div class="search-group">
@@ -251,52 +249,46 @@ $password = $_SESSION['password'] ?? '';
                                         <td><?= $row['location'] ?></td>
                                         <td>Slot <?= $row['slot_number'] ?></td>
                                         <td><?= $row['size'] ?> (₱<?= $row['price'] ?>)</td>
+
                                         <td>
                                             <?php if ($row['status'] == 'Pending') { ?>
-                                                <span class="badge rounded-pill bg-warning">Pending</span>
+                                                <span class="badge rounded-pill pending-badge">Pending</span>
 
                                             <?php } elseif ($row['status'] == 'Accepted') { ?>
-                                                <span class="badge rounded-pill bg-success">Accepted</span>
+                                                <span class="badge rounded-pill accepted-badge">Accepted</span>
 
                                             <?php } elseif ($row['status'] == 'Revoked') { ?>
-                                                <span class="badge rounded-pill bg-danger">Revoked</span>
+                                                <span class="badge rounded-pill revoked-badge">Revoked</span>
+
+                                            <?php } elseif ($row['status'] == 'Cancelled') { ?>
+                                                <span class="badge rounded-pill cancelled-badge">Cancelled</span>
                                             
                                             <?php } else { ?>
-                                                <span class="badge rounded-pill bg-danger">Rejected</span>
+                                                <span class="badge rounded-pill rejected-badge">Rejected</span>
                                             <?php }?>
                                         </td>
 
                                         <td>
-                                            <?php if ($row['status'] == 'Pending') { ?>
+                                            <?php if ($row['status'] == 'Pending') { ?> 
+                                                <button class="sm-btn primary-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#acceptLockerSlotApplicationModal<?= $row['application_id'] ?>">
+                                                    <i class="fa-solid fa-check"></i> Accept
+                                                </button>
 
-                                                <form method="POST" action="../app/locker/accept_locker_application.php" style="display:inline;">
-                                                    <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
-
-                                                    <button class="sm-btn primary-btn">
-                                                        <i class="fa-solid fa-check"></i>
-                                                        Accept
-                                                    </button>
-                                                </form>
-
-                                                <form method="POST" action="../app/locker/reject_locker_application.php" style="display:inline;">
-                                                    <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
-
-                                                    <button class="sm-btn danger-btn">
-                                                        <i class="fa-solid fa-xmark"></i>
-                                                        Reject
-                                                    </button>
-                                                </form>
+                                                <button class="sm-btn danger-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#rejectLockerSlotApplicationModal<?= $row['application_id'] ?>">
+                                                    <i class="fa-solid fa-xmark"></i> Reject
+                                                </button>
 
                                             <?php } elseif ($row['status'] == 'Accepted') { ?>
 
-                                                <form method="POST" action="../app/locker/revoke_locker_application.php" style="display:inline;">
-                                                    <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
-
-                                                    <button class="sm-btn warning-btn">
-                                                        <i class="fa-solid fa-ban"></i>
-                                                        Revoke
-                                                    </button>
-                                                </form>
+                                                <button class="sm-btn danger-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#revokeLockerSlotApplicationModal<?= $row['application_id'] ?>">
+                                                    <i class="fa-solid fa-ban"></i> Revoke
+                                                </button>
 
                                             <?php } else { ?>
 
@@ -310,6 +302,101 @@ $password = $_SESSION['password'] ?? '';
                         </table>
                     </div>
                 </div>
+
+                <?php
+                    $result = $conn_local->query("CALL getLockerSlotApplication()");
+                    $conn_local->next_result();
+
+                    while ($row = $result->fetch_assoc()) {
+                ?>
+
+                    <!-- Accept locker slot application modals -->
+                    <div class="modal fade primary-modal" id="acceptLockerSlotApplicationModal<?= $row['application_id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="message">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                        <h5>Accept</h5>
+                                        <p>Are you sure you want to accept <span>application <?= $row['application_id'] ?></span>?</p>
+                                    </div>
+
+                                    <div class="action-buttons">
+                                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                                            Cancel
+                                        </button>
+
+                                        <form method="POST" action="../app/locker/accept_locker_application.php">
+                                            <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
+
+                                            <button type="submit" class="btn primary-btn">
+                                                Yes, Accept
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reject locker slot application modals -->
+                    <div class="modal fade danger-modal" id="rejectLockerSlotApplicationModal<?= $row['application_id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="message">
+                                        <i class="fa-solid fa-circle-xmark"></i>
+                                        <h5>Reject</h5>
+                                        <p>Are you sure you want to reject <span>application <?= $row['application_id'] ?></span>?</p>
+                                    </div>
+
+                                    <div class="action-buttons">
+                                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                                            Cancel
+                                        </button>
+
+                                        <form method="POST" action="../app/locker/reject_locker_application.php">
+                                            <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
+
+                                            <button type="submit" class="btn primary-btn">
+                                                Yes, Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Revoke locker slot application modals -->
+                    <div class="modal fade danger-modal" id="revokeLockerSlotApplicationModal<?= $row['application_id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="message">
+                                        <i class="fa-solid fa-ban"></i>
+                                        <h5>Revoke</h5>
+                                        <p>Are you sure you want to revoke <span>application <?= $row['application_id'] ?></span>?</p>
+                                    </div>
+
+                                    <div class="action-buttons">
+                                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                                            Cancel
+                                        </button>
+
+                                        <form method="POST" action="../app/locker/revoke_locker_application.php">
+                                            <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
+
+                                            <button type="submit" class="btn primary-btn">
+                                                Yes, Revoke
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
 
                 <!-- Offcanvas for locker locations -->
                 <div class="offcanvas offcanvas-end" id="lockerLocationsOffcanvas">
@@ -410,25 +497,20 @@ $password = $_SESSION['password'] ?? '';
                     <div class="modal fade danger-modal" id="deleteLockerLocation<?= $row['id'] ?>" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
-
-                                <div class="modal-header">
-                                    <h5 class="modal-title">
-                                        <i class="fa-solid fa-trash"></i>
-                                        Delete Location
-                                    </h5>
-                                </div>
-
                                 <div class="modal-body">
-                                    <p>Are you sure you want to delete <i><?= $row['location'] ?></i>?</p>
+                                    <div class="message">
+                                        <p><i class="fa-solid fa-circle-exclamation"></i></p>
+                                        <h5>Delete</h5>
+                                        <p>Are you sure you want to delete <span><?= $row['location'] ?></span>?</p>
+                                    </div>
 
                                     <div class="action-buttons">
+                                        <button class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+
                                         <form method="POST" action="../app/locker/delete_locker_location.php">
                                             <input type="hidden" name="id" value="<?= $row['id'] ?>">
-
-                                            <button type="submit" class="btn danger-btn">Yes Delete</button>
+                                            <button type="submit" class="btn danger-btn">Yes, Delete</button>
                                         </form>
-
-                                        <button class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
                                     </div>
                                 </div>
 
@@ -441,8 +523,8 @@ $password = $_SESSION['password'] ?? '';
                 <div class="offcanvas offcanvas-end" id="lockerSizesOffcanvas">
                     <div class="offcanvas-header">
                         <h3 class="offcanvas-title">Lockers Sizes & Prices</h3>
-                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addLockerSlotModal">
-                            Add Locker Slot
+                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addLockerSizeModal">
+                            Add Locker Size 
                         </button>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
                     </div>
@@ -541,25 +623,21 @@ $password = $_SESSION['password'] ?? '';
                     <div class="modal fade danger-modal" id="deleteLockerSize<?= $row['id'] ?>" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
-
-                                <div class="modal-header">
-                                    <h5 class="modal-title">
-                                        <i class="fa-solid fa-trash"></i>
-                                        Delete Size
-                                    </h5>
-                                </div>
-
                                 <div class="modal-body">
-                                    <p>Are you sure you want to delete <i><?= $row['size'] ?></i>?</p>
+                                    <div class="message">
+                                        <p><i class="fa-solid fa-circle-exclamation"></i></p>
+                                        <h5>Delete</h5>
+                                        <p>Are you sure you want to delete <span><?= $row['size'] ?></span>?</p>
+                                    </div>
 
                                     <div class="action-buttons">
+                                        <button class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+
                                         <form method="POST" action="../app/locker/delete_locker_size.php">
                                             <input type="hidden" name="id" value="<?= $row['id'] ?>">
 
-                                            <button type="submit" class="btn danger-btn">Yes Delete</button>
+                                            <button type="submit" class="btn danger-btn">Yes, Delete</button>
                                         </form>
-
-                                        <button class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
                                     </div>
                                 </div>
 
@@ -819,31 +897,24 @@ $password = $_SESSION['password'] ?? '';
                                         <div class="modal fade danger-modal" id="deleteLockerSlotConfirmationModal<?= $row['id'] ?>" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
-
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">
-                                                            <i class="fa-solid fa-trash"></i>
-                                                            Delete Confirmation
-                                                        </h5>
-                                                    </div>
-
                                                     <div class="modal-body">
-                                                        <p>Are you sure you want to delete slot <i><?= $row['slot_number'] ?></i>?</p>
+                                                        <div class="message">
+                                                            <p><i class="fa-solid fa-circle-exclamation"></i></p>
+                                                            <h5>Delete</h5>
+                                                            <p>Are you sure you want to delete <span>slot <?= $row['slot_number'] ?></span>?</p>
+                                                        </div>
 
                                                         <div class="action-buttons">
-
-                                                            <form method="POST" action="../app/locker/delete_locker_slot.php">
-                                                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
-
-                                                                <button type="submit" class="btn primary-btn">
-                                                                    Yes, Delete
-                                                                </button>
-                                                            </form>
-
                                                             <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
                                                                 Cancel
                                                             </button>
 
+                                                            <form method="POST" action="../app/locker/delete_locker_slot.php">
+                                                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                                <button type="submit" class="btn primary-btn">
+                                                                    Yes, Delete
+                                                                </button>
+                                                            </form>
                                                         </div>
                                                     </div>
 
@@ -1008,25 +1079,21 @@ $password = $_SESSION['password'] ?? '';
     <div class="modal fade danger-modal" id="logoutConfirmationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        Logout Confirmation
-                    </h5>
-                </div>
-
                 <div class="modal-body">
-                    <p>Are you sure you want to logout?</p>
+                    <div class="message">
+                        <p><i class="fa-solid fa-circle-exclamation"></i></p>
+                        <h5>Logout</h5>
+                        <p>Are you sure you want to logout?</p>
+                    </div>
                     
                     <div class="action-buttons">
-                        <a href="../app/auth/logout.php" class="btn primary-btn">
-                            Yes, Logout
-                        </a>
-                        
                         <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
                             No
                         </button>
+
+                        <a href="../app/auth/logout.php" class="btn primary-btn">
+                            Yes, Logout
+                        </a>
                     </div>
                 </div>
             </div>

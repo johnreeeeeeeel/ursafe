@@ -158,39 +158,53 @@ $password = $_SESSION['password'] ?? '';
 
     <section id="section">
         <header>
-            <div class="menuToggleButtonContainer">
+            <div class="left">
                 <i class="fa-solid fa-bars menuToggleButton" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile"></i>
+                <h1 class="page-title">Users</h1> 
             </div>
-
-            <h1 class="page-title">Users</h1>
         </header>
 
         <div class="content">
             <div id="users">
-                
-                <!-- Users table -->
-                <div class="table-container">
-                    <div class="table-header">
+                <header>
+                    <form method="GET">
                         <div class="search-group">
                             <i class="fa-solid fa-magnifying-glass"></i>
-                            <form method="GET">
-                                <input type="search" name="searchUser" placeholder="Search users..." value="<?= htmlspecialchars($_GET['searchUser'] ?? '') ?>">
-                            </form>
+                            <input type="search"
+                                name="searchUsers"
+                                placeholder="Search users..."
+                                value="<?= htmlspecialchars($_GET['searchUsers'] ?? '') ?>">
                         </div>
 
                         <div class="filter-group">
                             <i class="fa-solid fa-filter"></i>
-                            <form method="GET">
-                                <input type="hidden" name="searchUser" value="<?= htmlspecialchars($_GET['searchUser'] ?? '') ?>">
-
-                                <select name="filter" onchange="this.form.submit()">
-                                    <option value="new" <?= ($_GET['filter'] ?? '') == 'new' ? 'selected' : '' ?>>Newest</option>
-                                    <option value="old" <?= ($_GET['filter'] ?? '') == 'old' ? 'selected' : '' ?>>Oldest</option>
-                                </select>
-                            </form>
+                            <select name="filter" onchange="this.form.submit()">
+                                <option value="">All</option>
+                                <option value="asc" <?= (($_GET['filter'] ?? '') === 'asc') ? 'selected' : '' ?>>A - Z</option>
+                                <option value="desc" <?= (($_GET['filter'] ?? '') === 'desc') ? 'selected' : '' ?>>Z - A</option>
+                            </select>
                         </div>
-                    </div>
 
+                        <button type="submit" hidden></button>
+                    </form>
+                </header>
+                
+                <?php
+                    $search = $_GET['searchUsers'] ?? '';
+                    $filter = $_GET['filter'] ?? '';
+
+                    if (!empty($search) || !empty($filter)) {
+                        $stmt = $conn_local->prepare("CALL getSearchFilterUsers(?, ?)");
+                        $stmt->bind_param("ss", $search, $filter);
+                    } else {
+                        $stmt = $conn_local->prepare("CALL getUsers()");
+                    }
+
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                ?>
+
+                <div class="table-container">
                     <table class="table table-borderless">
                         <thead>
                             <th>ID</th>
@@ -199,39 +213,29 @@ $password = $_SESSION['password'] ?? '';
                             <th>Email</th>
                             <th>Action</th>
                         </thead>
+                        
                         <tbody>
-                            <?php
-                                $search_term = $_GET['searchUser'] ?? '';
-
-                                if (!empty($search_term)) {
-                                    $stmt = $conn_local->prepare("SELECT * FROM view_users WHERE fullname LIKE ? OR email LIKE ?");
-                                    $like = "%" . $search_term . "%";
-                                    $stmt->bind_param("ss", $like, $like);
-                                    $stmt->execute();
-                                    $result = $stmt->get_result();
-                                } else {
-                                    require '../app/users/search_filter_users.php';
-                                }
-                            ?>
-
                             <?php while ($row = $result->fetch_assoc()): ?>
                                 <tr>
                                     <td data-label="ID"><?= $row['id']; ?></td>
                                     <td data-label="Username"><?= $row['username']; ?></td>
                                     <td data-label="Fullname"><?= $row['fullname']; ?></td>
                                     <td data-label="Email"><?= $row['email']; ?></td>
+
                                     <td data-label="Action">
                                         <div class="action-buttons">
-                                            <button type="button" class="sm-btn primary-btn" data-bs-toggle="modal" data-bs-target="#viewUserModal" 
+                                            <button type="button" class="sm-btn primary-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#viewUserModal"
                                                 onclick="viewUserDetails(
-                                                    '<?= $row['id'] ?>', 
-                                                    '<?= $row['fullname'] ?>', 
-                                                    '<?= $row['sex'] ?>', 
-                                                    '<?= $row['dob'] ?>', 
-                                                    '<?= $row['institute'] ?>', 
-                                                    '<?= $row['program'] ?>', 
-                                                    '<?= $row['username'] ?>', 
-                                                    '<?= $row['email'] ?>',
+                                                    '<?= htmlspecialchars($row['id']) ?>',
+                                                    '<?= htmlspecialchars($row['fullname']) ?>',
+                                                    '<?= htmlspecialchars($row['sex'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($row['dob'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($row['institute'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($row['program'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($row['username']) ?>',
+                                                    '<?= htmlspecialchars($row['email']) ?>'
                                                 )">
                                                 <i class="fa-solid fa-eye"></i>
                                                 View
@@ -255,42 +259,39 @@ $password = $_SESSION['password'] ?? '';
                     </div>
 
                     <div class="modal-body">
-                        <div class="profile-container">
-                            <div class="profile">
-                                <div class="profile-icon">
-                                    <i class="fa-solid fa-circle-user"></i>
-                                    <span class="badge rounded-pill" id="vu_userrole"></span>
-                                </div>
-                                <h5><span id="vu_fullname"></span></h5>
-                            </div>
-                            
-                            
-                            <div class="profile-section">
-                                <h6>Personal Information</h6>
-                                <p>
-                                    <small><b>User ID: </b><span id="vu_id"></span></small>
-                                    <small><b>Username: </b><span id="vu_username"></span></small>
-                                </p>
-                                <p>
-                                    <small><b>Sex: </b><span id="vu_sex"></span></small>
-                                    <small><b>Data of Birth: </b><span id="vu_dob"></span></small>
-                                </p>
-                            </div>
+                        <div class="profile">
+                            <i class="fa-solid fa-circle-user"></i>
+                            <h4><span id="vu_fullname"></span></h4>
+                        </div>
+                        
+                        
+                        <div class="profile-section">
+                            <h6>Personal Information</h6>
+                            <p>
+                                <small><b>ID: </b><span id="vu_id"></span></small>
+                                <small><b>Username: </b><span id="vu_username"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Sex: </b><span id="vu_sex"></span></small>
+                                <small><b>Date of Birth: </b><span id="vu_dob"></span></small>
+                            </p>
+                        </div>
 
-                            <div class="profile-section">
-                                <h6>Academic Information</h6>
-                                <p>
-                                    <small><b>Institute: </b><span id="vu_institute"></span></small>
-                                    <small><b>Program: </b><span id="vu_program"></span></small>
-                                </p>
-                            </div>
+                        <div class="profile-section">
+                            <h6>Academic Information</h6>
+                            <p>
+                                <small><b>Institute: </b><span id="vu_institute"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Program: </b><span id="vu_program"></span></small>
+                            </p>
+                        </div>
 
-                            <div class="profile-section">
-                                <h6>Account Information</h6>
-                                <p>
-                                    <small><b>Email: </b><span id="vu_email"></span></small>
-                                </p>
-                            </div>
+                        <div class="profile-section">
+                            <h6>Account Information</h6>
+                            <p>
+                                <small><b>Email: </b><span id="vu_email"></span></small>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -301,25 +302,21 @@ $password = $_SESSION['password'] ?? '';
         <div class="modal fade danger-modal" id="logoutConfirmationModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                            Logout Confirmation
-                        </h5>
-                    </div>
-
                     <div class="modal-body">
-                        <p>Are you sure you want to logout?</p>
+                        <div class="message">
+                            <p><i class="fa-solid fa-circle-exclamation"></i></p>
+                            <h5>Logout</h5>
+                            <p>Are you sure you want to logout?</p>
+                        </div>
                         
                         <div class="action-buttons">
-                            <a href="../app/auth/logout.php" class="btn primary-btn">
-                                Yes, Logout
-                            </a>
-                            
                             <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
                                 No
                             </button>
+
+                            <a href="../app/auth/logout.php" class="btn primary-btn">
+                                Yes, Logout
+                            </a>
                         </div>
                     </div>
                 </div>

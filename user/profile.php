@@ -14,6 +14,8 @@ $lastname = $_SESSION['lastname'] ?? '';
 $firstname = $_SESSION['firstname'] ?? '';
 $middlename = $_SESSION['middlename'] ?? '';
 
+$fullname = $firstname . ' ' . (!empty($middlename) ? $middlename . ' ' : '') . $lastname;
+
 $sex = $_SESSION['sex'] ?? '';
 $dob = $_SESSION['dob'] ?? '';
 
@@ -158,18 +160,55 @@ $password = $_SESSION['password'] ?? '';
     
     <section id="section">
         <header>
-            <div class="menuToggleButtonContainer">
+            <div class="left">
                 <i class="fa-solid fa-bars menuToggleButton" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile"></i>
+                <h1 class="page-title">Profile</h1> 
             </div>
-
-            <h1 class="page-title">Profile</h1>
         </header>
 
         <div class="content">
             <div id="profile">
-                <button class="btn primary-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                    Change Password
-                </button>
+                <div class="profile-container">
+                    <div class="profile">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <h4><span><?= htmlspecialchars($fullname)?></span></h4>
+                    </div>
+                    
+                    
+                    <div class="profile-section">
+                        <h6>Personal Information</h6>
+                        <p>
+                            <small><b>ID: </b><span><?= htmlspecialchars($id)?></span></small>
+                            <small><b>Username: </b><span><?= htmlspecialchars($username)?></span></small>
+                        </p>
+                        <p>
+                            <small><b>Sex: </b><span><?= htmlspecialchars($sex)?></span></small>
+                            <small><b>Date of Birth: </b><span><?= htmlspecialchars($dob)?></span></small>
+                        </p>
+                    </div>
+
+                    <div class="profile-section">
+                        <h6>Academic Information</h6>
+                        <p>
+                            <small><b>Institute: </b><span><?= htmlspecialchars($institute)?></span></small>
+                        </p>
+                        <p>
+                            <small><b>Program: </b><span><?= htmlspecialchars($program)?></span></small>
+                        </p>
+                    </div>
+
+                    <div class="profile-section">
+                        <h6>Account Information</h6>
+                        <p>
+                            <small><b>Email: </b><span><?= htmlspecialchars($email)?></span></small>
+                        </p>
+                    </div>
+
+                    <button class="btn secondary-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <i class="fa-solid fa-key"></i>
+                        Change Password
+                    </button>
+                </div>
             </div>  
         </div>
     </section>
@@ -226,25 +265,21 @@ $password = $_SESSION['password'] ?? '';
     <div class="modal fade danger-modal" id="logoutConfirmationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        Logout Confirmation
-                    </h5>
-                </div>
-
                 <div class="modal-body">
-                    <p>Are you sure you want to logout?</p>
+                    <div class="message">
+                        <p><i class="fa-solid fa-circle-exclamation"></i></p>
+                        <h5>Logout</h5>
+                        <p>Are you sure you want to logout?</p>
+                    </div>
                     
                     <div class="action-buttons">
-                        <a href="../app/auth/logout.php" class="btn primary-btn">
-                            Yes, Logout
-                        </a>
-                        
                         <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
                             No
                         </button>
+
+                        <a href="../app/auth/logout.php" class="btn primary-btn">
+                            Yes, Logout
+                        </a>
                     </div>
                 </div>
             </div>

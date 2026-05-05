@@ -54,7 +54,7 @@ document.addEventListener('hide.bs.modal', function (e) {
     }
 });
 
-// Stay in modal when adding, editing and deleting locker location and sizes
+// Stay in offcanvas when reloading or redirecting
 document.addEventListener("DOMContentLoaded", function () {
 
     if (window.location.hash) {
@@ -71,7 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
     }
-
 });
 
 // View user details

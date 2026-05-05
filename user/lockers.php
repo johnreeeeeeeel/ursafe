@@ -158,11 +158,26 @@ $password = $_SESSION['password'] ?? '';
     
     <section id="section">
         <header>
-            <div class="menuToggleButtonContainer">
+            <div class="left">
                 <i class="fa-solid fa-bars menuToggleButton" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile"></i>
+                <h1 class="page-title">Lockers</h1> 
             </div>
 
-            <h1 class="page-title">Lockers</h1>
+            <div class="right">
+                <div class="dropdown">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                        View
+                    </button>
+                    
+                    <ul class="dropdown-menu"> 
+                        <li>
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#myLockerApplicationOffcanvas" onclick="window.location.hash='myLockerApplicationOffcanvas';">
+                                View My Locker Applications
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </header>
 
         <div class="content">
@@ -191,6 +206,131 @@ $password = $_SESSION['password'] ?? '';
                     </form>
                 </header>
 
+                <!-- Offcanvas for my locker application -->
+                <div class="offcanvas offcanvas-end" id="myLockerApplicationOffcanvas">
+                    <div class="offcanvas-header">
+                        <h3 class="offcanvas-title">My Locker Applications</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                    </div>
+
+                    <div class="offcanvas-body">
+
+                        <?php
+                            $stmt = $conn_local->prepare("CALL getUserLockerSlotApplications(?)");
+                            $stmt->bind_param("s", $id);
+                            $stmt->execute();
+
+                            $applications = $stmt->get_result();
+
+                            $stmt->close();
+                            $conn_local->next_result();
+                        ?>
+
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Location</th>
+                                    <th>Slot</th>
+                                    <th>Size</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <?php while ($app = $applications->fetch_assoc()) { ?>
+                                    <tr>
+                                        <td><?= $app['location'] ?></td>
+                                        <td>Slot <?= $app['slot_number'] ?></td>
+                                        <td><?= $app['size'] ?></td>
+                                        <td>₱<?= $app['price'] ?></td>
+
+                                        <td>
+                                            <?php if ($app['status'] == 'Pending') { ?>
+                                                <span class="badge rounded-pill pending-badge">Pending</span>
+
+                                            <?php } elseif ($app['status'] == 'Accepted') { ?>
+                                                <span class="badge rounded-pill accepted-badge">Accepted</span>
+
+                                            <?php } elseif ($app['status'] == 'Revoked') { ?>
+                                                <span class="badge rounded-pill revoked-badge">Revoked</span>
+
+                                            <?php } elseif ($app['status'] == 'Cancelled') { ?>
+                                                <span class="badge rounded-pill cancelled-badge">Cancelled</span>
+                                            
+                                            <?php } else { ?>
+                                                <span class="badge rounded-pill rejected-badge">Rejected</span>
+                                            <?php }?>
+                                        </td>
+
+                                        <td>
+                                            <?php if ($app['status'] == 'Pending') { ?>
+                                                <button class="sm-btn danger-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#cancelApplicationModal<?= $app['application_id'] ?>">
+                                                    Cancel
+                                                </button>
+                                            <?php } else { ?>
+                                                <small>No Action</small>
+                                            <?php } ?>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <?php
+                    $stmt = $conn_local->prepare("CALL getUserLockerSlotApplications(?)");
+                    $stmt->bind_param("s", $id);
+                    $stmt->execute();
+
+                    $applications = $stmt->get_result();
+                    $stmt->close();
+                    $conn_local->next_result();
+
+                    while ($app = $applications->fetch_assoc()) {
+                ?>
+                    
+                    <div class="modal fade danger-modal"
+                        id="cancelApplicationModal<?= $app['application_id'] ?>"
+                        tabindex="-1">
+
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+
+                                <div class="modal-body">
+                                    <div class="message">
+                                        <i class="fa-solid fa-circle-xmark"></i>
+                                        <h5>Cancel Application</h5>
+                                        <p>
+                                            Are you sure you want to cancel your application for
+                                            <span>Slot <?= $app['slot_number'] ?></span>?
+                                        </p>
+                                    </div>
+
+                                    <div class="action-buttons">
+                                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                                            No
+                                        </button>
+
+                                        <form method="POST" action="../app/locker/cancel_locker_application.php">
+                                            <input type="hidden" name="id" value="<?= $app['application_id'] ?>">
+                                            <button type="submit" class="btn primary-btn">
+                                                Yes, Cancel
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+
                 <div class="table-container">
                     <!-- Get locker locations and search, filter -->
                     <?php
@@ -202,8 +342,8 @@ $password = $_SESSION['password'] ?? '';
                         $stmt->execute();
 
                         $locations = $stmt->get_result();
-                        $stmt->close();
 
+                        $stmt->close();
                         $conn_local->next_result();
                     ?>
 
@@ -216,11 +356,12 @@ $password = $_SESSION['password'] ?? '';
 
                             <?php
                                 // Get lockers per location
-                                $stmt = $conn_local->prepare("CALL getLockersByLocation(?)");
-                                $stmt->bind_param("i", $loc['id']);
-                                $stmt->execute();
+                                $lockerStmt = $conn_local->prepare("CALL getLockersByLocation(?)");
+                                $lockerStmt->bind_param("i", $loc['id']);
+                                $lockerStmt->execute();
 
-                                $result = $stmt->get_result();
+                                $result = $lockerStmt->get_result();
+                                $conn_local->next_result();
                             ?>
 
                             <table class="table table-borderless">
@@ -258,20 +399,18 @@ $password = $_SESSION['password'] ?? '';
                                         <div class="modal fade success-modal" id="applyLockerSlotModal<?= $row['id'] ?>" tabindex="-1">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
-
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">
-                                                            <i class="fa-solid fa-file"></i>
-                                                            Apply Locker Slot
-                                                        </h5>
-                                                    </div>
-
                                                     <div class="modal-body">
-                                                        <p>
-                                                            Are you sure you want to apply slot number <i><?= $row['slot_number'] ?></i>?
-                                                        </p>
+                                                        <div class="message">
+                                                            <i class="fa-solid fa-circle-check"></i>
+                                                            <h5>Apply</h5>
+                                                            <p>Are you sure you want to apply slot number <span><?= $row['slot_number'] ?></span>?</p>
+                                                        </div>
 
                                                         <div class="action-buttons">
+                                                            <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                                                                Cancel
+                                                            </button>
+
                                                             <form method="POST" action="../app/locker/apply_locker_slot.php">
                                                                 <input type="hidden" name="slot_id" value="<?= $row['id'] ?>">
 
@@ -279,10 +418,6 @@ $password = $_SESSION['password'] ?? '';
                                                                     Yes, Apply
                                                                 </button>
                                                             </form>
-
-                                                            <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
-                                                                Cancel
-                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -293,82 +428,13 @@ $password = $_SESSION['password'] ?? '';
                             </table>
 
                             <?php
-                                $stmt->close();
-                                $conn_local->next_result();
+                                $result->free();
+                                $lockerStmt->close();
                             ?>
+                            
                         </div>
                     <?php } ?>
                 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-
-                <h2 class="mt-5">My Locker Applications</h2>
-
-<?php
-$stmt = $conn_local->prepare("CALL getUserLockerSlotApplications(?)");
-$stmt->bind_param("s", $id);
-$stmt->execute();
-$applications = $stmt->get_result();
-?>
-
-<table class="table table-borderless mt-3">
-    <thead>
-        <tr>
-            <th>Location</th>
-            <th>Slot</th>
-            <th>Size</th>
-            <th>Price</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        <?php while ($app = $applications->fetch_assoc()) { ?>
-            <tr>
-                <td><?= $app['location'] ?></td>
-
-                <td>Slot <?= $app['slot_number'] ?></td>
-
-                <td><?= $app['size'] ?></td>
-
-                <td>₱<?= $app['price'] ?></td>
-
-                <td>
-                    <?php if ($app['status'] == 'Pending') { ?>
-                        <span class="badge bg-warning">Pending</span>
-                    <?php } elseif ($app['status'] == 'Accepted') { ?>
-                        <span class="badge bg-success">Accepted</span>
-
-                    <?php } elseif ($app['status'] == 'Revoked') { ?>
-                        <span class="badge bg-success">Revoked</span>
-
-                    <?php } else { ?>
-                        <span class="badge bg-danger">Rejected</span>
-                    <?php } ?>
-                </td>
-            </tr>
-        <?php } ?>
-    </tbody>
-</table>
             </div>  
         </div>
     </section>
@@ -377,25 +443,21 @@ $applications = $stmt->get_result();
     <div class="modal fade danger-modal" id="logoutConfirmationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        Logout Confirmation
-                    </h5>
-                </div>
-
                 <div class="modal-body">
-                    <p>Are you sure you want to logout?</p>
+                    <div class="message">
+                        <p><i class="fa-solid fa-circle-exclamation"></i></p>
+                        <h5>Logout</h5>
+                        <p>Are you sure you want to logout?</p>
+                    </div>
                     
                     <div class="action-buttons">
-                        <a href="../app/auth/logout.php" class="btn primary-btn">
-                            Yes, Logout
-                        </a>
-                        
                         <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
                             No
                         </button>
+
+                        <a href="../app/auth/logout.php" class="btn primary-btn">
+                            Yes, Logout
+                        </a>
                     </div>
                 </div>
             </div>

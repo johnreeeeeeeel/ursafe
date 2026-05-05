@@ -158,11 +158,10 @@ $password = $_SESSION['password'] ?? '';
     
     <section id="section">
         <header>
-            <div class="menuToggleButtonContainer">
+            <div class="left">
                 <i class="fa-solid fa-bars menuToggleButton" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile"></i>
+                <h1 class="page-title">Home</h1> 
             </div>
-
-            <h1 class="page-title">Home</h1>
         </header>
 
         <div class="content">
@@ -176,25 +175,21 @@ $password = $_SESSION['password'] ?? '';
     <div class="modal fade danger-modal" id="logoutConfirmationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        Logout Confirmation
-                    </h5>
-                </div>
-
                 <div class="modal-body">
-                    <p>Are you sure you want to logout?</p>
+                    <div class="message">
+                        <p><i class="fa-solid fa-circle-exclamation"></i></p>
+                        <h5>Logout</h5>
+                        <p>Are you sure you want to logout?</p>
+                    </div>
                     
                     <div class="action-buttons">
-                        <a href="../app/auth/logout.php" class="btn primary-btn">
-                            Yes, Logout
-                        </a>
-                        
                         <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
                             No
                         </button>
+
+                        <a href="../app/auth/logout.php" class="btn primary-btn">
+                            Yes, Logout
+                        </a>
                     </div>
                 </div>
             </div>

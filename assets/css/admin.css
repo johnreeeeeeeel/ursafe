@@ -311,7 +311,9 @@ section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:hover {
     box-shadow: none !important;
 }
 
-section #lockers #lockerApplicationOffcanvas .offcanvas-header div {
+section #lockers #lockerApplicationOffcanvas .offcanvas-header div,
+section #lockers #lockerLocationsOffcanvas .offcanvas-header div,
+section #lockers #lockerSizesOffcanvas .offcanvas-header div  {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -319,7 +321,9 @@ section #lockers #lockerApplicationOffcanvas .offcanvas-header div {
     gap: 12px;
 }
 
-section #lockers #lockerApplicationOffcanvas .offcanvas-header div h3 {
+section #lockers #lockerApplicationOffcanvas .offcanvas-header div h3,
+section #lockers #lockerLocationsOffcanvas .offcanvas-header div h3,
+section #lockers #lockerSizesOffcanvas .offcanvas-header div h3 {
     color: var(--text-dark-secondary);
 }
 
@@ -346,15 +350,6 @@ section #lockers #lockerSizesOffcanvas .offcanvas-body table tbody tr td {
     vertical-align: middle;
     color: var(--text-dark-tertiary);
 }
-
-
-
-
-
-
-
-
-
 
 section #lockers .table-container {
     display: flex;
@@ -385,14 +380,14 @@ section #lockers .table-container .location-slot-section .location-header h3 {
     color: var(--text-dark-secondary);
 }
 
-section #lockers .table-container .location-slot-section table thead tr th{
+section #lockers .table-container .location-slot-section table thead tr th {
     text-align: left;
     font-weight: 500;
     vertical-align: middle;
     color: var(--text-dark-secondary);
 }
 
-section #lockers .table-container .location-slot-section table tbody tr td{
+section #lockers .table-container .location-slot-section table tbody tr td {
     text-align: left;
     font-weight: 400;
     vertical-align: middle;
@@ -400,95 +395,97 @@ section #lockers .table-container .location-slot-section table tbody tr td{
 }
 
 /* Users */
+section #users {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 12px;
+}
+
+section #users header {
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+section #users header form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+section #users header form .search-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+section #users header form .search-group i {
+    color: var(--text-dark-secondary);
+}
+
+section #users header form .search-group input {
+    flex: 1;
+    padding: 6px 12px;
+    border: 1px solid var(--text-light-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-dark-primary);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    font-weight: 400;
+}
+
+section #users header form .search-group input:focus {
+    border-color: var(--color-primary-base);
+}
+
+section #users header .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+section #users header form .filter-group i {
+    color: var(--text-dark-secondary);
+}
+
+section #users header form .filter-group select {
+    padding: 6px 12px;
+    border: 1px solid var(--text-light-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-dark-primary);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    font-weight: 400;
+}
+
+section #users header form .filter-group select:focus {
+    border-color: var(--color-primary-base);
+}
+
 section #users .table-container {
     background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     padding: 12px;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-section #users .table-header {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-}
-
-section #users .table-header .search-group {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-    align-items: center;
-    flex: 1;
-}
-
-section #users .table-header .search-group input {
-    flex: 1;
-    padding: 6px 12px;
-    border: 1px solid var(--text-light-secondary);
-    background: var(--bg-secondary);
-    color: var(--text-dark-primary);
-    border-radius: 8px;
-    font-size: 14px;
-    outline: none;
-}
-
-section #users .table-header .search-group input:focus {
-    border-color: var(--color-primary-base);
-}
-
-section #users .table-header .filter-group {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-    align-items: center;
-}
-
-section #users .table-header .filter-group select {
-    padding: 6px 12px;
-    border: 1px solid var(--text-light-secondary);
-    background: var(--bg-secondary);
-    color: var(--text-dark-primary);
-    border-radius: 8px;
-    font-size: 14px;
-    outline: none;
-}
-
-section #users .table-header .filter-group select :focus {
-    border-color: var(--color-primary-base);
-}
-
-section #users table {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    overflow: hidden;
-    border-radius: 8px;
-    cursor: default;
-}
-
-section #users table th {
-    padding: 8px;
+section #users .table-container table thead tr th {
     text-align: left;
     font-weight: 500;
-    color: #444;
     vertical-align: middle;
+    color: var(--text-dark-secondary);
 }
 
-section #users table td {
-    padding: 8px;
-    border-top: 1px solid #eee;
-    font-weight: 300;
+section #users .table-container table tbody tr td {
+    text-align: left;
+    font-weight: 400;
     vertical-align: middle;
-}
-
-section #users table td .action-buttons {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 4px;
+    color: var(--text-dark-tertiary);
 }
 
 @media (max-width: 768px) {
@@ -498,17 +495,15 @@ section #users table td .action-buttons {
 
     section #users .table-container table,
     section #users .table-container table tbody,
-    section #users #users .table-container table tr,
-    section #users #users .table-container table td {
+    section #users .table-container table tr,
+    section #users .table-container table td {
         display: block;
-        width: 100%;
     }
 
-    section #users #users .table-container table td {
-        font-size: 14px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+    section #users .table-container table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
     }
 
     section #users #users .table-container table tr {
@@ -520,12 +515,16 @@ section #users table td .action-buttons {
     }
 
     section #users .table-container table td {
-        border: none;
-        padding: 6px 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 12px;
+        border: none;
+        padding: 6px 0;
+        font-size: 14px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
 
     section #users .table-container table td::before {
@@ -534,4 +533,85 @@ section #users table td .action-buttons {
         color: #555;
         flex-shrink: 0;
     }
+}
+
+#viewUserModal .modal-dialog {
+    max-width: 400px !important;
+}
+
+#viewUserModal .modal-content {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 18px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+}
+
+#viewUserModal .modal-content .modal-header,
+#viewUserModal .modal-content .modal-body,
+#viewUserModal .modal-content .modal-footer {
+    border: none !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+}
+
+#viewUserModal .modal-content .modal-header .btn-close,
+#viewUserModal .modal-content .modal-header .btn-close:focus,
+#viewUserModal .modal-content .modal-header .btn-close:active,
+#viewUserModal .modal-content .modal-header .btn-close:hover {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#viewUserModal .modal-content .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#viewUserModal .modal-content .modal-body .profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+#viewUserModal .modal-content .modal-body .profile i {
+    color: var(--text-dark-tertiary);
+    font-size: 128px;
+}
+
+#viewUserModal .modal-content .modal-body .profile h4 {
+    color: var(--text-dark-secondary);
+    text-align: center;
+}
+
+#viewUserModal .modal-content .modal-body .profile-section {
+    background-color: #ffffff;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#viewUserModal .modal-content .modal-body .profile-section h6 {
+    color: var(--text-dark-secondary);
+}
+
+#viewUserModal .modal-content .modal-body .profile-section p {
+    color: var(--text-dark-tertiary);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#viewUserModal .modal-content .modal-body .profile-section p small {
+    font-size: 13px;
 }

@@ -137,30 +137,61 @@ section header {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
     width: 100%;
     height: 60px;
-    padding: 0 12px;
+    padding: 0 10px;
 }
 
-section header .menuToggleButtonContainer {
+section header .left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+section header .left i {
     display: none;
-}
-
-@media (max-width: 767px) {
-    section header .menuToggleButtonContainer {
-        display: flex;
-    }
-}
-
-section header .menuToggleButtonContainer i {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
     font-size: 20px;
     cursor: pointer;
     color: var(--text-light-primary);
 }
 
-section header .page-title {
-    font-weight: 500;
+@media (max-width: 767px) {
+    section header .left i {
+        display: flex;
+    }
+}
+
+section header .left .page-title {
+    font-weight: 400;
+    color: var(--text-light-primary);
+}
+
+section header .right .dropdown .dropdown-toggle {
+    background-color: transparent;
+    color: var(--text-light-primary);
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-weight: 400;
+}
+
+section header .right .dropdown .dropdown-menu {
+    background-color: var(--bg-secondary);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border: none;
+}
+
+section header .right .dropdown .dropdown-menu .dropdown-item:hover {
+    background-color: var(--color-primary-base);
     color: var(--text-light-primary);
 }
 
@@ -239,6 +270,71 @@ section #lockers header form .filter-group select:focus {
     border-color: var(--color-primary-base);
 }
 
+section #lockers #myLockerApplicationOffcanvas {
+    background-color: var(--bg-secondary);
+    width: 100vw;
+    height: 100vh;
+    padding: 24px 48px;
+}
+
+section #lockers #myLockerApplicationOffcanvas .offcanvas-footer,
+section #lockers #myLockerApplicationOffcanvas .offcanvas-footer,
+section #lockers #myLockerApplicationOffcanvas .offcanvas-footer {
+    border: none !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+}
+
+section #lockers #myLockerApplicationOffcanvas .offcanvas-header .btn-close,
+section #lockers #myLockerApplicationOffcanvas .offcanvas-header .btn-close:focus,
+section #lockers #myLockerApplicationOffcanvas .offcanvas-header .btn-close:active,
+section #lockers #myLockerApplicationOffcanvas .offcanvas-header .btn-close:hover {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+section #lockers #myLockerApplicationOffcanvas .offcanvas-header div  {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+section #lockers #myLockerApplicationOffcanvas .offcanvas-header div h3 {
+    color: var(--text-dark-secondary);
+}
+
+section #lockers #myLockerApplicationOffcanvas .offcanvas-body table {
+    background-color: transparent !important;
+}
+
+section #lockers #myLockerApplicationOffcanvas .offcanvas-body table thead tr th {
+    text-align: left;
+    font-weight: 500;
+    vertical-align: middle;
+    color: var(--text-dark-secondary);
+}
+
+section #lockers #myLockerApplicationOffcanvas .offcanvas-body table tbody tr td {
+    text-align: left;
+    font-weight: 400;
+    vertical-align: middle;
+    color: var(--text-dark-tertiary);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 section #lockers .table-container {
     display: flex;
     flex-direction: column;
@@ -280,4 +376,65 @@ section #lockers .table-container .location-slot-section table tbody tr td{
     font-weight: 400;
     vertical-align: middle;
     color: var(--text-dark-tertiary);
+}
+
+/* Profile */
+section #profile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;      
+    gap: 12px;
+    height: 100%;
+}
+
+section #profile .profile-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 400px;
+    width: 100%;            
+}
+
+section #profile .profile-container .profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+section #profile .profile-container .profile i {
+    color: var(--text-dark-tertiary);
+    font-size: 128px;
+}
+
+section #profile .profile-container .profile h4 {
+    color: var(--text-dark-secondary);
+    text-align: center;
+}
+
+section #profile .profile-container .profile-section {
+    background-color: #ffffff;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+section #profile .profile-container .profile-section h6 {
+    color: var(--text-dark-secondary);
+}
+
+section #profile .profile-container .profile-section p {
+    color: var(--text-dark-tertiary);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+section #profile .profile-container .profile-section p small {
+    font-size: 13px;
 }
