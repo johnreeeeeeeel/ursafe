@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2026 at 01:39 PM
+-- Generation Time: May 06, 2026 at 06:26 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -128,6 +128,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `applyLockerSlot` (IN `u_user_id` VA
     END IF;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `cancelLockerSlotApplication` (IN `p_application_id` INT)   BEGIN
+    UPDATE locker_applications 
+    SET status = 'Cancelled'
+    WHERE id = p_application_id
+      AND status = 'Pending';
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteLockerLocation` (IN `p_id` INT)   BEGIN
     DELETE FROM locker_locations
     WHERE id = p_id;
@@ -158,6 +165,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAdminByEmail` (IN `p_email` VARC
         password
     FROM admin
     WHERE email = p_email
+    LIMIT 1;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerApplicationById` (IN `p_application_id` INT)   BEGIN
+    SELECT 
+        user_id,
+        slot_id
+    FROM locker_applications
+    WHERE id = p_application_id
     LIMIT 1;
 END$$
 
@@ -223,35 +239,63 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerSlotApplication` ()   BEGI
     ORDER BY la.id DESC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerLocation` (IN `searchTerm` VARCHAR(100), IN `sortOrder` VARCHAR(10))   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerLocation` (IN `p_search` VARCHAR(255), IN `p_filter` VARCHAR(10))   BEGIN
     SELECT id, location
     FROM locker_locations
-    WHERE (searchTerm IS NULL OR searchTerm = ''
-           OR location LIKE CONCAT('%', searchTerm, '%'))
+    WHERE (p_search IS NULL OR p_search = '' 
+           OR location LIKE CONCAT('%', p_search, '%'))
     ORDER BY
-        CASE
-            WHEN sortOrder = 'desc' THEN location
+        CASE 
+            WHEN p_filter = 'desc' THEN location
         END DESC,
-        CASE
-            WHEN sortOrder = 'asc' OR sortOrder = '' THEN location
+        CASE 
+            WHEN p_filter = 'asc' OR p_filter IS NULL OR p_filter = '' THEN location
         END ASC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterUsers` (IN `searchTerm` VARCHAR(100), IN `sortOrder` VARCHAR(10))   BEGIN
-    SELECT *
-    FROM view_users
-    WHERE (searchTerm IS NULL OR searchTerm = ''
-	OR id LIKE CONCAT('%', searchTerm, '%')
-	OR username LIKE CONCAT('%', searchTerm, '%')
-        OR fullname LIKE CONCAT('%', searchTerm, '%')
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterUsers` (IN `searchTerm` VARCHAR(255), IN `sortOrder` VARCHAR(255))   BEGIN
+    SELECT
+        id,
+        firstname,
+        middlename,
+        lastname,
+        TRIM(CONCAT(firstname, ' ',
+            IFNULL(CONCAT(middlename, ' '), ''),
+            lastname
+        )) AS fullname,
+        sex,
+        dob,
+        institute,
+        program,
+        username,
+        email
+    FROM users
+    WHERE (
+        searchTerm IS NULL OR searchTerm = ''
+        OR id LIKE CONCAT('%', searchTerm, '%')
+        OR firstname LIKE CONCAT('%', searchTerm, '%')
+        OR middlename LIKE CONCAT('%', searchTerm, '%')
+        OR lastname LIKE CONCAT('%', searchTerm, '%')
+        OR username LIKE CONCAT('%', searchTerm, '%')
         OR email LIKE CONCAT('%', searchTerm, '%')
+        OR TRIM(CONCAT(firstname, ' ',
+            IFNULL(CONCAT(middlename, ' '), ''),
+            lastname
+        )) LIKE CONCAT('%', searchTerm, '%')
     )
     ORDER BY
-        CASE 
-            WHEN sortOrder = 'desc' THEN fullname
+        CASE
+            WHEN sortOrder = 'desc' THEN TRIM(CONCAT(firstname, ' ',
+                IFNULL(CONCAT(middlename, ' '), ''),
+                lastname))
         END DESC,
-        CASE 
-            WHEN sortOrder = 'asc' OR sortOrder = '' OR sortOrder IS NULL THEN fullname
+
+        CASE
+            WHEN sortOrder = 'asc'
+              OR sortOrder = ''
+              OR sortOrder IS NULL THEN TRIM(CONCAT(firstname, ' ',
+                IFNULL(CONCAT(middlename, ' '), ''),
+                lastname))
         END ASC;
 END$$
 
@@ -348,13 +392,13 @@ END$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getUsers` ()   BEGIN
     SELECT
         id,
-        username,
         TRIM(CONCAT(firstname, ' ', IFNULL(CONCAT(middlename, ' '), ''), lastname)) AS fullname,
-        email,
         sex,
         dob,
         institute,
-        program
+        program,
+        username,
+        email
     FROM users
     ORDER BY lastname ASC;
 END$$
@@ -538,25 +582,18 @@ CREATE TABLE `locker_slots` (
 --
 
 INSERT INTO `locker_slots` (`id`, `slot_number`, `location_id`, `size_id`, `status`) VALUES
-(2, 1, 5, 1, 'Occupied'),
-(3, 2, 5, 1, 'Available'),
-(4, 3, 5, 1, 'Available'),
-(5, 4, 5, 1, 'Available');
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `locker_slots_view`
--- (See below for the actual view)
---
-CREATE TABLE `locker_slots_view` (
-`id` int(11)
-,`slot_number` int(11)
-,`location` varchar(255)
-,`size` varchar(255)
-,`price` double(10,2)
-,`status` varchar(255)
-);
+(3, 1, 5, 1, 'Available'),
+(4, 2, 5, 1, 'Available'),
+(5, 3, 5, 1, 'Available'),
+(6, 1, 2, 1, 'Available'),
+(7, 2, 2, 1, 'Available'),
+(8, 3, 2, 1, 'Available'),
+(9, 1, 3, 1, 'Available'),
+(10, 2, 3, 1, 'Available'),
+(11, 3, 3, 1, 'Available'),
+(12, 1, 4, 1, 'Available'),
+(13, 2, 4, 1, 'Available'),
+(14, 3, 4, 1, 'Available');
 
 -- --------------------------------------------------------
 
@@ -584,17 +621,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `lastname`, `firstname`, `middlename`, `sex`, `dob`, `institute`, `program`, `username`, `email`, `password`) VALUES
 ('2024-11468', 'Getalla', 'Joviet', 'Batang', 'Male', '2003-02-19', 'Institute of Computing', 'Bachelor of Science in Information System', 'jovietgetalla', 'getalla.joviet@dnscedu.onmicrosoft.com', '$2y$10$qB0M/V3TV1qettojErSu4OP5hZTFEkoHPDlfanT2Xu/S6vMRNbrdO'),
-('2024-31214', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'febyjohnrelmalbino', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com', '$2y$10$CwqAcEAydjjiuuXIPNOdhe58PXebSFd2C3EnffiVomC5mEckPw90a'),
+('2024-31214', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'febyjohnrelmalbino', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com', '$2y$10$/10IDBQmyGIRXuLvzy3hy.GY.VHdsB9w1.r4Xg7dA31jyc7uKIWVO'),
 ('2024-98026', 'Bulay-og', 'Jason', 'Dy', 'Male', '2004-11-23', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'jasonbulay-og', 'bulay-og.jason@dnscedu.onmicrosoft.com', '$2y$10$8uuGsxbl7lAatQXWmpBHZOgPEEbzDpV2sBVy5lJTJDfhP.KDqXyM2');
-
--- --------------------------------------------------------
-
---
--- Structure for view `locker_slots_view`
---
-DROP TABLE IF EXISTS `locker_slots_view`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `locker_slots_view`  AS SELECT `ls`.`id` AS `id`, `ls`.`slot_number` AS `slot_number`, `ll`.`location` AS `location`, `lsz`.`size` AS `size`, `lsz`.`price` AS `price`, `ls`.`status` AS `status` FROM ((`locker_slots` `ls` join `locker_locations` `ll` on(`ls`.`location_id` = `ll`.`id`)) join `locker_sizes` `lsz` on(`ls`.`size_id` = `lsz`.`id`)) ;
 
 --
 -- Indexes for dumped tables
@@ -659,7 +687,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `locker_applications`
 --
 ALTER TABLE `locker_applications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `locker_locations`
@@ -677,7 +705,7 @@ ALTER TABLE `locker_sizes`
 -- AUTO_INCREMENT for table `locker_slots`
 --
 ALTER TABLE `locker_slots`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables
