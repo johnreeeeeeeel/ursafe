@@ -277,7 +277,10 @@ section #lockers #lockerSizesOffcanvas {
     background-color: var(--bg-secondary);
     width: 100vw;
     height: 100vh;
-    padding: 24px 48px;
+    padding: 9px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 section #lockers #lockerApplicationOffcanvas .offcanvas-header,
@@ -291,7 +294,7 @@ section #lockers #lockerSizesOffcanvas .offcanvas-body,
 section #lockers #lockerSizesOffcanvas .offcanvas-footer {
     border: none !important;
     background-color: transparent !important;
-    padding: 0 !important;
+    padding: 0 !important;    
 }
 
 section #lockers #lockerApplicationOffcanvas .offcanvas-header .btn-close,
@@ -324,7 +327,7 @@ section #lockers #lockerSizesOffcanvas .offcanvas-header div  {
 section #lockers #lockerApplicationOffcanvas .offcanvas-header div h3,
 section #lockers #lockerLocationsOffcanvas .offcanvas-header div h3,
 section #lockers #lockerSizesOffcanvas .offcanvas-header div h3 {
-    color: var(--text-dark-secondary);
+    color: var(--text-dark-secondary) !important;
 }
 
 section #lockers #lockerApplicationOffcanvas .offcanvas-body table,
@@ -350,6 +353,130 @@ section #lockers #lockerSizesOffcanvas .offcanvas-body table tbody tr td {
     vertical-align: middle;
     color: var(--text-dark-tertiary);
 }
+
+/* Locker application - location - sizes offcanvas */
+section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container {
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table .location-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table .location-header h3 {
+    font-weight: 500;
+    color: var(--text-dark-secondary);
+}
+
+section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table table thead tr th {
+    text-align: left;
+    font-weight: 500;
+    vertical-align: middle;
+    color: var(--text-dark-secondary);
+}
+
+section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table table tbody tr td {
+    text-align: left;
+    font-weight: 400;
+    vertical-align: middle;
+    color: var(--text-dark-tertiary);
+}
+
+@media (max-width: 768px) {
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table thead {
+        display: none;
+    }
+
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table,
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table tbody,
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table tr,
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table td {
+        display: block;
+    }
+
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table tr {
+        margin-bottom: 10px;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        border: none;
+        padding: 6px 0;
+        font-size: 14px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table td::before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: #555;
+        flex-shrink: 0;
+    }
+
+    section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lockerSizesOffcanvas) .offcanvas-body .table-container table td:last-child .action-buttons {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 6px !important;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 section #lockers .table-container {
     display: flex;
@@ -392,6 +519,59 @@ section #lockers .table-container .location-slot-section table tbody tr td {
     font-weight: 400;
     vertical-align: middle;
     color: var(--text-dark-tertiary);
+}
+
+@media (max-width: 768px) {
+    section #lockers .table-container table thead {
+        display: none;
+    }
+
+    section #lockers .table-container table,
+    section #lockers .table-container table tbody,
+    section #lockers .table-container table tr,
+    section #lockers .table-container table td {
+        display: block;
+    }
+
+    section #lockers .table-container table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    section #lockers .table-container table tr {
+        margin-bottom: 10px;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    section #lockers .table-container table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        border: none;
+        padding: 6px 0;
+        font-size: 14px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    section #lockers .table-container table td::before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: #555;
+        flex-shrink: 0;
+    }
+
+    section #lockers .table-container table td:last-child .action-buttons{
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 6px !important;
+    }
 }
 
 /* Users */
@@ -506,7 +686,7 @@ section #users .table-container table tbody tr td {
         gap: 24px;
     }
 
-    section #users #users .table-container table tr {
+    section #users .table-container table tr {
         background: #ffffff;
         margin-bottom: 10px;
         padding: 12px;
@@ -532,6 +712,14 @@ section #users .table-container table tbody tr td {
         font-weight: 500;
         color: #555;
         flex-shrink: 0;
+    }
+
+    section #users .table-container table td:last-child .action-buttons{
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 6px !important;
     }
 }
 

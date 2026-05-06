@@ -129,7 +129,7 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     font-size: 16px;
     box-sizing: border-box;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 400 !important;
 }
 
 .sm-btn {
@@ -144,7 +144,7 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     font-size: 12px;
     box-sizing: border-box;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 400 !important;
 }
 
 .action-buttons {
@@ -393,8 +393,12 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: center !important;
     gap: 8px !important;
+}
+
+.primary-modal .modal-body .action-buttons form,
+.primary-modal .modal-body .action-buttons .btn {
+    width: 100% !important;
 }
 
 .primary-modal .modal-body .primary-btn {
@@ -520,12 +524,16 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     border-color: var(--success-base) !important;
 }
 
-.success-modal .modal-content .modal-body .action-buttons {
+.success-modal .modal-body .action-buttons {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: center !important;
     gap: 8px !important;
+}
+
+.success-modal .modal-body .action-buttons form,
+.success-modal .modal-body .action-buttons .btn {
+    width: 100% !important;
 }
 
 .success-modal .modal-content .modal-body .primary-btn {
@@ -652,12 +660,16 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     border-color: var(--danger-base) !important;
 }
 
-.danger-modal .modal-content .modal-body .action-buttons {
+.danger-modal .modal-body .action-buttons {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: center !important;
     gap: 8px !important;
+}
+
+.danger-modal .modal-body .action-buttons form,
+.danger-modal .modal-body .action-buttons .btn {
+    width: 100% !important;
 }
 
 .danger-modal .modal-content .modal-body .primary-btn {

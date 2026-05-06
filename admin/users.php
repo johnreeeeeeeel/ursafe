@@ -188,21 +188,6 @@ $password = $_SESSION['password'] ?? '';
                         <button type="submit" hidden></button>
                     </form>
                 </header>
-                
-                <?php
-                    $search = $_GET['searchUsers'] ?? '';
-                    $filter = $_GET['filter'] ?? '';
-
-                    if (!empty($search) || !empty($filter)) {
-                        $stmt = $conn_local->prepare("CALL getSearchFilterUsers(?, ?)");
-                        $stmt->bind_param("ss", $search, $filter);
-                    } else {
-                        $stmt = $conn_local->prepare("CALL getUsers()");
-                    }
-
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                ?>
 
                 <div class="table-container">
                     <table class="table table-borderless">
@@ -215,34 +200,56 @@ $password = $_SESSION['password'] ?? '';
                         </thead>
                         
                         <tbody>
+                            <?php
+                                // Get users
+                                $search = $_GET['searchUsers'] ?? '';
+                                $filter = $_GET['filter'] ?? '';
+
+                                if (!empty($search) || !empty($filter)) {
+                                    // Use search and filter
+                                    $stmt = $conn_local->prepare("CALL getSearchFilterUsers(?, ?)");
+                                    $stmt->bind_param("ss", $search, $filter);
+                                } else {
+                                    // Use raw
+                                    $stmt = $conn_local->prepare("CALL getUsers()");
+                                }
+
+                                $stmt->execute();
+                                $result = $stmt->get_result();
+                                $stmt->close();
+
+                                $conn_local->next_result();
+                            ?>
+
                             <?php while ($row = $result->fetch_assoc()): ?>
                                 <tr>
-                                    <td data-label="ID"><?= $row['id']; ?></td>
-                                    <td data-label="Username"><?= $row['username']; ?></td>
-                                    <td data-label="Fullname"><?= $row['fullname']; ?></td>
-                                    <td data-label="Email"><?= $row['email']; ?></td>
+                                <td data-label="ID"><?= $row['id']; ?></td>
+                                <td data-label="Username"><?= $row['username']; ?></td>
+                                <td data-label="Full Name"><?= $row['fullname']; ?></td>
+                                <td data-label="Email"><?= $row['email']; ?></td>
 
-                                    <td data-label="Action">
-                                        <div class="action-buttons">
-                                            <button type="button" class="sm-btn primary-btn"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#viewUserModal"
-                                                onclick="viewUserDetails(
-                                                    '<?= htmlspecialchars($row['id']) ?>',
-                                                    '<?= htmlspecialchars($row['fullname']) ?>',
-                                                    '<?= htmlspecialchars($row['sex'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($row['dob'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($row['institute'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($row['program'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($row['username']) ?>',
-                                                    '<?= htmlspecialchars($row['email']) ?>'
-                                                )">
-                                                <i class="fa-solid fa-eye"></i>
-                                                View
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <td data-label="Action">
+                                    <div class="action-buttons">
+                                        <button class="sm-btn primary-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#viewUserModal"
+                                            onclick="viewUserDetails(
+                                                '<?= htmlspecialchars($row['id']) ?>',
+                                                '<?= htmlspecialchars($row['fullname']) ?>',
+                                                '<?= htmlspecialchars($row['sex'] ?? '') ?>',
+                                                '<?= htmlspecialchars($row['dob'] ?? '') ?>',
+                                                '<?= htmlspecialchars($row['institute'] ?? '') ?>',
+                                                '<?= htmlspecialchars($row['program'] ?? '') ?>',
+                                                '<?= htmlspecialchars($row['username']) ?>',
+                                                '<?= htmlspecialchars($row['email']) ?>'
+                                            )">
+
+                                            <i class="fa-solid fa-eye"></i>
+                                            View
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                             <?php endwhile; ?>
                         </tbody>
                     </table>

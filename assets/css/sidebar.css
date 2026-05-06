@@ -85,20 +85,23 @@
         flex-direction: column;
         height: 100vh;
         border-radius: 0 12px 12px 0;
-        padding: 32px 12px;
         display: flex;
         flex-direction: column;
         gap: 0;
+        padding: 0;
     }
 
-    #sidebarMobile {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
+    #sidebarMobile .offcanvas-body {
         padding: 32px 12px;
     }
 
-    #sidebarMobile .logo {
+    #sidebarMobile .offcanvas-body .nav {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    #sidebarMobile .offcanvas-body .nav .logo {
         width: 95%;
         height: auto;
         display: block;
@@ -107,26 +110,20 @@
         cursor: pointer;
     }
 
-    #sidebarMobile .nav {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-
-    #sidebarMobile .nav .top-nav {
+    #sidebarMobile .offcanvas-body .nav .top-nav {
         display: flex;
         flex-direction: column;
         gap: 12px;
     }
 
-    #sidebarMobile .nav .bottom-nav {
+    #sidebarMobile .offcanvas-body .nav .bottom-nav {
         margin-top: auto;
         display: flex;
         flex-direction: column;
         gap: 18px;
     }
 
-    #sidebarMobile .nav .link {
+    #sidebarMobile .offcanvas-body .nav .link {
         background-color: transparent;
         color: var(--text-light-primary);
         outline: none;
@@ -140,17 +137,17 @@
         text-decoration: none;
     }
 
-    #sidebarMobile .nav a i {
+    #sidebarMobile .offcanvas-body .nav a i {
         color: var(--text-light-primary);
     }
 
-    #sidebarMobile .nav a:active,
-    #sidebarMobile .nav a:hover {
+    #sidebarMobile .offcanvas-body .nav a:active,
+    #sidebarMobile .offcanvas-body .nav a:hover {
         background-color: var(--color-primary-base);
         color: var(--text-light-primary);
     }
 
-    #sidebarMobile .nav a.active {
+    #sidebarMobile .offcanvas-body .nav a.active {
         background-color: var(--color-primary-base);
         color: var(--text-light-primary);
     }
@@ -174,19 +171,19 @@
     }
 }
 
-#sidebarDesktop .logo {
+#sidebarDesktop .nav {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#sidebarDesktop .nav .logo {
     width: 95%;
     height: auto;
     display: block;
     margin: 0 auto;
     margin-bottom: 28px;
     cursor: pointer;
-}
-
-#sidebarDesktop .nav {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
 }
 
 #sidebarDesktop .nav .top-nav {
