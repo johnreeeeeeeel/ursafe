@@ -11,7 +11,7 @@ if (!$app_id) {
 }
 
 try {
-    $stmt = $conn_local->prepare("CALL getUserLockerSlotApplicationId(?)");
+    $stmt = $conn_local->prepare("CALL getUserLockerApplicationId(?)");
     $stmt->bind_param("i", $app_id);
     $stmt->execute();
 
@@ -28,13 +28,13 @@ try {
     $slot_id = $app['slot_id'];
     $user_id = $app['user_id'];
 
-    $stmt = $conn_local->prepare("CALL rejectLockerSlotApplication(?)");
+    $stmt = $conn_local->prepare("CALL rejectLockerApplication(?)");
     $stmt->bind_param("i", $app_id);
     $stmt->execute();
     $stmt->close();
     $conn_local->next_result();
 
-    $stmt = $conn_local->prepare("CALL getUserLockerSlotApplicationDetails(?)");
+    $stmt = $conn_local->prepare("CALL getUserLockerApplicationDetails(?)");
     $stmt->bind_param("i", $slot_id);
     $stmt->execute();
 

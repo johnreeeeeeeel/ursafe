@@ -8,7 +8,7 @@ $email = $_POST['email'] ?? null;
 if (!$email) {
     $_SESSION['alert_message'] = [
         'type' => 'danger',
-        'text' => 'Email is required'
+        'text' => 'Something went wrong. Please try again.'
     ];
 
     header("Location: ../../index.php");

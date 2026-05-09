@@ -107,7 +107,7 @@ $password = $_SESSION['password'] ?? '';
                     <li>
                         <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                            logout
+                            Logout
                         </a>
                     </li>
                 </div>
@@ -149,7 +149,7 @@ $password = $_SESSION['password'] ?? '';
                 <li>
                     <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        logout
+                        Logout
                     </a>
                 </li>
             </div>

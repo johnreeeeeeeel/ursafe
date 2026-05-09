@@ -107,7 +107,7 @@ $password = $_SESSION['password'] ?? '';
                     <li>
                         <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                            logout
+                            Logout
                         </a>
                     </li>
                 </div>
@@ -149,7 +149,7 @@ $password = $_SESSION['password'] ?? '';
                 <li>
                     <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        logout
+                        Logout
                     </a>
                 </li>
             </div>
@@ -218,17 +218,17 @@ $password = $_SESSION['password'] ?? '';
                                 <div class="search-group">
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                     <input type="search"
-                                        name="searchMyApplication"
+                                        name="searchMyLockerApplication"
                                         placeholder="Search my locker applications..."
-                                        value="<?= htmlspecialchars($_GET['searchMyApplication'] ?? '') ?>">
+                                        value="<?= htmlspecialchars($_GET['searchMyLockerApplication'] ?? '') ?>">
                                 </div>
 
                                 <div class="filter-group">
                                     <i class="fa-solid fa-filter"></i>
-                                    <select name="filterMyApplication" onchange="this.form.submit()">
+                                    <select name="filterMyLockerApplication" onchange="this.form.submit()">
                                         <option value="">All</option>
-                                        <option value="asc" <?= (($_GET['filterMyApplication'] ?? '') === 'asc') ? 'selected' : '' ?>>A - Z</option>
-                                        <option value="desc" <?= (($_GET['filterMyApplication'] ?? '') === 'desc') ? 'selected' : '' ?>>Z - A</option>
+                                        <option value="asc" <?= (($_GET['filterMyLockerApplication'] ?? '') === 'asc') ? 'selected' : '' ?>>A - Z</option>
+                                        <option value="desc" <?= (($_GET['filterMyLockerApplication'] ?? '') === 'desc') ? 'selected' : '' ?>>Z - A</option>
                                     </select>
                                 </div>
 
@@ -236,18 +236,31 @@ $password = $_SESSION['password'] ?? '';
                             </form>
                         </header>
 
-                        <?php
-                            $stmt = $conn_local->prepare("CALL getUserLockerSlotApplications(?)");
-                            $stmt->bind_param("s", $id);
-                            $stmt->execute();
-
-                            $applications = $stmt->get_result();
-
-                            $stmt->close();
-                            $conn_local->next_result();
-                        ?>
-
                         <div class="table-container">
+                            <?php
+                                // Get my locker application
+                                $search = trim($_GET['searchMyLockerApplication'] ?? '');
+                                $filter = strtolower($_GET['filterMyLockerApplication'] ?? '');
+
+                                if (!empty($search) || !empty($filter)) {
+                                    // Use search and filter
+                                    $stmtMyLockerApplication = $conn_local->prepare("CALL getSearchFilterMyLockerApplication(?, ?, ?)");
+                                    $stmtMyLockerApplication->bind_param("sss", $id, $search, $filter);
+                                } else {
+                                    // Use raw
+                                    $stmtMyLockerApplication = $conn_local->prepare("CALL getMyLockerApplications(?)");
+                                        $stmtMyLockerApplication->bind_param("s", $id);
+                                }
+
+                                $stmtMyLockerApplication->execute();
+                                $myLockerApplicationResultSet = $stmtMyLockerApplication->get_result();
+                                $stmtMyLockerApplication->close();
+
+                                while ($conn_local->next_result()) {
+                                    $conn_local->store_result();
+                                }
+                            ?>
+
                             <table class="table table-borderless">
                                 <thead>
                                     <tr>
@@ -261,24 +274,24 @@ $password = $_SESSION['password'] ?? '';
                                 </thead>
 
                                 <tbody>
-                                    <?php while ($app = $applications->fetch_assoc()) { ?>
+                                    <?php while ($myLockerApplicationRow = $myLockerApplicationResultSet->fetch_assoc()) { ?>
                                         <tr>
-                                            <td data-label="Location"><?= $app['location'] ?></td>
-                                            <td data-label="Slot"><?= $app['slot_number'] ?></td>
-                                            <td data-label="Size"><?= $app['size'] ?></td>
-                                            <td data-label="Price"><?= $app['price'] ?></td>
+                                            <td data-label="Location"><?= $myLockerApplicationRow['location'] ?></td>
+                                            <td data-label="Slot"><?= $myLockerApplicationRow['slot_number'] ?></td>
+                                            <td data-label="Size"><?= $myLockerApplicationRow['size'] ?></td>
+                                            <td data-label="Price"><?= $myLockerApplicationRow['price'] ?></td>
 
                                             <td data-label="Status">
-                                                <?php if ($app['status'] == 'Pending') { ?>
+                                                <?php if ($myLockerApplicationRow['status'] == 'Pending') { ?>
                                                     <span class="badge rounded-pill pending-badge">Pending</span>
 
-                                                <?php } elseif ($app['status'] == 'Accepted') { ?>
+                                                <?php } elseif ($myLockerApplicationRow['status'] == 'Accepted') { ?>
                                                     <span class="badge rounded-pill accepted-badge">Accepted</span>
 
-                                                <?php } elseif ($app['status'] == 'Revoked') { ?>
+                                                <?php } elseif ($myLockerApplicationRow['status'] == 'Revoked') { ?>
                                                     <span class="badge rounded-pill revoked-badge">Revoked</span>
 
-                                                <?php } elseif ($app['status'] == 'Cancelled') { ?>
+                                                <?php } elseif ($myLockerApplicationRow['status'] == 'Cancelled') { ?>
                                                     <span class="badge rounded-pill cancelled-badge">Cancelled</span>
                                                 
                                                 <?php } else { ?>
@@ -287,11 +300,11 @@ $password = $_SESSION['password'] ?? '';
                                             </td>
 
                                             <td data-label="Action">
-                                                <?php if ($app['status'] == 'Pending') { ?>
+                                                <?php if ($myLockerApplicationRow['status'] == 'Pending') { ?>
                                                     <div class="action-buttons">
                                                         <button class="sm-btn danger-btn"
                                                             data-bs-toggle="modal"
-                                                            data-bs-target="#cancelApplicationModal<?= $app['application_id'] ?>">
+                                                            data-bs-target="#cancelApplicationModal<?= $myLockerApplicationRow['application_id'] ?>">
                                                             <i class="fa-solid fa-circle-xmark"></i>
                                                             Cancel
                                                         </button>
@@ -311,19 +324,17 @@ $password = $_SESSION['password'] ?? '';
                 </div>
 
                 <?php
-                    $stmt = $conn_local->prepare("CALL getUserLockerSlotApplications(?)");
-                    $stmt->bind_param("s", $id);
-                    $stmt->execute();
+                    $stmtModalLockerApplication = $conn_local->prepare("CALL getMyLockerApplications(?)");
+                    $stmtModalLockerApplication->bind_param("s", $id);
+                    $stmtModalLockerApplication->execute();
 
-                    $applications = $stmt->get_result();
-                    $stmt->close();
-                    $conn_local->next_result();
-
-                    while ($app = $applications->fetch_assoc()) {
+                    $mylockerApplicationResultSet = $stmtModalLockerApplication->get_result();
                 ?>
+
+                <?php while ($myLockerApplicationRow = $mylockerApplicationResultSet->fetch_assoc()) { ?>
                     
                     <div class="modal fade danger-modal"
-                        id="cancelApplicationModal<?= $app['application_id'] ?>"
+                        id="cancelApplicationModal<?= $myLockerApplicationRow['application_id'] ?>"
                         tabindex="-1">
 
                         <div class="modal-dialog modal-dialog-centered">
@@ -334,7 +345,7 @@ $password = $_SESSION['password'] ?? '';
                                         <i class="fa-solid fa-circle-xmark"></i>
                                         <h5>Cancel Application</h5>
                                         <p>
-                                            Are you sure you want to cancel your application for <span>Slot <?= $app['slot_number'] ?></span>?
+                                            Are you sure you want to cancel your application for <span>Slot <?= $myLockerApplicationRow['slot_number'] ?></span>?
                                         </p>
                                     </div>
 
@@ -344,59 +355,69 @@ $password = $_SESSION['password'] ?? '';
                                         </button>
 
                                         <form method="POST" action="../app/locker/cancel_locker_application.php">
-                                            <input type="hidden" name="id" value="<?= $app['application_id'] ?>">
+                                            <input type="hidden" name="id" value="<?= $myLockerApplicationRow['application_id'] ?>">
                                             <button type="submit" class="btn primary-btn">
                                                 Yes, Cancel
                                             </button>
                                         </form>
                                     </div>
-
                                 </div>
-
                             </div>
                         </div>
                     </div>
+
                 <?php } ?>
 
+                <?php
+                $stmtModalLockerApplication->close();
+
+                while ($conn_local->next_result()) {
+                    $conn_local->store_result();
+                }
+                ?>
+
+                <!-- Lockers -->
                 <div class="table-container">
-                    <?php
+                     <?php
                         // Get locker locations
                         $search = trim($_GET['searchLocation'] ?? '');
                         $filter = strtolower($_GET['filterLocation'] ?? '');
 
                         if (!empty($search) || !empty($filter)) {
                             // Use search and filter
-                            $stmtLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?)");
-                            $stmtLocation->bind_param("ss", $search, $filter);
+                            $stmtLockerLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?)");
+                            $stmtLockerLocation->bind_param("ss", $search, $filter);
                         } else {
                             // Use raw
-                            $stmtLocation = $conn_local->prepare("CALL getLockerLocations()");
+                            $stmtLockerLocation = $conn_local->prepare("CALL getLockerLocations()");
                         }
 
-                        $stmtLocation->execute();
-                        $locationResultSet = $stmtLocation->get_result();
-                        $stmtLocation->close();
+                        $stmtLockerLocation->execute();
+                        $lockerLocationResultSet = $stmtLockerLocation->get_result();
+                        $stmtLockerLocation->close();
 
-                        $conn_local->next_result();
-                        $conn_local->store_result();
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
 
-                    <?php while($loc = $locationResultSet->fetch_assoc()) { ?>
+                    <?php while($lockerLocationRow = $lockerLocationResultSet->fetch_assoc()) { ?>
                         <div class="location-slot-section">
                             <div class="location-header">
-                                <h3><?= $loc['location'] ?></h3>
+                                <h3><?= $lockerLocationRow['location'] ?></h3>
                             </div>
 
                             <?php
                                 // Get lockers by location
-                                $stmtSlot = $conn_local->prepare("CALL getLockersByLocation(?)");
-                                $stmtSlot->bind_param("i", $loc['id']);
-                                $stmtSlot->execute();
-                                $slotResultSet = $stmtSlot->get_result();
-                                $stmtSlot->close();
+                                $stmtLocker = $conn_local->prepare("CALL getLockersByLocation(?)");
+                                $stmtLocker->bind_param("i", $lockerLocationRow['id']);
+                                $stmtLocker->execute();
+                                $lockerResultSet = $stmtLocker->get_result();
+                                $stmtLocker->close();
 
-                                $conn_local->next_result();
-                                $conn_local->store_result();
+                                while ($conn_local->next_result()) {
+                                    $conn_local->store_result();
+                                }
                             ?>
 
                             <table class="table table-borderless">
@@ -411,12 +432,12 @@ $password = $_SESSION['password'] ?? '';
                                 </thead>
 
                                 <tbody>
-                                    <?php while($row = $slotResultSet->fetch_assoc()) { ?>
+                                    <?php while($lockerRow = $lockerResultSet->fetch_assoc()) { ?>
                                         <tr>
-                                        <td data-label="Slot Number"><?= $row['slot_number'] ?></td>
-                                        <td data-label="Size"><?= $row['size'] ?></td>
-                                        <td data-label="Price"><?= $row['price'] ?></td>
-                                        <td data-label="Status"><?= $row['status'] ?></td>
+                                        <td data-label="Slot Number"><?= $lockerRow['slot_number'] ?></td>
+                                        <td data-label="Size"><?= $lockerRow['size'] ?></td>
+                                        <td data-label="Price"><?= $lockerRow['price'] ?></td>
+                                        <td data-label="Status"><?= $lockerRow['status'] ?></td>
 
                                         <td data-label="Action">
                                             <div class="action-buttons">
@@ -424,7 +445,7 @@ $password = $_SESSION['password'] ?? '';
                                                     type="button" 
                                                     class="sm-btn secondary-btn"
                                                     data-bs-toggle="modal" 
-                                                    data-bs-target="#applyLockerSlotModal<?= $row['id'] ?>">
+                                                    data-bs-target="#applyLockerSlotModal<?= $lockerRow['id'] ?>">
 
                                                     <i class="fa-solid fa-file"></i>
                                                     Apply
@@ -435,7 +456,7 @@ $password = $_SESSION['password'] ?? '';
 
                                         <!-- Apply locker slot modal -->
                                         <div class="modal fade success-modal"
-                                            id="applyLockerSlotModal<?= $row['id'] ?>"
+                                            id="applyLockerSlotModal<?= $lockerRow['id'] ?>"
                                             tabindex="-1">
 
                                             <div class="modal-dialog modal-dialog-centered">
@@ -446,7 +467,7 @@ $password = $_SESSION['password'] ?? '';
                                                             <i class="fa-solid fa-circle-check"></i>
                                                             <h5>Apply</h5>
                                                             <p>
-                                                                Are you sure you want to apply <span>slot <?= $row['slot_number'] ?></span>?
+                                                                Are you sure you want to apply <span>slot <?= $lockerRow['slot_number'] ?></span>?
                                                             </p>
                                                         </div>
 
@@ -456,7 +477,7 @@ $password = $_SESSION['password'] ?? '';
                                                             </button>
 
                                                             <form method="POST" action="../app/locker/apply_locker_slot.php">
-                                                                <input type="hidden" name="slot_id" value="<?= $row['id'] ?>">
+                                                                <input type="hidden" name="slot_id" value="<?= $lockerRow['id'] ?>">
 
                                                                 <button type="submit" class="btn primary-btn">
                                                                     Yes, Apply

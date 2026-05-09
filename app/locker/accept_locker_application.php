@@ -12,7 +12,7 @@ if (!$app_id) {
 
 try {
 
-    $stmt = $conn_local->prepare("CALL getUserLockerSlotApplicationId(?)");
+    $stmt = $conn_local->prepare("CALL getUserLockerApplicationId(?)");
     $stmt->bind_param("i", $app_id);
     $stmt->execute();
 
@@ -35,7 +35,7 @@ try {
     $stmt->close();
     $conn_local->next_result();
 
-    $stmt = $conn_local->prepare("CALL getUserLockerSlotApplicationDetails(?)");
+    $stmt = $conn_local->prepare("CALL getUserLockerApplicationDetails(?)");
     $stmt->bind_param("i", $slot_id);
     $stmt->execute();
 

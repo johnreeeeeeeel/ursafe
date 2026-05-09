@@ -6,7 +6,7 @@ require '../emails/cancel_locker_slot_application_email.php';
 $id = $_POST['id'];
 
 // Get application data 
-$stmt = $conn_local->prepare("CALL getLockerApplicationById(?)");
+$stmt = $conn_local->prepare("CALL getUserLockerApplicationId(?)");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -19,7 +19,7 @@ $user_id = $data['user_id'];
 $slot_id = $data['slot_id'];
 
 // Cancel application
-$stmt = $conn_local->prepare("CALL cancelLockerSlotApplication(?)");
+$stmt = $conn_local->prepare("CALL cancelLockerApplication(?)");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 
@@ -27,7 +27,7 @@ $stmt->close();
 $conn_local->next_result(); 
 
 // Get slot details
-$stmt = $conn_local->prepare("CALL getUserLockerSlotApplicationDetails(?)");
+$stmt = $conn_local->prepare("CALL getUserLockerApplicationDetails(?)");
 $stmt->bind_param("i", $slot_id);
 $stmt->execute();
 $result = $stmt->get_result();

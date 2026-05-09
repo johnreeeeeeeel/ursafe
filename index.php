@@ -1,91 +1,5 @@
 <?php
 session_start();
-require 'app/db_connection.php';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-
-    $user = null;
-    $isAdmin = false;
-
-    // Check admin
-    $stmt = $conn_local->prepare("CALL getAdminByEmail(?)");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-
-    if ($result && $result->num_rows === 1) {
-        $user = $result->fetch_assoc();
-        $isAdmin = true;
-    }
-
-    $stmt->close();
-    $conn_local->next_result();
-
-    // Check user 
-    if (!$user) {
-
-        $stmt = $conn_local->prepare("CALL getUserByEmail(?)");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-
-        if ($result && $result->num_rows === 1) {
-            $user = $result->fetch_assoc();
-        }
-
-        $stmt->close();
-        $conn_local->next_result();
-    }
-
-    // If still no user found
-    if (!$user) {
-        $_SESSION['alert_message'] = [
-            'type' => 'danger',
-            'text' => 'Account not found'
-        ];
-        header("Location: index.php");
-        exit;
-    }
-
-    // Check password
-    if (password_verify($password, $user['password'])) {
-
-        $_SESSION['id'] = $user['id'];
-
-        $_SESSION['lastname']  = $user['lastname'] ?? '';
-        $_SESSION['firstname'] = $user['firstname'] ?? '';
-        $_SESSION['middlename']= $user['middlename'] ?? '';
-
-        $_SESSION['sex'] = $user['sex'] ?? '';
-        $_SESSION['dob'] = $user['dob'] ?? '';
-
-        $_SESSION['institute'] = $user['institute'] ?? '';
-        $_SESSION['program']   = $user['program'] ?? '';
-
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['email']    = $user['email'];
-
-        if ($isAdmin) {
-            header("Location: admin/dashboard.php");
-        } else {
-            header("Location: user/home.php");
-        }
-        exit;
-
-    } else {
-        $_SESSION['alert_message'] = [
-            'type' => 'danger',
-            'text' => 'Invalid email or password'
-        ];
-        header("Location: index.php");
-        exit;
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -139,13 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- Login Form -->
         <div class="auth-form">
-            <form method="POST">
+            <form method="POST" action="app/auth/login.php">
                 <div class="input-box">
-                    <input type="email" id="email" class="input" placeholder="Email" name="email" required>
+                    <input type="email" id="loginEmail" class="input" placeholder="Email" name="loginEmail" required>
                 </div>
 
                 <div class="input-box">
-                    <input type="password" id="password" class="input" placeholder="Password" name="password" required>
+                    <input type="password" id="loginPassword" class="input" placeholder="Password" name="loginPassword" required>
                     <i class="fa-solid fa-eye-slash toggle-password"></i>
                 </div>
 
@@ -166,7 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="modal fade success-modal" id="activateAccountModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="fa-solid fa-user-plus"></i>

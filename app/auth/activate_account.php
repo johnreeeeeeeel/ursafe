@@ -9,21 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $plainPassword = $_POST['password'];
 
     // Checkly check if email exists in campus database
-    $stmt = $conn_remote->prepare("
-        SELECT 
-            id,
-            lastname,
-            firstname,
-            middlename,
-            sex,
-            dob,
-            institute,
-            program,
-            email
-        FROM students
-        WHERE email = ?
-    ");
-
+    $stmt = $conn_remote->prepare("CALL getCampusStudentByEmail(?)");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -40,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $student = $result->fetch_assoc();
     $stmt->close();
 
-    // Check if account already exists in local database
-    $stmt = $conn_local->prepare("SELECT id FROM users WHERE email = ?");
+    // Check if account already exists in ursafe database 
+    $stmt = $conn_local->prepare("CALL getUserByEmail(?)");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $check = $stmt->get_result();
@@ -57,24 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $stmt->close();
 
-    // Insert into local database
+    // Insert into ursafe database
     $password = password_hash($plainPassword, PASSWORD_DEFAULT);
 
-    $insert = $conn_local->prepare("
-        INSERT INTO users (
-            id,
-            lastname,
-            firstname,
-            middlename,
-            sex,
-            dob,
-            institute,
-            program,
-            username,
-            email,
-            password
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
+    $insert = $conn_local->prepare(" CALL activateUserAccount(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
 
     $insert->bind_param(
         "sssssssssss",

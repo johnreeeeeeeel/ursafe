@@ -8,7 +8,7 @@ $email = $_SESSION['email'] ?? null;
 if (!$email) {
     $_SESSION['alert_message'] = [
         'type' => 'danger',
-        'text' => 'Session expired. Please try again.'
+        'text' => 'Something went wrong. Please try again.'
     ];
 
     header("Location: ../../index.php");

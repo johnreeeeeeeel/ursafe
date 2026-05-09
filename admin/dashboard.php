@@ -1,28 +1,6 @@
 <?php
 session_start();
 require '../app/db_connection.php';
-
-if (!isset($_SESSION['id']) || !isset($_SESSION['email'])) {
-    header('Location: ../index.php');
-    exit;
-}
-
-// Set session variables
-$id = $_SESSION['id'] ?? '';
-
-$lastname = $_SESSION['lastname'] ?? '';
-$firstname = $_SESSION['firstname'] ?? '';
-$middlename = $_SESSION['middlename'] ?? '';
-
-$sex = $_SESSION['sex'] ?? '';
-$dob = $_SESSION['dob'] ?? '';
-
-$institute = $_SESSION['institute'] ?? '';
-$program = $_SESSION['program'] ?? '';
-
-$username = $_SESSION['username'] ?? '';
-$email = $_SESSION['email'] ?? '';
-$password = $_SESSION['password'] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -107,7 +85,7 @@ $password = $_SESSION['password'] ?? '';
                     <li>
                         <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                            logout
+                            Logout
                         </a>
                     </li>
                 </div>
@@ -149,7 +127,7 @@ $password = $_SESSION['password'] ?? '';
                 <li>
                     <a class="link danger-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        logout
+                        Logout
                     </a>
                 </li>
             </div>

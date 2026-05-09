@@ -451,33 +451,6 @@ section #lockers :is(#lockerApplicationOffcanvas, #lockerLocationsOffcanvas, #lo
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 section #lockers .table-container {
     display: flex;
     flex-direction: column;
@@ -687,11 +660,9 @@ section #users .table-container table tbody tr td {
     }
 
     section #users .table-container table tr {
-        background: #ffffff;
         margin-bottom: 10px;
         padding: 12px;
         border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
     section #users .table-container table td {
