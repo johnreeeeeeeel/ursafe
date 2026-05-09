@@ -1,6 +1,13 @@
 <?php
 session_start();
 require '../app/db_connection.php';
+
+if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
+
+} else {
+    header("Location: ../index.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -162,7 +169,13 @@ require '../app/db_connection.php';
                         <li>
                             <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerSizesOffcanvas" onclick="window.location.hash='lockerSizesOffcanvas';">
                                 View Locker Sizes
-                            </button>
+                            </button> 
+                        </li>
+                        <li><hr class="dropdown-divider"></hr></li>
+                        <li>
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerLogsOffcanvas" onclick="window.location.hash='lockerLogsOffcanvas';">
+                                View Locker Logs
+                            </button> 
                         </li>
                     </ul>
                 </div>
@@ -301,7 +314,7 @@ require '../app/db_connection.php';
                                                             <i class="fa-solid fa-xmark"></i> Reject
                                                         </button>
                                                     </div>
-                                                <?php } elseif ($row['status'] == 'Accepted') { ?>
+                                                <?php } elseif ($lockerApplicationRow['status'] == 'Accepted') { ?>
                                                     <div class="action-buttons">
                                                         <button class="sm-btn danger-btn"
                                                             data-bs-toggle="modal"
@@ -821,6 +834,81 @@ require '../app/db_connection.php';
                         </div>
                     </div>
                 <?php } ?>
+
+                <!-- Offcanvas for locker logs -->
+                <div class="offcanvas offcanvas-end" id="lockerLogsOffcanvas">
+                    <div class="offcanvas-header">
+                        <h3 class="offcanvas-title">Locker Logs</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                    </div>
+
+                    <div class="offcanvas-body">
+                        <div class="table-container">
+                            <?php
+                                // Get user account logs
+                                $limit = 18;
+                                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+                                if ($page < 1) $page = 1;
+
+                                $offset = ($page - 1) * $limit;
+
+                                $stmtLockerLogs = $conn_local->prepare("CALL getLockerLogs(?, ?)");
+                                $stmtLockerLogs->bind_param("ii", $limit, $offset);
+
+                                $stmtLockerLogs->execute();
+                                $userLockerLogsResultSet = $stmtLockerLogs->get_result();
+                                $stmtLockerLogs->close();
+
+                                $conn_local->next_result();
+                            ?>
+
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Log ID</th>
+                                        <th>Timestamp</th>
+                                        <th>Action</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <?php while ($lockerLogsRow = $userLockerLogsResultSet->fetch_assoc()) { ?>
+                                        <tr>
+                                            <td data-label="Log ID"><?= $lockerLogsRow['id'] ?></td>
+                                            <td data-label="Timestamp"><?= $lockerLogsRow['created_at'] ?></td>
+                                            <td data-label="Action"><?= $lockerLogsRow['action'] ?></td>
+                                            <td data-label="Description"><?= $lockerLogsRow['description'] ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <ul class="pagination">
+                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                <?php if ($page > 1): ?>
+                                    <a class="page-link" href="?page=<?= $page - 1 ?>#lockerLogsOffcanvas">Previous</a>
+                                <?php else: ?>
+                                    <span class="page-link">Previous</span>
+                                <?php endif; ?>
+                            </li>
+
+                            <li class="page-item active">
+                                <span class="page-link"><?= $page ?></span>
+                            </li>
+
+                            <li class="page-item <?= (mysqli_num_rows($userLockerLogsResultSet) < $limit) ? 'disabled' : '' ?>">
+                                <?php if (mysqli_num_rows($userLockerLogsResultSet) == $limit): ?>
+                                    <a class="page-link" href="?page=<?= $page + 1 ?>#lockerLogsOffcanvas">Next</a>
+                                <?php else: ?>
+                                    <span class="page-link">Next</span>
+                                <?php endif; ?>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
                 <!-- Lockers -->
                 <div class="table-container">

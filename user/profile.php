@@ -2,7 +2,9 @@
 session_start();
 require '../app/db_connection.php';
 
-if (!isset($_SESSION['id']) || !isset($_SESSION['email'])) {
+if (isset($_SESSION['role']) && $_SESSION['role'] == 'user') {
+
+} else {
     header("Location: ../index.php");
     exit;
 }

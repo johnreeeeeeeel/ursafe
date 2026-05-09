@@ -29,7 +29,7 @@ try {
     $slot_id = $app['slot_id'];
     $user_id = $app['user_id'];
 
-    $stmt = $conn_local->prepare("CALL acceptLockerSlotApplication(?)");
+    $stmt = $conn_local->prepare("CALL acceptLockerApplication(?)");
     $stmt->bind_param("i", $app_id);
     $stmt->execute();
     $stmt->close();

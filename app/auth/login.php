@@ -73,9 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['email']      = $user['email'];
 
         if ($isAdmin) {
+            $_SESSION['role'] = 'admin';
             header("Location: ../../admin/dashboard.php");
 
         } elseif ($isUser) {
+            $_SESSION['role'] = 'user';
             header("Location: ../../user/home.php");
 
         } else {

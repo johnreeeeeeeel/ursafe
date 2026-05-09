@@ -1,6 +1,13 @@
 <?php
 session_start();
 require '../app/db_connection.php';
+
+if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
+
+} else {
+    header("Location: ../index.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>

@@ -1,6 +1,13 @@
 <?php
 session_start();
 require '../app/db_connection.php';
+
+if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
+
+} else {
+    header("Location: ../index.php");
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -140,6 +147,22 @@ require '../app/db_connection.php';
                 <i class="fa-solid fa-bars menuToggleButton" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile"></i>
                 <h1 class="page-title">Users</h1> 
             </div>
+
+            <div class="right">
+                <div class="dropdown">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                        View
+                    </button>
+                    
+                    <ul class="dropdown-menu"> 
+                        <li>
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#userAccountLogsOffcanvas" onclick="window.location.hash='userAccountLogsOffcanvas';">
+                                View Account Logs
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </header>
 
         <div class="content">
@@ -167,6 +190,83 @@ require '../app/db_connection.php';
                     </form>
                 </header>
 
+                <!-- Offcanvas for user logs -->
+                <div class="offcanvas offcanvas-end" id="userAccountLogsOffcanvas">
+                    <div class="offcanvas-header">
+                        <h3 class="offcanvas-title">User Account Logs</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                    </div>
+
+                    <div class="offcanvas-body">
+                        <div class="table-container">
+                            <?php
+                                // Get user account logs
+                                $limit = 18;
+                                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+                                if ($page < 1) $page = 1;
+
+                                $offset = ($page - 1) * $limit;
+
+                                $stmtUserAccountLogs = $conn_local->prepare("CALL getUserAccountLogs(?, ?)");
+                                $stmtUserAccountLogs->bind_param("ii", $limit, $offset);
+
+                                $stmtUserAccountLogs->execute();
+                                $userAccountLogsResultSet = $stmtUserAccountLogs->get_result();
+                                $stmtUserAccountLogs->close();
+
+                                $conn_local->next_result();
+                                $conn_local->store_result();
+                            ?>
+
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Log ID</th>
+                                        <th>Timestamp</th>
+                                        <th>Action</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <?php while ($userAccountLogsRow = $userAccountLogsResultSet->fetch_assoc()) { ?>
+                                        <tr>
+                                            <td data-label="Log ID"><?= $userAccountLogsRow['id'] ?></td>
+                                            <td data-label="Timestamp"><?= $userAccountLogsRow['created_at'] ?></td>
+                                            <td data-label="Action"><?= $userAccountLogsRow['action'] ?></td>
+                                            <td data-label="Description"><?= $userAccountLogsRow['description'] ?></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <ul class="pagination">
+                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                <?php if ($page > 1): ?>
+                                    <a class="page-link" href="?page=<?= $page - 1 ?>#userAccountLogsOffcanvas">Previous</a>
+                                <?php else: ?>
+                                    <span class="page-link">Previous</span>
+                                <?php endif; ?>
+                            </li>
+
+                            <li class="page-item active">
+                                <span class="page-link"><?= $page ?></span>
+                            </li>
+
+                            <li class="page-item <?= (mysqli_num_rows($userAccountLogsResultSet) < $limit) ? 'disabled' : '' ?>">
+                                <?php if (mysqli_num_rows($userAccountLogsResultSet) == $limit): ?>
+                                    <a class="page-link" href="?page=<?= $page + 1 ?>#userAccountLogsOffcanvas">Next</a>
+                                <?php else: ?>
+                                    <span class="page-link">Next</span>
+                                <?php endif; ?>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Users -->
                 <div class="table-container">
                     <table class="table table-borderless">
                         <thead>
