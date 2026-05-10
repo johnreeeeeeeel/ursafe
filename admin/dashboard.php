@@ -61,7 +61,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
     <nav class="offcanvas offcanvas-start" id="sidebarMobile">
         <div class="offcanvas-body">
             <ul class="nav">
-                <a href="dashboard.php">
+                <a class="logo-container" href="dashboard.php">
                     <img class="logo" src="../assets/images/ursafe_logo_2.png" alt="logo">
                 </a>
 
@@ -103,7 +103,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
     <!-- Desktop Sidebar -->
     <nav id="sidebarDesktop">
         <ul class="nav">
-            <a href="dashboard.php">
+            <a class="logo-container" href="dashboard.php">
                 <img class="logo" src="../assets/images/ursafe_logo_2.png" alt="logo">
             </a>
 
@@ -151,7 +151,167 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
         <div class="content">
             <div id="dashboard">
-                <h1>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Repudiandae autem explicabo non ad voluptates est itaque eligendi cupiditate! Libero saepe debitis sequi doloribus aperiam? Repudiandae explicabo iste doloremque commodi architecto? Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate accusantium adipisci perferendis vitae asperiores quasi totam, neque fuga officiis, repellendus fugiat minima. Rem nihil vel architecto culpa magni iusto aut. Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias atque expedita voluptatum omnis minus, ea eum aut illo nobis iure numquam ipsam natus quisquam inventore doloribus error incidunt laborum optio? Lorem, ipsum dolor sit amet consectetur adipisicing elit. Voluptatem delectus excepturi ratione. Obcaecati iusto voluptatibus temporibus libero in quas non ducimus adipisci, porro illo? Magnam ea voluptate sed perspiciatis nobis. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Adipisci facilis quis molestias quam officiis illum fugit, amet beatae incidunt ut, et, dolorem quia corrupti. Alias optio molestiae placeat dicta quaerat. Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil iste esse nulla. Amet debitis suscipit, ad qui cum, dolore quisquam, repudiandae molestiae ab quasi eligendi. Et facilis illo error unde!</h1>
+                <?php
+                    // Get users count
+                    $stmtUsersCount = $conn_local->prepare("SELECT COUNT(*) AS users_count FROM users");
+                    $stmtUsersCount->execute();
+
+                    $usersCountResultSet = $stmtUsersCount->get_result();
+                    $usersCountRow = $usersCountResultSet->fetch_assoc();
+
+                    $stmtUsersCount->close();
+                    $conn_local->next_result();
+
+                    // Get students count
+                    $stmtStudentsCount = $conn_remote->prepare("SELECT COUNT(*) AS students_count FROM students");
+                    $stmtStudentsCount->execute();
+
+                    $studentsCountResultSet = $stmtStudentsCount->get_result();
+                    $studentsCountRow = $studentsCountResultSet->fetch_assoc();
+
+                    $stmtStudentsCount->close();
+                    $conn_local->next_result();
+
+                    // Get total lockers
+                    $stmtTotalLockersCount = $conn_local->prepare("SELECT COUNT(*) AS total_lockers_count FROM locker_slots");
+                    $stmtTotalLockersCount->execute();
+
+                    $totalLockersCountResultSet = $stmtTotalLockersCount->get_result();
+                    $totalLockersCountRow = $totalLockersCountResultSet->fetch_assoc();
+
+                    $stmtTotalLockersCount->close();
+                    $conn_local->next_result();
+
+                    // Get available lockers
+                    $stmtAvailableLockersCount = $conn_local->prepare("SELECT COUNT(*) AS available_lockers_count FROM locker_slots WHERE status = 'Available'");
+                    $stmtAvailableLockersCount->execute();
+
+                    $availableLockersCountResultSet = $stmtAvailableLockersCount->get_result();
+                    $availableLockersCountRow = $availableLockersCountResultSet->fetch_assoc();
+
+                    $stmtAvailableLockersCount->close();
+                    $conn_local->next_result();
+
+                    // Get occupied lockers
+                    $stmtOccupiedLockersCount = $conn_local->prepare("SELECT COUNT(*) AS occupied_lockers_count FROM locker_slots WHERE status = 'Occupied'");
+                    $stmtOccupiedLockersCount->execute();
+
+                    $occupiedLockersCountResultSet = $stmtOccupiedLockersCount->get_result();
+                    $occupiedLockersCountRow = $occupiedLockersCountResultSet->fetch_assoc();
+
+                    $stmtOccupiedLockersCount->close();
+                    $conn_local->next_result();
+
+                    // Get total locker application
+                    $stmtTotalLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS total_locker_applications_count FROM locker_applications");
+                    $stmtTotalLockerApplicationsCount->execute();
+
+                    $totalLockerApplicationsCountResultSet = $stmtTotalLockerApplicationsCount->get_result();
+                    $totalLockerApplicationsCountRow = $totalLockerApplicationsCountResultSet->fetch_assoc();
+
+                    $stmtTotalLockerApplicationsCount->close();
+                    $conn_local->next_result();
+
+                    // Get pending locker application
+                    $stmtPendingLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS pending_locker_applications_count FROM locker_applications WHERE status = 'Pending'");
+                    $stmtPendingLockerApplicationsCount->execute();
+
+                    $pendingLockerApplicationsCountResultSet = $stmtPendingLockerApplicationsCount->get_result();
+                    $pendingLockerApplicationsCountRow = $pendingLockerApplicationsCountResultSet->fetch_assoc();
+
+                    $stmtPendingLockerApplicationsCount->close();
+                    $conn_local->next_result();
+
+                    // Get cancelled locker application
+                    $stmtCancelledLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS cancelled_locker_applications_count FROM locker_applications WHERE status = 'Cancelled'");
+                    $stmtCancelledLockerApplicationsCount->execute();
+
+                    $cancelledLockerApplicationsCountResultSet = $stmtCancelledLockerApplicationsCount->get_result();
+                    $cancelledLockerApplicationsCountRow = $cancelledLockerApplicationsCountResultSet->fetch_assoc();
+
+                    $stmtCancelledLockerApplicationsCount->close();
+                    $conn_local->next_result();
+
+                    // Get accepted locker application
+                    $stmtAcceptedLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS accepted_locker_applications_count FROM locker_applications WHERE status = 'Accepted'");
+                    $stmtAcceptedLockerApplicationsCount->execute();
+
+                    $acceptedLockerApplicationsCountResultSet = $stmtAcceptedLockerApplicationsCount->get_result();
+                    $acceptedLockerApplicationsCountRow = $acceptedLockerApplicationsCountResultSet->fetch_assoc();
+
+                    $stmtAcceptedLockerApplicationsCount->close();
+                    $conn_local->next_result();
+
+                    // Get rejected locker application
+                    $stmtRejectedLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS rejected_locker_applications_count FROM locker_applications WHERE status = 'Rejected'");
+                    $stmtRejectedLockerApplicationsCount->execute();
+
+                    $rejectedLockerApplicationsCountResultSet = $stmtRejectedLockerApplicationsCount->get_result();
+                    $rejectedLockerApplicationsCountRow = $rejectedLockerApplicationsCountResultSet->fetch_assoc();
+
+                    $stmtRejectedLockerApplicationsCount->close();
+                    $conn_local->next_result();
+
+                    // Get revoked locker application
+                    $stmtRevokedLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS revoked_locker_applications_count FROM locker_applications WHERE status = 'Revoked'");
+                    $stmtRevokedLockerApplicationsCount->execute();
+
+                    $revokedLockerApplicationsCountResultSet = $stmtRevokedLockerApplicationsCount->get_result();
+                    $revokedLockerApplicationsCountRow = $revokedLockerApplicationsCountResultSet->fetch_assoc();
+
+                    $stmtRevokedLockerApplicationsCount->close();
+                    $conn_local->next_result();
+                ?>
+
+                <div class="data-count-container">
+                    <!-- Activated users -->
+                    <div class="data-count">
+                        <div class="count">
+                            <small>Activated Users</small>
+
+                            <h1>
+                                <span><?php echo $usersCountRow['users_count']; ?></span>
+                                <span><i class="fa-solid fa-users"></i></span>
+                            </h1>
+                        </div>
+
+                        <small>
+                            Over <?php echo $studentsCountRow['students_count']; ?> students enrolled
+                        </small>
+                    </div>
+                    
+                    <!-- Lockers -->
+                    <div class="data-count">
+                        <div class="count">
+                            <small>Total Lockers</small>
+
+                            <h1>
+                                <span><?php echo $totalLockersCountRow['total_lockers_count']; ?></span>
+                                <span><i class="fa-solid fa-vault"></i></span>
+                            </h1>
+                        </div>
+
+                        <small>
+                            Over <?php echo $availableLockersCountRow['available_lockers_count']; ?> available lockers and <?php echo $occupiedLockersCountRow['occupied_lockers_count']; ?> occupied lockers
+                        </small>
+                    </div>
+
+                    <!-- Locker applications -->
+                    <div class="data-count">
+                        <div class="count">
+                            <small>Accepted Application</small>
+
+                            <h1>
+                                <span><?php echo $acceptedLockerApplicationsCountRow['accepted_locker_applications_count']; ?></span>
+                                <span><i class="fa-solid fa-circle-check"></i></span>
+                            </h1>
+                        </div>
+
+                        <small>
+                            Over <?php echo $pendingLockerApplicationsCountRow['pending_locker_applications_count']; ?> pending locker applications
+                        </small>
+                    </div>
+                </div>
             </div>  
         </div>
     </section>

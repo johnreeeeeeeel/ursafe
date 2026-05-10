@@ -76,7 +76,7 @@
 }
 
 /* Default Spacing */
-a, p, span, strong, h1, h2, h3, h4, h5, h6 {
+a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
     margin: 0;
 }
 
@@ -136,7 +136,7 @@ a, p, span, strong, h1, h2, h3, h4, h5, h6 {
     outline: none;
     border: none;
     padding: 6px 10px;
-    border-radius: 12px;
+    border-radius: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;

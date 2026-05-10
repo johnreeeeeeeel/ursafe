@@ -61,7 +61,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
     <nav class="offcanvas offcanvas-start" id="sidebarMobile">
         <div class="offcanvas-body">
             <ul class="nav">
-                <a href="dashboard.php">
+                <a class="logo-container" href="dashboard.php">
                     <img class="logo" src="../assets/images/ursafe_logo_2.png" alt="logo">
                 </a>
 
@@ -103,7 +103,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
     <!-- Desktop Sidebar -->
     <nav id="sidebarDesktop">
         <ul class="nav">
-            <a href="dashboard.php">
+            <a class="logo-container" href="dashboard.php">
                 <img class="logo" src="../assets/images/ursafe_logo_2.png" alt="logo">
             </a>
 

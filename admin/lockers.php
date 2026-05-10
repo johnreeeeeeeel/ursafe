@@ -61,7 +61,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
     <nav class="offcanvas offcanvas-start" id="sidebarMobile">
         <div class="offcanvas-body">
             <ul class="nav">
-                <a href="dashboard.php">
+                <a class="logo-container" href="dashboard.php">
                     <img class="logo" src="../assets/images/ursafe_logo_2.png" alt="logo">
                 </a>
 
@@ -103,7 +103,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
     <!-- Desktop Sidebar -->
     <nav id="sidebarDesktop">
         <ul class="nav">
-            <a href="dashboard.php">
+            <a class="logo-container" href="dashboard.php">
                 <img class="logo" src="../assets/images/ursafe_logo_2.png" alt="logo">
             </a>
 
@@ -238,95 +238,127 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             </form>
                         </header>
 
-                        <div class="table-container">
+                        <div class="locker-applications-container">
                             <?php
-                                // Get locker application
-                                $search = trim($_GET['searchLockerApplication'] ?? '');
-                                $filter = strtolower($_GET['filterLockerApplication'] ?? '');
+                                // Accepted locker application
+                                $stmtAccepted = $conn_local->prepare("CALL getAcceptedLockerApplications()");
+                                $stmtAccepted->execute();
+                                $acceptedResultSet = $stmtAccepted->get_result();
+                                $stmtAccepted->close();
 
-                                if (!empty($search) || !empty($filter)) {
-                                    // Use search and filter
-                                    $stmtLockerApplication = $conn_local->prepare("CALL getSearchFilterLockerApplication(?, ?)");
-                                    $stmtLockerApplication->bind_param("ss", $search, $filter);
-                                } else {
-                                    // Use raw
-                                    $stmtLockerApplication = $conn_local->prepare("CALL getLockerApplication()");
-                                }
+                                while ($conn_local->next_result()) { $conn_local->store_result(); }
 
-                                $stmtLockerApplication->execute();
-                                $lockerApplicationResultSet = $stmtLockerApplication->get_result();
-                                $stmtLockerApplication->close();
+                                // Pending locker application
+                                $stmtPending = $conn_local->prepare("CALL getPendingLockerApplications()");
+                                $stmtPending->execute();
+                                $pendingResultSet = $stmtPending->get_result();
+                                $stmtPending->close();
 
-                                $conn_local->next_result();
-                                $conn_local->store_result();
+                                while ($conn_local->next_result()) { $conn_local->store_result(); }
+
+                                // Locker application history 
+                                $stmtHistory = $conn_local->prepare("CALL getLockerApplicationHistory()");
+                                $stmtHistory->execute();
+                                $historyResultSet = $stmtHistory->get_result();
+                                $stmtHistory->close();
+
+                                while ($conn_local->next_result()) { $conn_local->store_result(); }
                             ?>
 
+                            <!-- Accepted applications -->
+                            <div class="card-container">
+                                <h3>Accepted Applications</h3>
+
+                                <div class="cards">
+                                    <?php while ($row = $acceptedResultSet->fetch_assoc()) { ?>
+                                        <div class="card accepted">
+                                            <p><span>Application ID</span> <span><?= $row['application_id'] ?></span></p>
+                                            <p><span>User ID</span> <span><?= $row['user_id'] ?></span></p>
+                                            <p><span>Fullname</span> <span><?= $row['fullname'] ?></span></p>
+                                            <p><span>Location</span> <span><?= $row['location'] ?></span></p>
+                                            <p><span>Slot</span> <span><?= $row['slot_number'] ?></span></p>
+                                            <p><span>Size</span> <span><?= $row['size'] ?></span></p>
+                                            <p><span>Price</span> <span><?= $row['price'] ?></span></p>
+
+                                            <div class="action-buttons">
+                                                <button class="sm-btn danger-btn" data-bs-toggle="modal" data-bs-target="#revokeLockerApplicationModal<?= $row['application_id'] ?>">
+                                                    <i class="fa-solid fa-ban"></i>
+                                                    Revoke
+                                                </button>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+
+                            <!-- Pending applications -->
+                            <div class="card-container">
+                                <h3>Pending Applications</h3>
+
+                                <div class="cards">
+                                    <?php while ($row = $pendingResultSet->fetch_assoc()) { ?>
+                                        <div class="card pending">
+                                            <p><span>Application ID</span> <span><?= $row['application_id'] ?></span></p>
+                                            <p><span>User ID</span> <span><?= $row['user_id'] ?></span></p>
+                                            <p><span>Fullname</span> <span><?= $row['fullname'] ?></span></p>
+                                            <p><span>Location</span> <span><?= $row['location'] ?></span></p>
+                                            <p><span>Slot</span> <span><?= $row['slot_number'] ?></span></p>
+                                            <p><span>Size</span> <span><?= $row['size'] ?></span></p>
+                                            <p><span>Price</span> <span><?= $row['price'] ?></span></p>
+
+                                            <div class="action-buttons">
+                                                <button class="sm-btn primary-btn" data-bs-toggle="modal" data-bs-target="#acceptLockerApplicationModal<?= $row['application_id'] ?>">
+                                                    <i class="fa-solid fa-check"></i>
+                                                    Accept
+                                                </button>
+
+                                                <button class="sm-btn danger-btn" data-bs-toggle="modal" data-bs-target="#rejectLockerApplicationModal<?= $row['application_id'] ?>">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+
+                            <!-- Application history -->
                             <table class="table table-borderless">
+                                <h3>Application History</h3>
+
                                 <thead>
                                     <tr>
-                                        <th>User</th>
+                                        <th>Application ID</th>
+                                        <th>User ID</th>
+                                        <th>Fullname</th>
                                         <th>Location</th>
                                         <th>Slot</th>
-                                        <th>Size & Price</th>
+                                        <th>Size</th>
+                                        <th>Price</th>
                                         <th>Status</th>
-                                        <th>Action</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    <?php while ($lockerApplicationRow = $lockerApplicationResultSet->fetch_assoc()) { ?>
+                                    <?php while ($row = $historyResultSet->fetch_assoc()) { ?>
                                         <tr>
-                                            <td data-label="Full Name"><?= $lockerApplicationRow['fullname'] ?></td>
-                                            <td data-label="Location"><?= $lockerApplicationRow['location'] ?></td>
-                                            <td data-label="Slot">Slot <?= $lockerApplicationRow['slot_number'] ?></td>
-                                            <td data-label="Details"><?= $lockerApplicationRow['size'] ?> (₱<?= $lockerApplicationRow['price'] ?>)</td>
+                                            <td data-label="Application ID"><?= $row['application_id'] ?></td>
+                                            <td data-label="User ID"><?= $row['user_id'] ?></td>
+                                            <td data-label="Fullname"><?= $row['fullname'] ?></td>
+                                            <td data-label="Location"><?= $row['location'] ?></td>
+                                            <td data-label="Slot"><?= $row['slot_number'] ?></td>
+                                            <td data-label="Size"><?= $row['size'] ?></td>
+                                            <td data-label="Price"><?= $row['price'] ?></td>
 
                                             <td data-label="Status">
-                                                <?php if ($lockerApplicationRow['status'] == 'Pending') { ?>
-                                                    <span class="badge rounded-pill pending-badge">Pending</span>
-
-                                                <?php } elseif ($lockerApplicationRow['status'] == 'Accepted') { ?>
-                                                    <span class="badge rounded-pill accepted-badge">Accepted</span>
-
-                                                <?php } elseif ($lockerApplicationRow['status'] == 'Revoked') { ?>
+                                                <?php if ($row['status'] == 'Revoked') { ?>
                                                     <span class="badge rounded-pill revoked-badge">Revoked</span>
 
-                                                <?php } elseif ($lockerApplicationRow['status'] == 'Cancelled') { ?>
+                                                <?php } elseif ($row['status'] == 'Cancelled') { ?>
                                                     <span class="badge rounded-pill cancelled-badge">Cancelled</span>
 
                                                 <?php } else { ?>
                                                     <span class="badge rounded-pill rejected-badge">Rejected</span>
-                                                <?php } ?>
-                                            </td>
-
-                                            <td data-label="Action">
-                                                <?php if ($lockerApplicationRow['status'] == 'Pending') { ?> 
-                                                    <div class="action-buttons">
-                                                        <button class="sm-btn primary-btn"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#acceptLockerApplicationModal<?= $lockerApplicationRow['application_id'] ?>">
-                                                            <i class="fa-solid fa-check"></i> Accept
-                                                        </button>
-
-                                                        <button class="sm-btn danger-btn"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#rejectLockerApplicationModal<?= $lockerApplicationRow['application_id'] ?>">
-                                                            <i class="fa-solid fa-xmark"></i> Reject
-                                                        </button>
-                                                    </div>
-                                                <?php } elseif ($lockerApplicationRow['status'] == 'Accepted') { ?>
-                                                    <div class="action-buttons">
-                                                        <button class="sm-btn danger-btn"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#revokeLockerApplicationModal<?= $lockerApplicationRow['application_id'] ?>">
-                                                            <i class="fa-solid fa-ban"></i> Revoke
-                                                        </button>
-                                                    </div>
-
-                                                <?php } else { ?>
-
-                                                    <small>No Action</small>
-
                                                 <?php } ?>
                                             </td>
                                         </tr>
@@ -337,22 +369,16 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </div>
                 </div>
 
-                <?php
-                    $lockerApplicationResultSet = $conn_local->query("CALL getLockerApplication()");
-                    $conn_local->next_result();
-
-                    while ($lockerApplicationRow = $lockerApplicationResultSet->fetch_assoc()) {
-                ?>
-
+                <?php foreach ($pendingResultSet as $row) { ?>
                     <!-- Accept locker application modals -->
-                    <div class="modal fade primary-modal" id="acceptLockerApplicationModal<?= $lockerApplicationRow['application_id'] ?>" tabindex="-1">
+                    <div class="modal fade primary-modal" id="acceptLockerApplicationModal<?= $row['application_id'] ?>" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-body">
                                     <div class="message">
                                         <i class="fa-solid fa-circle-check"></i>
-                                        <h5>Accept</h5>
-                                        <p>Are you sure you want to accept <span>application <?= $lockerApplicationRow['application_id'] ?></span>?</p>
+                                        <h5>Accept Application</h5>
+                                        <p>Are you sure you want to accept <span>application <?= $row['application_id'] ?></span>?</p>
                                     </div>
 
                                     <div class="action-buttons">
@@ -361,7 +387,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         </button>
 
                                         <form method="POST" action="../app/locker/accept_locker_application.php">
-                                            <input type="hidden" name="id" value="<?= $lockerApplicationRow['application_id'] ?>">
+                                            <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
 
                                             <button type="submit" class="btn primary-btn">
                                                 Yes, Accept
@@ -374,14 +400,14 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </div>
 
                     <!-- Reject locker application modals -->
-                    <div class="modal fade danger-modal" id="rejectLockerApplicationModal<?= $lockerApplicationRow['application_id'] ?>" tabindex="-1">
+                    <div class="modal fade danger-modal" id="rejectLockerApplicationModal<?= $row['application_id'] ?>" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-body">
                                     <div class="message">
                                         <i class="fa-solid fa-circle-xmark"></i>
-                                        <h5>Reject</h5>
-                                        <p>Are you sure you want to reject <span>application <?= $lockerApplicationRow['application_id'] ?></span>?</p>
+                                        <h5>Reject Application</h5>
+                                        <p>Are you sure you want to reject <span>application <?= $row['application_id'] ?></span>?</p>
                                     </div>
 
                                     <div class="action-buttons">
@@ -390,7 +416,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         </button>
 
                                         <form method="POST" action="../app/locker/reject_locker_application.php">
-                                            <input type="hidden" name="id" value="<?= $lockerApplicationRow['application_id'] ?>">
+                                            <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
 
                                             <button type="submit" class="btn primary-btn">
                                                 Yes, Reject
@@ -401,16 +427,18 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             </div>
                         </div>
                     </div>
+                <?php } ?>
 
+                <?php foreach ($acceptedResultSet as $row) { ?>
                     <!-- Revoke locker application modals -->
-                    <div class="modal fade danger-modal" id="revokeLockerApplicationModal<?= $lockerApplicationRow['application_id'] ?>" tabindex="-1">
+                    <div class="modal fade danger-modal" id="revokeLockerApplicationModal<?= $row['application_id'] ?>" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-body">
                                     <div class="message">
                                         <i class="fa-solid fa-ban"></i>
-                                        <h5>Revoke</h5>
-                                        <p>Are you sure you want to revoke <span>application <?= $lockerApplicationRow['application_id'] ?></span>?</p>
+                                        <h5>Revoke Application</h5>
+                                        <p>Are you sure you want to revoke <span>application <?= $row['application_id'] ?></span>?</p>
                                     </div>
 
                                     <div class="action-buttons">
@@ -419,7 +447,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         </button>
 
                                         <form method="POST" action="../app/locker/revoke_locker_application.php">
-                                            <input type="hidden" name="id" value="<?= $lockerApplicationRow['application_id'] ?>">
+                                            <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
 
                                             <button type="submit" class="btn primary-btn">
                                                 Yes, Revoke
@@ -431,7 +459,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         </div>
                     </div>
                 <?php } ?>
-
+                
                 <!-- Offcanvas for locker locations -->
                 <div class="offcanvas offcanvas-end" id="lockerLocationsOffcanvas">
                     <div class="offcanvas-header">

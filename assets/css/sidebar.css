@@ -100,6 +100,12 @@
         flex-direction: column;
         height: 100%;
     }
+
+    #sidebarMobile .offcanvas-body .nav .logo-container:hover,
+    #sidebarMobile .offcanvas-body .nav .logo-container:focus,
+    #sidebarMobile .offcanvas-body .nav .logo-container:active {
+        background-color: transparent !important;
+    }
     
     #sidebarMobile .offcanvas-body .nav .logo {
         width: 95%;
@@ -132,16 +138,17 @@
         align-items: center;
         gap: 6px;
         padding: 8px 12px;
-        border-radius: 12px;
+        border-radius: 8px;
         font-weight: 400;
         text-decoration: none;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
     }
 
     #sidebarMobile .offcanvas-body .nav a i {
         color: var(--text-light-primary);
     }
 
-    #sidebarMobile .offcanvas-body .nav a:active,
     #sidebarMobile .offcanvas-body .nav a:hover {
         background-color: var(--color-primary-base);
         color: var(--text-light-primary);
@@ -177,6 +184,12 @@
     height: 100%;
 }
 
+#sidebarMobile .nav .logo-container:hover,
+#sidebarMobile .nav .logo-container:focus,
+#sidebarMobile .nav .logo-container:active {
+    background-color: transparent !important;
+}
+
 #sidebarDesktop .nav .logo {
     width: 95%;
     height: auto;
@@ -208,12 +221,13 @@
     align-items: center;
     gap: 6px;
     padding: 8px 12px;
-    border-radius: 12px;
+    border-radius: 8px;
     font-weight: 400;
     text-decoration: none;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
 }
 
-#sidebarDesktop .nav .link:active,
 #sidebarDesktop .nav .link:hover {
     background-color: var(--color-primary-base);
     color: var(--text-light-primary);

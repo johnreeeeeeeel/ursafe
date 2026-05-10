@@ -80,7 +80,7 @@ $password = $_SESSION['password'] ?? '';
     <nav class="offcanvas offcanvas-start" id="sidebarMobile">
         <div class="offcanvas-body">
             <ul class="nav">
-                <a href="home.php">
+                <a class="logo-container" href="home.php">
                     <img class="logo" src="../assets/images/ursafe_logo_2.png" alt="logo">
                 </a>
 
@@ -122,7 +122,7 @@ $password = $_SESSION['password'] ?? '';
     <!-- Desktop Sidebar -->
     <nav id="sidebarDesktop">
         <ul class="nav">
-            <a href="home.php">
+            <a class="logo-container" href="home.php">
                 <img class="logo" src="../assets/images/ursafe_logo_2.png" alt="logo">
             </a>
 
