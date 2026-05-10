@@ -2,7 +2,7 @@
 
 
 
-##### GET LOCKER APPLICATIONS
+##### GET LOCKER APPLICATIONS HISTORY
 
 
 
@@ -10,7 +10,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getLockerApplication()
+CREATE OR REPLACE PROCEDURE getLockerApplicationHistory()
 
 BEGIN
 
@@ -63,6 +63,8 @@ BEGIN
 &#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked')
 
 
 
@@ -76,7 +78,7 @@ DELIMITER ;
 
 
 
-##### GET SEARCH AND FILTER LOCKER APPLICATIONS
+##### GET ACCEPTED LOCKER APPLICATIONS
 
 
 
@@ -84,13 +86,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getSearchFilterLockerApplication (
-
-&#x20;   IN p\_search VARCHAR(255),
-
-&#x20;   IN p\_filter VARCHAR(10)
-
-)
+CREATE OR REPLACE PROCEDURE getAcceptedLockerApplications()
 
 BEGIN
 
@@ -134,6 +130,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -142,45 +140,107 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-
-
-&#x20;   WHERE
-
-&#x20;       (p\_search IS NULL OR p\_search = '')
-
-&#x20;       OR CONCAT(u.firstname, ' ', IFNULL(CONCAT(u.middlename, ' '), ''), u.lastname)
-
-&#x20;       LIKE CONCAT('%', p\_search, '%')
+&#x20;   WHERE la.status IN ('Accepted')
 
 
 
-&#x20;   ORDER BY
-
-&#x20;       CASE
-
-&#x20;           WHEN p\_filter = 'desc' THEN
-
-&#x20;               CONCAT(u.firstname, ' ', IFNULL(CONCAT(u.middlename, ' '), ''), u.lastname)
-
-&#x20;       END DESC,
-
-
-
-&#x20;       CASE
-
-&#x20;           WHEN p\_filter = 'asc' OR p\_filter IS NULL OR p\_filter = '' THEN
-
-&#x20;               CONCAT(u.firstname, ' ', IFNULL(CONCAT(u.middlename, ' '), ''), u.lastname)
-
-&#x20;       END ASC;
-
-
+&#x20;   ORDER BY la.id DESC;
 
 END //
 
 
 
 DELIMITER ;
+
+
+
+##### GET PENDING LOCKER APPLICATIONS
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getPendingLockerApplications()
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.user\_id,
+
+&#x20;       la.slot\_id,
+
+&#x20;       la.status,
+
+
+
+&#x20;       TRIM(CONCAT(
+
+&#x20;           u.firstname, ' ',
+
+&#x20;           IFNULL(CONCAT(u.middlename, ' '), ''),
+
+&#x20;           u.lastname
+
+&#x20;       )) AS fullname,
+
+
+
+&#x20;       u.email,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       ls.size\_id,
+
+&#x20;       lsz.size,
+
+&#x20;       lsz.price
+
+
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   WHERE la.status IN ('Pending')
+
+
+
+&#x20;   ORDER BY la.id DESC;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -912,7 +972,7 @@ DELIMITER ;
 
 
 
-##### GET MY LOCKER APPLICATIONS
+##### GET MY PENDING LOCKER APPLICATIONS
 
 
 
@@ -920,7 +980,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getMyLockerApplications(IN p\_user\_id VARCHAR(255))
+CREATE OR REPLACE PROCEDURE getMyPendingLockerApplications(IN p\_user\_id VARCHAR(255))
 
 BEGIN
 
@@ -938,8 +998,6 @@ BEGIN
 
 &#x20;       sz.price
 
-
-
 &#x20;   FROM locker\_applications la
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -948,9 +1006,9 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
 
-
-
 &#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;     AND la.status IN ('Pending')
 
 &#x20;   ORDER BY la.id DESC;
 
@@ -962,7 +1020,7 @@ DELIMITER ;
 
 
 
-##### GET SEARCH AND FILTER MY LOCKER APPLICATIONS
+##### GET MY ACCEPTED LOCKER APPLICATIONS
 
 
 
@@ -970,15 +1028,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getSearchFilterMyLockerApplication (
-
-&#x20;   IN p\_user\_id VARCHAR(255),
-
-&#x20;   IN p\_search VARCHAR(255),
-
-&#x20;   IN p\_filter VARCHAR(10)
-
-)
+CREATE OR REPLACE PROCEDURE getMyAcceptedLockerApplications(IN p\_user\_id VARCHAR(255))
 
 BEGIN
 
@@ -996,7 +1046,53 @@ BEGIN
 
 &#x20;       sz.price
 
+&#x20;   FROM locker\_applications la
 
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;     AND la.status IN ('Accepted')
+
+&#x20;   ORDER BY la.id DESC;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET MY LOCKER APPLICATION HISTORY
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getMyLockerApplicationHistory(IN p\_user\_id VARCHAR(255))
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.status,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       sz.size,
+
+&#x20;       sz.price
 
 &#x20;   FROM locker\_applications la
 
@@ -1006,45 +1102,11 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
 
-
-
 &#x20;   WHERE la.user\_id = p\_user\_id
 
-&#x20;   AND (
+&#x20;     AND la.status IN ('Cancelled', 'Rejected', 'Revoked')
 
-&#x20;       p\_search IS NULL
-
-&#x20;       OR p\_search = ''
-
-&#x20;       OR ll.location LIKE CONCAT('%', p\_search, '%')
-
-&#x20;   )
-
-
-
-&#x20;   ORDER BY
-
-&#x20;       CASE
-
-&#x20;           WHEN p\_filter = 'desc' THEN ll.location
-
-&#x20;       END DESC,
-
-
-
-&#x20;       CASE
-
-&#x20;           WHEN p\_filter = 'asc'
-
-&#x20;             OR p\_filter IS NULL
-
-&#x20;             OR p\_filter = ''
-
-&#x20;           THEN ll.location
-
-&#x20;       END ASC;
-
-
+&#x20;   ORDER BY la.id DESC;
 
 END //
 
@@ -2007,6 +2069,4 @@ END //
 
 
 DELIMITER ;
-
-
 

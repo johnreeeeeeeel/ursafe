@@ -234,7 +234,7 @@ BEGIN
 
 &#x09;SET description = CONCAT(NEW.username, ' (', '#', NEW.id, ') ', 'account has been activated.');
 
-&#x20;   
+&#x20;
 
 &#x09;INSERT INTO user\_account\_logs (
 
@@ -284,7 +284,7 @@ BEGIN
 
 &#x09;SET description = CONCAT(OLD.username, ' (', '#', OLD.id, ') ', 'account has been deleted.');
 
-&#x20;   
+&#x20;
 
 &#x09;INSERT INTO user\_account\_logs (
 
