@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2026 at 01:38 PM
+-- Generation Time: May 12, 2026 at 01:01 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,41 @@ SET time_zone = "+00:00";
 --
 -- Database: `campus_db`
 --
+
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getCampusStudentByEmail` (IN `p_email` VARCHAR(255))   BEGIN
+    SELECT
+        id,
+
+        TRIM(CONCAT(
+            firstname, ' ',
+            IFNULL(CONCAT(middlename, ' '), ''),
+            lastname
+        )) AS fullname,
+
+        lastname,
+        firstname,
+        middlename,
+        sex,
+        dob,
+        institute,
+        program,
+        email
+
+    FROM students
+    WHERE email = p_email
+    LIMIT 1;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_students_count` ()   BEGIN
+    SELECT COUNT(*) AS students_count
+    FROM students;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 

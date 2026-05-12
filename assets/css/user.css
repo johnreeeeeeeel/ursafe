@@ -200,6 +200,55 @@ section .content {
     overflow-y: auto;
 }
 
+/* Home */
+#home {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 12px;
+}
+
+#home .hero {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+}
+
+#home .hero .left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#home .hero .left h3 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#home .hero .left h3 span {
+    color: var(--color-primary-base);
+    font-weight: 700;
+}
+
+#home .hero .left h3 img {
+    width: 320px;
+}
+
+#home .hero .left p {
+    font-weight: 400;
+    color: var(--text-dark-secondary);
+}
+
+#home .hero .right h3 img {
+    width: 320px;
+}
+
 /* Lockers */
 #lockers {
     display: flex;
@@ -270,7 +319,105 @@ section .content {
     border-color: var(--color-primary-base);
 }
 
-/* My locker applications offcanvas */
+#lockers .table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#lockers .table-container .location-slot-section {
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#lockers .table-container .location-slot-section .location-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+#lockers .table-container .location-slot-section .location-header h3 {
+    font-weight: 500;
+    color: var(--text-dark-secondary);
+}
+
+#lockers .table-container .location-slot-section table thead tr th {
+    text-align: left;
+    font-weight: 500;
+    vertical-align: middle;
+    color: var(--text-dark-secondary);
+}
+
+#lockers .table-container .location-slot-section table tbody tr td {
+    text-align: left;
+    font-weight: 400;
+    vertical-align: middle;
+    color: var(--text-dark-tertiary);
+}
+
+@media (max-width: 768px) {
+    #lockers .table-container table thead {
+        display: none;
+    }
+
+    #lockers .table-container table,
+    #lockers .table-container table tbody,
+    #lockers .table-container table tr,
+    #lockers .table-container table td {
+        display: block;
+    }
+
+    #lockers .table-container table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    #lockers .table-container table tr {
+        margin-bottom: 10px;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    #lockers .table-container table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        border: none;
+        padding: 6px 0;
+        font-size: 14px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    #lockers .table-container table td::before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: #555;
+        flex-shrink: 0;
+    }
+
+    #lockers .table-container table td:last-child .action-buttons{
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 6px !important;
+    }
+}
+
+
+
+
 #lockers #myLockerApplicationOffcanvas {
     background-color: var(--bg-secondary) !important;
     width: 100vw !important;
@@ -553,103 +700,6 @@ section .content {
     }
 
     #lockers #myLockerApplicationOffcanvas .offcanvas-body .locker-applications-container .table td:last-child .action-buttons {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: flex-end !important;
-        gap: 6px !important;
-    }
-}
-
-/* Lockers */
-section #lockers .table-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-section #lockers .table-container .location-slot-section {
-    background: #ffffff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    padding: 12px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-section #lockers .table-container .location-slot-section .location-header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-section #lockers .table-container .location-slot-section .location-header h3 {
-    font-weight: 500;
-    color: var(--text-dark-secondary);
-}
-
-section #lockers .table-container .location-slot-section table thead tr th {
-    text-align: left;
-    font-weight: 500;
-    vertical-align: middle;
-    color: var(--text-dark-secondary);
-}
-
-section #lockers .table-container .location-slot-section table tbody tr td {
-    text-align: left;
-    font-weight: 400;
-    vertical-align: middle;
-    color: var(--text-dark-tertiary);
-}
-
-@media (max-width: 768px) {
-    section #lockers .table-container table thead {
-        display: none;
-    }
-
-    section #lockers .table-container table,
-    section #lockers .table-container table tbody,
-    section #lockers .table-container table tr,
-    section #lockers .table-container table td {
-        display: block;
-    }
-
-    section #lockers .table-container table tbody {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-    }
-
-    section #lockers .table-container table tr {
-        margin-bottom: 10px;
-        padding: 12px;
-        border-radius: 8px;
-    }
-
-    section #lockers .table-container table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        border: none;
-        padding: 6px 0;
-        font-size: 14px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
-
-    section #lockers .table-container table td::before {
-        content: attr(data-label);
-        font-weight: 500;
-        color: #555;
-        flex-shrink: 0;
-    }
-
-    section #lockers .table-container table td:last-child .action-buttons{
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;

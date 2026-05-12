@@ -204,6 +204,78 @@ DELIMITER ;
 
 
 
+##### GET USERS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_users\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS users\_count
+
+&#x20;   FROM users;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET STUDENTS COUNT (CAMPUS\_DB)
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_students\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS students\_count
+
+&#x20;   FROM students;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET RECENT USER ACCOUNT ACTIVATION
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_recent\_user\_account\_activation()
+
+BEGIN
+
+&#x20;   SELECT \*
+
+&#x20;   FROM recent\_user\_account\_activation;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
 # USERS (TRIGGERS)
 
 
@@ -305,4 +377,36 @@ END //
 
 
 DELIMITER ;
+
+
+
+# USERS (VIEWS)
+
+
+
+##### GET RECENT USER ACCOUNT ACTIVATION
+
+
+
+CREATE OR REPLACE VIEW recent\_user\_account\_activation AS
+
+
+
+SELECT
+
+&#x20;   id,
+
+&#x20;   lastname,
+
+&#x20;   firstname,
+
+&#x20;   middlename,
+
+&#x20;   created\_at
+
+FROM users
+
+ORDER BY created\_at DESC
+
+LIMIT 1;
 

@@ -230,20 +230,6 @@ DELIMITER ;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ##### GET LOCKER LOCATIONS
 
 
@@ -1252,6 +1238,260 @@ DELIMITER ;
 
 
 
+##### GET TOTAL LOCKERS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_total\_lockers\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS total\_lockers\_count
+
+&#x20;   FROM locker\_slots;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET AVAILABLE LOCKERS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_available\_lockers\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS available\_lockers\_count
+
+&#x20;   FROM locker\_slots
+
+&#x20;   WHERE status = 'Available';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET OCCUPIED LOCKERS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_occupied\_lockers\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS occupied\_lockers\_count
+
+&#x20;   FROM locker\_slots
+
+&#x20;   WHERE status = 'Occupied';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET TOTAL LOCKER APPLICATIONS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_total\_locker\_applications\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS total\_locker\_applications\_count
+
+&#x20;   FROM locker\_applications;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET PENDING LOCKER APPLICATIONS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_pending\_locker\_applications\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS pending\_locker\_applications\_count
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE status = 'Pending';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET CANCELLED LOCKER APPLICATIONS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_cancelled\_locker\_applications\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS cancelled\_locker\_applications\_count
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE status = 'Cancelled';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET ACCEPTED LOCKER APPLICATIONS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_accepted\_locker\_applications\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS accepted\_locker\_applications\_count
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE status = 'Accepted';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET REJECTED LOCKER APPLICATIONS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_rejected\_locker\_applications\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS rejected\_locker\_applications\_count
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE status = 'Rejected';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET REVOKED LOCKER APPLICATIONS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_revoked\_locker\_applications\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS revoked\_locker\_applications\_count
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE status = 'Revoked';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET RECENT LOCKER APPLICATION
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_recent\_locker\_application()
+
+BEGIN
+
+&#x20;   SELECT \*
+
+&#x20;   FROM recent\_locker\_application;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
 # LOCKERS (TRIGGERS)
 
 
@@ -2069,4 +2309,60 @@ END //
 
 
 DELIMITER ;
+
+
+
+# LOCKERS (VIEWS)
+
+
+
+##### GET RECENT LOCKER APPLICATION
+
+
+
+CREATE OR REPLACE VIEW recent\_locker\_application AS
+
+
+
+SELECT
+
+&#x20;   la.id,
+
+&#x20;   la.user\_id,
+
+&#x20;   u.firstname,
+
+&#x20;   u.middlename,
+
+&#x20;   u.lastname,
+
+&#x20;   ll.location,
+
+&#x20;   ls.slot\_number,
+
+&#x20;   lsz.size,
+
+&#x20;   lsz.price,
+
+&#x20;   la.created\_at
+
+FROM locker\_applications la
+
+
+
+INNER JOIN users u ON la.user\_id = u.id
+
+INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+
+
+WHERE la.status = 'Pending'
+
+ORDER BY la.created\_at DESC
+
+LIMIT 1;
 

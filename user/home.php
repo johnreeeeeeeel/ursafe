@@ -168,7 +168,22 @@ $password = $_SESSION['password'] ?? '';
 
         <div class="content">
             <div id="home">
-                <h1>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Repudiandae autem explicabo non ad voluptates est itaque eligendi cupiditate! Libero saepe debitis sequi doloribus aperiam? Repudiandae explicabo iste doloremque commodi architecto? Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate accusantium adipisci perferendis vitae asperiores quasi totam, neque fuga officiis, repellendus fugiat minima. Rem nihil vel architecto culpa magni iusto aut. Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias atque expedita voluptatum omnis minus, ea eum aut illo nobis iure numquam ipsam natus quisquam inventore doloribus error incidunt laborum optio? Lorem, ipsum dolor sit amet consectetur adipisicing elit. Voluptatem delectus excepturi ratione. Obcaecati iusto voluptatibus temporibus libero in quas non ducimus adipisci, porro illo? Magnam ea voluptate sed perspiciatis nobis. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Adipisci facilis quis molestias quam officiis illum fugit, amet beatae incidunt ut, et, dolorem quia corrupti. Alias optio molestiae placeat dicta quaerat. Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil iste esse nulla. Amet debitis suscipit, ad qui cum, dolore quisquam, repudiandae molestiae ab quasi eligendi. Et facilis illo error unde!</h1>
+                <div class="hero">
+                    <div class="left">
+                        <h3>
+                            <span>WELCOME TO</span>
+                            <img src="../assets/images/ursafe_logo_3.png" alt="reload">
+                        </h3>
+                        <p>Make locker applicaton and management easier and faster</p>
+                    </div>
+
+                    <div class="right">
+                        <a href="lockers.php" class="btn primary-btn">
+                            <i class="fa-solid fa-angle-right"></i>
+                            Apply Now
+                        </a>
+                    </div>
+                </div>
             </div>  
         </div>
     </section>

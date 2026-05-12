@@ -153,7 +153,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
             <div id="dashboard">
                 <?php
                     // Get users count
-                    $stmtUsersCount = $conn_local->prepare("SELECT COUNT(*) AS users_count FROM users");
+                    $stmtUsersCount = $conn_local->prepare("CALL get_users_count()");
                     $stmtUsersCount->execute();
 
                     $usersCountResultSet = $stmtUsersCount->get_result();
@@ -163,7 +163,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get students count
-                    $stmtStudentsCount = $conn_remote->prepare("SELECT COUNT(*) AS students_count FROM students");
+                    $stmtStudentsCount = $conn_remote->prepare("CALL get_students_count()");
                     $stmtStudentsCount->execute();
 
                     $studentsCountResultSet = $stmtStudentsCount->get_result();
@@ -173,7 +173,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get total lockers
-                    $stmtTotalLockersCount = $conn_local->prepare("SELECT COUNT(*) AS total_lockers_count FROM locker_slots");
+                    $stmtTotalLockersCount = $conn_local->prepare("CALL get_total_lockers_count()");
                     $stmtTotalLockersCount->execute();
 
                     $totalLockersCountResultSet = $stmtTotalLockersCount->get_result();
@@ -183,7 +183,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get available lockers
-                    $stmtAvailableLockersCount = $conn_local->prepare("SELECT COUNT(*) AS available_lockers_count FROM locker_slots WHERE status = 'Available'");
+                    $stmtAvailableLockersCount = $conn_local->prepare("CALL get_available_lockers_count()");
                     $stmtAvailableLockersCount->execute();
 
                     $availableLockersCountResultSet = $stmtAvailableLockersCount->get_result();
@@ -193,7 +193,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get occupied lockers
-                    $stmtOccupiedLockersCount = $conn_local->prepare("SELECT COUNT(*) AS occupied_lockers_count FROM locker_slots WHERE status = 'Occupied'");
+                    $stmtOccupiedLockersCount = $conn_local->prepare("CALL get_occupied_lockers_count()");
                     $stmtOccupiedLockersCount->execute();
 
                     $occupiedLockersCountResultSet = $stmtOccupiedLockersCount->get_result();
@@ -203,7 +203,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get total locker application
-                    $stmtTotalLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS total_locker_applications_count FROM locker_applications");
+                    $stmtTotalLockerApplicationsCount = $conn_local->prepare("CALL get_total_locker_applications_count()");
                     $stmtTotalLockerApplicationsCount->execute();
 
                     $totalLockerApplicationsCountResultSet = $stmtTotalLockerApplicationsCount->get_result();
@@ -213,7 +213,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get pending locker application
-                    $stmtPendingLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS pending_locker_applications_count FROM locker_applications WHERE status = 'Pending'");
+                    $stmtPendingLockerApplicationsCount = $conn_local->prepare("CALL get_pending_locker_applications_count()");
                     $stmtPendingLockerApplicationsCount->execute();
 
                     $pendingLockerApplicationsCountResultSet = $stmtPendingLockerApplicationsCount->get_result();
@@ -223,7 +223,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get cancelled locker application
-                    $stmtCancelledLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS cancelled_locker_applications_count FROM locker_applications WHERE status = 'Cancelled'");
+                    $stmtCancelledLockerApplicationsCount = $conn_local->prepare("CALL get_cancelled_locker_applications_count()");
                     $stmtCancelledLockerApplicationsCount->execute();
 
                     $cancelledLockerApplicationsCountResultSet = $stmtCancelledLockerApplicationsCount->get_result();
@@ -233,7 +233,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get accepted locker application
-                    $stmtAcceptedLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS accepted_locker_applications_count FROM locker_applications WHERE status = 'Accepted'");
+                    $stmtAcceptedLockerApplicationsCount = $conn_local->prepare("CALL get_accepted_locker_applications_count()");
                     $stmtAcceptedLockerApplicationsCount->execute();
 
                     $acceptedLockerApplicationsCountResultSet = $stmtAcceptedLockerApplicationsCount->get_result();
@@ -243,7 +243,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get rejected locker application
-                    $stmtRejectedLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS rejected_locker_applications_count FROM locker_applications WHERE status = 'Rejected'");
+                    $stmtRejectedLockerApplicationsCount = $conn_local->prepare("CALL get_rejected_locker_applications_count()");
                     $stmtRejectedLockerApplicationsCount->execute();
 
                     $rejectedLockerApplicationsCountResultSet = $stmtRejectedLockerApplicationsCount->get_result();
@@ -253,13 +253,32 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     $conn_local->next_result();
 
                     // Get revoked locker application
-                    $stmtRevokedLockerApplicationsCount = $conn_local->prepare("SELECT COUNT(*) AS revoked_locker_applications_count FROM locker_applications WHERE status = 'Revoked'");
+                    $stmtRevokedLockerApplicationsCount = $conn_local->prepare("CALL get_revoked_locker_applications_count()");
                     $stmtRevokedLockerApplicationsCount->execute();
 
                     $revokedLockerApplicationsCountResultSet = $stmtRevokedLockerApplicationsCount->get_result();
                     $revokedLockerApplicationsCountRow = $revokedLockerApplicationsCountResultSet->fetch_assoc();
 
                     $stmtRevokedLockerApplicationsCount->close();
+                    $conn_local->next_result();
+
+                    // Get recent activated user
+                    $stmtRecentActivatedUser = $conn_local->prepare("CALL get_recent_user_account_activation()");
+                    $stmtRecentActivatedUser->execute();
+
+                    $recentActivatedUserResultSet = $stmtRecentActivatedUser->get_result();
+                    $recentActivatedUserRow = $recentActivatedUserResultSet->fetch_assoc();
+
+                    $stmtRecentActivatedUser->close();
+                    $conn_local->next_result();
+
+                    // Get recent locker application
+                    $stmtRecentLockerApplication = $conn_local->prepare("CALL get_recent_locker_application()");
+                    $stmtRecentLockerApplication->execute();
+
+                    $recentLockerApplicationResultSet = $stmtRecentLockerApplication->get_result();
+
+                    $stmtRecentLockerApplication->close();
                     $conn_local->next_result();
                 ?>
 
@@ -299,7 +318,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     <!-- Locker applications -->
                     <div class="data-count">
                         <div class="count">
-                            <small>Accepted Application</small>
+                            <small>Accepted Applications</small>
 
                             <h1>
                                 <span><?php echo $acceptedLockerApplicationsCountRow['accepted_locker_applications_count']; ?></span>
@@ -310,6 +329,81 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         <small>
                             Over <?php echo $pendingLockerApplicationsCountRow['pending_locker_applications_count']; ?> pending locker applications
                         </small>
+                    </div>
+                </div>
+
+                <div class="recent-container">
+                    <!-- Recent user activation -->
+                    <div class="recent-user-account-activation">
+                        <h4>Recent User Activation</h4>
+
+                        <?php if ($recentActivatedUserRow): ?>
+                            <div class="profile">
+                                <i class="fa-solid fa-circle-user"></i>
+                                
+                                <h6>
+                                    <?php
+                                        echo htmlspecialchars(
+                                            $recentActivatedUserRow['firstname'] . ' ' .
+                                            $recentActivatedUserRow['middlename'] . ' ' .
+                                            $recentActivatedUserRow['lastname']
+                                        );
+                                    ?>
+                                </h6>
+                                <small>
+                                    <span>ID: </span>
+                                    <?php echo htmlspecialchars($recentActivatedUserRow['id']); ?>
+                                </small>
+                            </div>
+
+                            <div class="profile-details">
+                                <small>
+                                    <span>Date: </span>
+                                    <?php echo htmlspecialchars($recentActivatedUserRow['created_at']); ?>
+                                </small>
+                            </div>
+                        <?php else: ?>
+
+                            <small>No recent activated user found.</small>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Recent locker application -->
+                    <div class="recent-locker-application"> 
+                        <h4>Recent Locker Applications</h4>
+
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Application ID</th>
+                                    <th>User ID</th>
+                                    <th>Location</th>
+                                    <th>Slot</th>
+                                    <th>Size</th>
+                                    <th>Price</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <?php if ($recentLockerApplicationResultSet->num_rows > 0): ?>
+                                    <?php while ($recentLockerApplicationRow = $recentLockerApplicationResultSet->fetch_assoc()): ?>
+                                        <tr>
+                                            <td data-label="Application ID"><?= $recentLockerApplicationRow['id'] ?></td>
+                                            <td data-label="User ID"><?= $recentLockerApplicationRow['user_id'] ?></td>
+                                            <td data-label="Location"><?= $recentLockerApplicationRow['location'] ?></td>
+                                            <td data-label="Slot"><?= $recentLockerApplicationRow['slot_number'] ?></td>
+                                            <td data-label="Size"><?= $recentLockerApplicationRow['size'] ?></td>
+                                            <td data-label="Price"><?= $recentLockerApplicationRow['price'] ?></td>
+                                            <td data-label="Date"><?= $recentLockerApplicationRow['created_at'] ?></td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+
+                                <small>No recent locker application found.</small>
+                            <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>  
