@@ -66,11 +66,24 @@ $password = $_SESSION['password'] ?? '';
     
     <!-- Alert messege -->
     <?php if (isset($_SESSION['alert_message'])): ?>
-        <div class="alert alert-<?= $_SESSION['alert_message']['type'] ?> alert-dismissible fade show" id="messageAlert">
-            <?= $_SESSION['alert_message']['text'] ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="toast align-items-center <?= $_SESSION['alert_message']['type'] ?> show" role="alert" aria-live="assertive" aria-atomic="true" id="messageAlert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <?php if ($_SESSION['alert_message']['type'] == 'danger') : ?>
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <?= $_SESSION['alert_message']['text'] ?>
+                    <?php elseif ($_SESSION['alert_message']['type'] == 'warning') : ?>
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <?= $_SESSION['alert_message']['text'] ?>
+                     <?php else : ?>
+                        <i class="fa-solid fa-circle-check"></i>
+                        <?= $_SESSION['alert_message']['text'] ?>
+                    <?php endif; ?>
+                </div>
 
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
         <?php unset($_SESSION['alert_message']); ?>
     <?php endif; ?>
     

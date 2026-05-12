@@ -36,14 +36,16 @@ document.querySelectorAll(".toggle-password").forEach(icon => {
     });
 });
 
-// Alert message timout
-setTimeout(() => {
-    const alertBox = document.getElementById("messageAlert");
-
-    if (alertBox) {
-        alertBox.remove();
+// Alert message timout    
+document.addEventListener("DOMContentLoaded", function () {
+    const toastEl = document.getElementById('messageAlert');
+    if (toastEl) {
+        const toast = new bootstrap.Toast(toastEl, {
+            delay: 4000,
+        });
+        toast.show();
     }
-}, 4500);
+});
 
 // Remove focus when modal closes
 document.addEventListener('hide.bs.modal', function (e) {

@@ -722,6 +722,124 @@ DELIMITER ;
 
 
 
+##### ADD LOCKER
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE addLocker (
+
+&#x20;   IN p\_slot\_number INT,
+
+&#x20;   IN p\_location\_id INT,
+
+&#x20;   IN p\_size\_id INT
+
+)
+
+BEGIN
+
+&#x20;   INSERT INTO locker\_slots (
+
+&#x20;       slot\_number,
+
+&#x20;       location\_id,
+
+&#x20;       size\_id,
+
+&#x20;       status
+
+&#x20;   )
+
+&#x20;   VALUES (
+
+&#x20;       p\_slot\_number,
+
+&#x20;       p\_location\_id,
+
+&#x20;       p\_size\_id,
+
+&#x20;       'Available'
+
+&#x20;   );
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### UPDATE LOCKER
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE updateLocker (
+
+&#x20;   IN p\_id INT,
+
+&#x20;   IN p\_slot\_number INT,
+
+&#x20;   IN p\_status VARCHAR(255)
+
+)
+
+BEGIN
+
+&#x20;   UPDATE locker\_slots
+
+&#x20;   SET
+
+&#x20;       slot\_number = p\_slot\_number,
+
+&#x20;       status = p\_status
+
+&#x20;   WHERE id = p\_id;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### DELETE LOCKER
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE deleteLocker (
+
+&#x20;   IN p\_id INT
+
+)
+
+BEGIN
+
+&#x20;   DELETE FROM locker\_slots
+
+&#x20;   WHERE id = p\_id;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
 ##### ACCEPT LOCKER APPLICATION
 
 

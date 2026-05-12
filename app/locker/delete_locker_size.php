@@ -9,7 +9,7 @@ $stmt->bind_param("i", $id);
 
 if ($stmt->execute()) {
     $_SESSION['alert_message'] = [
-        'type' => 'success',
+        'type' => 'warning',
         'text' => 'Locker size deleted successfully.'
     ];
 } else {

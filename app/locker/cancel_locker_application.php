@@ -49,7 +49,7 @@ sendLockerSlotCancellation(
 );
 
 $_SESSION['alert_message'] = [
-    'type' => 'success',
+    'type' => 'warning',
     'text' => 'Application cancelled successfully!'
 ];
 

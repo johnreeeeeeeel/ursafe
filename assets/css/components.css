@@ -100,11 +100,30 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
     bottom: 18px;
     right: 18px;
     border-radius: 12px;
-    border: 1px solid var(--announcement-base);
-    background-color: var(--announcement-1);
-    color: var(--text--dark-primary);
     font-weight: 400;
     z-index: 9999;
+}
+
+#messageAlert .toast-body {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+#messageAlert.danger {
+    background-color: var(--danger-5);
+    color: var(--text-light-primary);
+}
+
+#messageAlert.success {
+    background-color: var(--success-5);
+    color: var(--text-light-primary);
+}
+
+#messageAlert.warning {
+    background-color: var(--warning-5);
+    color: var(--text-light-primary);
 }
 
 #messageAlert .btn-close,

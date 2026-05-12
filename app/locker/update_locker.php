@@ -1,4 +1,5 @@
 <?php
+session_start();
 require '../db_connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -7,7 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $slot_number = $_POST['slot_number'];
     $status = $_POST['status'];
 
-    $stmt = $conn_local->prepare("CALL updateLockerSlot(?, ?, ?)");
+    $stmt = $conn_local->prepare("CALL updateLocker(?, ?, ?)");
     $stmt->bind_param("iis", $id, $slot_number, $status);
 
     if ($stmt->execute()) {
@@ -18,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $_SESSION['alert_message'] = [
             'type' => 'danger',
-            'text' => 'Error updating locker slot.'
+            'text' => 'Error updating locker slot: ' . $stmt->error
         ];
     }
 

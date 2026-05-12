@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         $_SESSION['alert_message'] = [
-            'type' => 'success',
+            'type' => 'warning',
             'text' => 'Location deleted successfully.'
         ];
     } else {
