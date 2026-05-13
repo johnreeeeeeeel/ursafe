@@ -84,7 +84,8 @@ function viewUserDetails(
     institute,
     program,
     username,
-    email
+    email,
+    created_at
 ) {
     document.getElementById('vu_id').innerText = id;
     document.getElementById('vu_username').innerText = username;
@@ -94,4 +95,5 @@ function viewUserDetails(
     document.getElementById('vu_institute').innerText = institute;
     document.getElementById('vu_program').innerText = program;
     document.getElementById('vu_email').innerText = email;
+    document.getElementById('vu_created_at').innerText = created_at;
 }

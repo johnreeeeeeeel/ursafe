@@ -76,6 +76,6 @@ try {
     ];
 }
 
-header("Location: ../../admin/lockers.php#lockerApplicationOffcanvas");
+header("Location: ../../admin/lockers.php#lockerPendingApplicationOffcanvas");
 exit;
 ?>

@@ -376,8 +376,11 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 </small>
                             </div>
                         <?php else: ?>
-
-                            <small>No recent activated user found.</small>
+                            <div id="empty">
+                                <i class="fa-solid fa-ban"></i>
+                                <small>No recent activated user yet</small>
+                                <small>Try to reload page</small>
+                            </div>
                         <?php endif; ?>
                     </div>
 
@@ -385,38 +388,41 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     <div class="recent-locker-application"> 
                         <h4>Recent Locker Applications</h4>
 
-                        <table class="table table-borderless">
-                            <thead>
-                                <tr>
-                                    <th>Application ID</th>
-                                    <th>User ID</th>
-                                    <th>Location</th>
-                                    <th>Slot</th>
-                                    <th>Size</th>
-                                    <th>Price</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
+                        <?php if ($recentLockerApplicationResultSet->num_rows > 0): ?>
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Application ID</th>
+                                        <th>User ID</th>
+                                        <th>Location</th>
+                                        <th>Slot</th>
+                                        <th>Size</th>
+                                        <th>Price</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
 
-                            <tbody>
-                                <?php if ($recentLockerApplicationResultSet->num_rows > 0): ?>
-                                    <?php while ($recentLockerApplicationRow = $recentLockerApplicationResultSet->fetch_assoc()): ?>
-                                        <tr>
-                                            <td data-label="Application ID"><?= $recentLockerApplicationRow['id'] ?></td>
-                                            <td data-label="User ID"><?= $recentLockerApplicationRow['user_id'] ?></td>
-                                            <td data-label="Location"><?= $recentLockerApplicationRow['location'] ?></td>
-                                            <td data-label="Slot"><?= $recentLockerApplicationRow['slot_number'] ?></td>
-                                            <td data-label="Size"><?= $recentLockerApplicationRow['size'] ?></td>
-                                            <td data-label="Price"><?= $recentLockerApplicationRow['price'] ?></td>
-                                            <td data-label="Date"><?= $recentLockerApplicationRow['created_at'] ?></td>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                <?php else: ?>
-
-                                <small>No recent locker application found.</small>
-                            <?php endif; ?>
-                            </tbody>
-                        </table>
+                                <tbody>
+                                        <?php while ($recentLockerApplicationRow = $recentLockerApplicationResultSet->fetch_assoc()): ?>
+                                            <tr>
+                                                <td data-label="Application ID"><?= $recentLockerApplicationRow['id'] ?></td>
+                                                <td data-label="User ID"><?= $recentLockerApplicationRow['user_id'] ?></td>
+                                                <td data-label="Location"><?= $recentLockerApplicationRow['location'] ?></td>
+                                                <td data-label="Slot"><?= $recentLockerApplicationRow['slot_number'] ?></td>
+                                                <td data-label="Size"><?= $recentLockerApplicationRow['size'] ?></td>
+                                                <td data-label="Price"><?= $recentLockerApplicationRow['price'] ?></td>
+                                                <td data-label="Date"><?= $recentLockerApplicationRow['created_at'] ?></td>
+                                            </tr>
+                                        <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <div id="empty">
+                                <i class="fa-solid fa-ban"></i>
+                                <small>No recent locker application yet</small>
+                                <small>Try to reload page</small>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>  

@@ -170,7 +170,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     <ul class="dropdown-menu"> 
                         <li>
                             <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#userAccountLogsOffcanvas" onclick="window.location.hash='userAccountLogsOffcanvas';">
-                                View Account Logs
+                                Account Logs
                             </button>
                         </li>
                     </ul>
@@ -180,29 +180,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
         <div class="content">
             <div id="users">
-                <header>
-                    <form method="GET">
-                        <div class="search-group">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="search"
-                                name="searchUsers"
-                                placeholder="Search users..."
-                                value="<?= htmlspecialchars($_GET['searchUsers'] ?? '') ?>">
-                        </div>
-
-                        <div class="filter-group">
-                            <i class="fa-solid fa-filter"></i>
-                            <select name="filter" onchange="this.form.submit()">
-                                <option value="">All</option>
-                                <option value="asc" <?= (($_GET['filter'] ?? '') === 'asc') ? 'selected' : '' ?>>A - Z</option>
-                                <option value="desc" <?= (($_GET['filter'] ?? '') === 'desc') ? 'selected' : '' ?>>Z - A</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" hidden></button>
-                    </form>
-                </header>
-
                 <!-- Offcanvas for user logs -->
                 <div class="offcanvas offcanvas-end" id="userAccountLogsOffcanvas">
                     <div class="offcanvas-header">
@@ -232,27 +209,35 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 $conn_local->store_result();
                             ?>
 
-                            <table class="table table-borderless">
-                                <thead>
-                                    <tr>
-                                        <th>Log ID</th>
-                                        <th>Timestamp</th>
-                                        <th>Action</th>
-                                        <th>Description</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    <?php while ($userAccountLogsRow = $userAccountLogsResultSet->fetch_assoc()) { ?>
+                            <?php if ($userAccountLogsResultSet->num_rows > 0): ?>
+                                <table class="table table-borderless">
+                                    <thead>
                                         <tr>
-                                            <td data-label="Log ID"><?= $userAccountLogsRow['id'] ?></td>
-                                            <td data-label="Timestamp"><?= $userAccountLogsRow['created_at'] ?></td>
-                                            <td data-label="Action"><?= $userAccountLogsRow['action'] ?></td>
-                                            <td data-label="Description"><?= $userAccountLogsRow['description'] ?></td>
+                                            <th>Log ID</th>
+                                            <th>Timestamp</th>
+                                            <th>Action</th>
+                                            <th>Description</th>
                                         </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+                                    </thead>
+
+                                    <tbody>
+                                        <?php while ($userAccountLogsRow = $userAccountLogsResultSet->fetch_assoc()) { ?>
+                                            <tr>
+                                                <td data-label="Log ID"><?= $userAccountLogsRow['id'] ?></td>
+                                                <td data-label="Timestamp"><?= $userAccountLogsRow['created_at'] ?></td>
+                                                <td data-label="Action"><?= $userAccountLogsRow['action'] ?></td>
+                                                <td data-label="Description"><?= $userAccountLogsRow['description'] ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            <?php else: ?>
+                                <div id="empty">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <small>No user logs yet</small>
+                                    <small>Try to reload page</small>
+                                </div>
+                            <?php endif; ?>
                         </div>
 
                         <ul class="pagination">
@@ -280,70 +265,104 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 </div>
 
                 <!-- Users -->
+                <header>
+                    <form method="GET">
+                        <div class="search-group">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="search"
+                                name="searchUsers"
+                                placeholder="Search users..."
+                                value="<?= htmlspecialchars($_GET['searchUsers'] ?? '') ?>">
+                        </div>
+
+                        <div class="filter-group">
+                            <i class="fa-solid fa-filter"></i>
+                            <select name="filter" onchange="this.form.submit()">
+                                <option value="">All</option>
+                                <option value="a-z" <?= (($_GET['filter'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
+                                <option value="z-a" <?= (($_GET['filter'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
+                                <option value="newest" <?= (($_GET['filter'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
+                                <option value="oldest" <?= (($_GET['filter'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" hidden></button>
+                    </form>
+                </header>
+
                 <div class="table-container">
-                    <table class="table table-borderless">
-                        <thead>
-                            <th>ID</th>
-                            <th>Username</th>
-                            <th>Fullname</th>
-                            <th>Email</th>
-                            <th>Action</th>
-                        </thead>
-                        
-                        <tbody>
-                            <?php
-                                // Get users
-                                $search = $_GET['searchUsers'] ?? '';
-                                $filter = $_GET['filter'] ?? '';
+                    <?php
+                        // Get users
+                        $search = $_GET['searchUsers'] ?? '';
+                        $filter = $_GET['filter'] ?? '';
 
-                                if (!empty($search) || !empty($filter)) {
-                                    // Use search and filter
-                                    $stmt = $conn_local->prepare("CALL getSearchFilterUsers(?, ?)");
-                                    $stmt->bind_param("ss", $search, $filter);
-                                } else {
-                                    // Use raw
-                                    $stmt = $conn_local->prepare("CALL getUsers()");
-                                }
+                        if (!empty($search) || !empty($filter)) {
+                            // Use search and filter
+                            $stmt = $conn_local->prepare("CALL getSearchFilterUsers(?, ?)");
+                            $stmt->bind_param("ss", $search, $filter);
+                        } else {
+                            // Use raw
+                            $stmt = $conn_local->prepare("CALL getUsers()");
+                        }
 
-                                $stmt->execute();
-                                $result = $stmt->get_result();
-                                $stmt->close();
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        $stmt->close();
 
-                                $conn_local->next_result();
-                            ?>
+                        $conn_local->next_result();
+                    ?>
 
-                            <?php while ($row = $result->fetch_assoc()): ?>
-                                <tr>
-                                <td data-label="ID"><?= $row['id']; ?></td>
-                                <td data-label="Username"><?= $row['username']; ?></td>
-                                <td data-label="Full Name"><?= $row['fullname']; ?></td>
-                                <td data-label="Email"><?= $row['email']; ?></td>
+                    <?php if ($result->num_rows > 0): ?>
+                        <table class="table table-borderless">
+                            <thead>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Fullname</th>
+                                <th>Email</th>
+                                <th>Action</th>
+                            </thead>
+                            
+                            <tbody>
+                                <?php while ($row = $result->fetch_assoc()): ?>
+                                    <tr>
+                                    <td data-label="ID"><?= $row['id']; ?></td>
+                                    <td data-label="Username"><?= $row['username']; ?></td>
+                                    <td data-label="Full Name"><?= $row['fullname']; ?></td>
+                                    <td data-label="Email"><?= $row['email']; ?></td>
 
-                                <td data-label="Action">
-                                    <div class="action-buttons">
-                                        <button class="sm-btn primary-btn"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#viewUserModal"
-                                            onclick="viewUserDetails(
-                                                '<?= htmlspecialchars($row['id']) ?>',
-                                                '<?= htmlspecialchars($row['fullname']) ?>',
-                                                '<?= htmlspecialchars($row['sex'] ?? '') ?>',
-                                                '<?= htmlspecialchars($row['dob'] ?? '') ?>',
-                                                '<?= htmlspecialchars($row['institute'] ?? '') ?>',
-                                                '<?= htmlspecialchars($row['program'] ?? '') ?>',
-                                                '<?= htmlspecialchars($row['username']) ?>',
-                                                '<?= htmlspecialchars($row['email']) ?>'
-                                            )">
+                                    <td data-label="Action">
+                                        <div class="action-buttons">
+                                            <button class="sm-btn primary-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#viewUserModal"
+                                                onclick="viewUserDetails(
+                                                    '<?= htmlspecialchars($row['id']) ?>',
+                                                    '<?= htmlspecialchars($row['fullname']) ?>',
+                                                    '<?= htmlspecialchars($row['sex'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($row['dob'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($row['institute'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($row['program'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($row['username']) ?>',
+                                                    '<?= htmlspecialchars($row['email']) ?>',
+                                                    '<?= htmlspecialchars($row['created_at']) ?>'
+                                                )">
 
-                                            <i class="fa-solid fa-eye"></i>
-                                            View
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
+                                                <i class="fa-solid fa-eye"></i>
+                                                View
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    <?php else: ?>
+                        <div id="empty">
+                            <i class="fa-solid fa-ban"></i>
+                            <small>No activated user yet</small>
+                            <small>Try to reload page</small>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -389,6 +408,9 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             <h6>Account Information</h6>
                             <p>
                                 <small><b>Email: </b><span id="vu_email"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Date Activated: </b><span id="vu_created_at"></span></small>
                             </p>
                         </div>
                     </div>
