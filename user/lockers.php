@@ -206,37 +206,19 @@ $password = $_SESSION['password'] ?? '';
 
                     <div class="offcanvas-body">
                         <div class="locker-applications-container">
-                            <?php
-                                // Accepted locker application
-                                $stmtAccepted = $conn_local->prepare("CALL getMyAcceptedLockerApplications(?)");
-                                $stmtAccepted->bind_param("s", $id);
-                                $stmtAccepted->execute();
-                                $acceptedResultSet = $stmtAccepted->get_result();
-                                $stmtAccepted->close();
-
-                                while ($conn_local->next_result()) { $conn_local->store_result(); }
-
-                                // Pending locker application
-                                $stmtPending = $conn_local->prepare("CALL getMyPendingLockerApplications(?)");
-                                $stmtPending->bind_param("s", $id);
-                                $stmtPending->execute();
-                                $pendingResultSet = $stmtPending->get_result();
-                                $stmtPending->close();
-
-                                while ($conn_local->next_result()) { $conn_local->store_result(); }
-
-                                // Locker application history 
-                                $stmtHistory = $conn_local->prepare("CALL getMyLockerApplicationHistory(?)");
-                                $stmtHistory->bind_param("s", $id);
-                                $stmtHistory->execute();
-                                $historyResultSet = $stmtHistory->get_result();
-                                $stmtHistory->close();
-
-                                while ($conn_local->next_result()) { $conn_local->store_result(); }
-                            ?>
-
                             <!-- Accepted applications -->
                             <div class="card-container">
+                                <?php
+                                    // Accepted locker application
+                                    $stmtAccepted = $conn_local->prepare("CALL getMyAcceptedLockerApplications(?)");
+                                    $stmtAccepted->bind_param("s", $id);
+                                    $stmtAccepted->execute();
+                                    $acceptedResultSet = $stmtAccepted->get_result();
+                                    $stmtAccepted->close();
+
+                                    while ($conn_local->next_result()) { $conn_local->store_result(); }
+                                ?>
+
                                 <h3>Accepted Applications</h3>
 
                                 <?php if ($acceptedResultSet->num_rows > 0): ?>
@@ -263,6 +245,17 @@ $password = $_SESSION['password'] ?? '';
 
                             <!-- Pending applications -->
                             <div class="card-container">
+                                <?php
+                                    // Pending locker application
+                                    $stmtPending = $conn_local->prepare("CALL getMyPendingLockerApplications(?)");
+                                    $stmtPending->bind_param("s", $id);
+                                    $stmtPending->execute();
+                                    $pendingResultSet = $stmtPending->get_result();
+                                    $stmtPending->close();
+
+                                    while ($conn_local->next_result()) { $conn_local->store_result(); }
+                                ?>
+
                                 <h3>Pending Applications</h3>
 
                                 <?php if ($pendingResultSet->num_rows > 0): ?>
@@ -296,6 +289,17 @@ $password = $_SESSION['password'] ?? '';
 
                             <!-- Application history -->
                             <table class="table table-borderless">
+                                <?php
+                                    // Locker application history 
+                                    $stmtHistory = $conn_local->prepare("CALL getMyLockerApplicationHistory(?)");
+                                    $stmtHistory->bind_param("s", $id);
+                                    $stmtHistory->execute();
+                                    $historyResultSet = $stmtHistory->get_result();
+                                    $stmtHistory->close();
+
+                                    while ($conn_local->next_result()) { $conn_local->store_result(); }
+                                ?>
+
                                 <h3>Application History</h3>
 
                                 <?php if ($historyResultSet->num_rows > 0): ?>
@@ -376,7 +380,7 @@ $password = $_SESSION['password'] ?? '';
                     </div>
                 <?php } ?>
 
-                <!-- Lockers -->
+                <!-- Lockers header -->
                  <header>
                     <form method="GET">
                         <div class="search-group">
@@ -402,6 +406,7 @@ $password = $_SESSION['password'] ?? '';
                     </form>
                 </header>
                 
+                <!-- Lockers -->
                 <div class="table-container">
                      <?php
                         // Get locker locations

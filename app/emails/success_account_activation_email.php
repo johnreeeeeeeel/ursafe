@@ -29,9 +29,16 @@ function sendUserEmail($email, $username, $password)
         $mail->Subject = 'Welcome to UrSafe';
 
         $mail->Body = "
-            <div>
-                <h4 style='margin:0; padding:0;'>Hello {$username},</h4>
-                <p style='margin:0; padding:0;'>Welcome to <b>UrSafe</b>!</p>
+            <div 
+                style='
+                    display: flex;
+                    margin: auto;
+                    background-color: #F5F9FE;
+                    border-radius: 8px;
+                    
+                '>
+                <h4 style='margin: 0; padding: 0;'>Hello {$username},</h4>
+                <p style='margin: 0; padding: 0;'>Welcome to <b>UrSafe</b>!</p>
                 
                 <br>
 

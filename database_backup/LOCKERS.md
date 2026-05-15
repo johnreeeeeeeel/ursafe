@@ -2,7 +2,7 @@
 
 
 
-##### GET LOCKER APPLICATIONS HISTORY
+##### GET PENDING LOCKER APPLICATIONS
 
 
 
@@ -10,7 +10,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getLockerApplicationHistory()
+CREATE OR REPLACE PROCEDURE getPendingLockerApplications()
 
 BEGIN
 
@@ -48,9 +48,9 @@ BEGIN
 
 &#x20;       lsz.size,
 
-&#x20;       lsz.price
+&#x20;       lsz.price,
 
-
+&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -64,11 +64,119 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked')
+&#x20;   WHERE la.status IN ('Pending')
 
 
 
-&#x20;   ORDER BY la.id DESC;
+&#x20;   ORDER BY la.created\_at DESC;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET SEARCH AND FILTER PENDING LOCKER APPLICATIONS
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getSearchFilterPendingLockerApplications(
+
+&#x20;   IN searchTerm VARCHAR(255),
+
+&#x20;   IN filterTerm VARCHAR(255)
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.user\_id,
+
+&#x20;       la.slot\_id,
+
+&#x20;       la.status,
+
+
+
+&#x20;       TRIM(CONCAT(
+
+&#x20;           u.firstname, ' ',
+
+&#x20;           IFNULL(CONCAT(u.middlename, ' '), ''),
+
+&#x20;           u.lastname
+
+&#x20;       )) AS fullname,
+
+
+
+&#x20;       u.email,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       lsz.size,
+
+&#x20;       lsz.price,
+
+&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+
+
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+
+
+&#x20;   WHERE la.status = 'Pending'
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
+
+
+
+&#x20;   ORDER BY
+
+&#x20;       CASE WHEN filterTerm = 'newest' THEN la.created\_at END DESC,
+
+&#x20;       CASE WHEN filterTerm = 'oldest' THEN la.created\_at END ASC,
+
+&#x20;       la.created\_at DESC;
 
 END //
 
@@ -124,9 +232,9 @@ BEGIN
 
 &#x20;       lsz.size,
 
-&#x20;       lsz.price
+&#x20;       lsz.price,
 
-
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -144,7 +252,7 @@ BEGIN
 
 
 
-&#x20;   ORDER BY la.id DESC;
+&#x20;   ORDER BY la.updated\_at DESC;
 
 END //
 
@@ -154,7 +262,7 @@ DELIMITER ;
 
 
 
-##### GET PENDING LOCKER APPLICATIONS
+##### GET SEARCH AND FILTER ACCEPTED LOCKER APPLICATIONS
 
 
 
@@ -162,7 +270,115 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getPendingLockerApplications()
+CREATE OR REPLACE PROCEDURE getSearchFilterAcceptedLockerApplications(
+
+&#x20;   IN searchTerm VARCHAR(255),
+
+&#x20;   IN filterTerm VARCHAR(255)
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.user\_id,
+
+&#x20;       la.slot\_id,
+
+&#x20;       la.status,
+
+
+
+&#x20;       TRIM(CONCAT(
+
+&#x20;           u.firstname, ' ',
+
+&#x20;           IFNULL(CONCAT(u.middlename, ' '), ''),
+
+&#x20;           u.lastname
+
+&#x20;       )) AS fullname,
+
+
+
+&#x20;       u.email,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       lsz.size,
+
+&#x20;       lsz.price,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+
+
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+
+
+&#x20;   WHERE la.status = 'Accepted'
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
+
+
+
+&#x20;   ORDER BY
+
+&#x20;       CASE WHEN filterTerm = 'newest' THEN la.updated\_at END DESC,
+
+&#x20;       CASE WHEN filterTerm = 'oldest' THEN la.updated\_at END ASC,
+
+&#x20;       la.updated\_at DESC;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET LOCKER APPLICATIONS HISTORY
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getLockerApplicationHistory()
 
 BEGIN
 
@@ -200,9 +416,9 @@ BEGIN
 
 &#x20;       lsz.size,
 
-&#x20;       lsz.price
+&#x20;       lsz.price,
 
-
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -216,11 +432,119 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status IN ('Pending')
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked')
 
 
 
-&#x20;   ORDER BY la.id DESC;
+&#x20;   ORDER BY la.updated\_at DESC;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET SEARCH AND FILTER LOCKER APPLICATIONS HISTORY
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getSearchFilterLockerApplicationHistory(
+
+&#x20;   IN searchTerm VARCHAR(255),
+
+&#x20;   IN filterTerm VARCHAR(255)
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.user\_id,
+
+&#x20;       la.slot\_id,
+
+&#x20;       la.status,
+
+
+
+&#x20;       TRIM(CONCAT(
+
+&#x20;           u.firstname, ' ',
+
+&#x20;           IFNULL(CONCAT(u.middlename, ' '), ''),
+
+&#x20;           u.lastname
+
+&#x20;       )) AS fullname,
+
+
+
+&#x20;       u.email,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       lsz.size,
+
+&#x20;       lsz.price,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+
+
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+
+
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked')
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
+
+
+
+&#x20;   ORDER BY
+
+&#x20;       CASE WHEN filterTerm = 'newest' THEN la.updated\_at END DESC,
+
+&#x20;       CASE WHEN filterTerm = 'oldest' THEN la.updated\_at END ASC,
+
+&#x20;       la.updated\_at DESC;
 
 END //
 
@@ -242,7 +566,15 @@ CREATE OR REPLACE PROCEDURE getLockerLocations()
 
 BEGIN
 
-&#x20;   SELECT id, location FROM locker\_locations;
+&#x20;   SELECT id,
+
+&#x09;location,
+
+&#x09;DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+
+&#x09;FROM locker\_locations
+
+&#x20;   ORDER BY created\_at DESC;
 
 END //
 
@@ -262,35 +594,67 @@ DELIMITER //
 
 CREATE OR REPLACE PROCEDURE getSearchFilterLockerLocation (
 
-&#x20;   IN p\_search VARCHAR(255),
+&#x20;   IN searchTerm VARCHAR(255),
 
-&#x20;   IN p\_filter VARCHAR(10)
+&#x20;   IN filterTerm VARCHAR(255)
 
 )
 
 BEGIN
 
-&#x20;   SELECT id, location
+&#x20;   SELECT id,
+
+&#x20;   location,
+
+&#x20;   DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM locker\_locations
 
-&#x20;   WHERE (p\_search IS NULL OR p\_search = ''
 
-&#x20;          OR location LIKE CONCAT('%', p\_search, '%'))
+
+&#x20;   WHERE
+
+&#x20;   	searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+&#x20;       OR location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;
 
 &#x20;   ORDER BY
 
 &#x20;       CASE
 
-&#x20;           WHEN p\_filter = 'desc' THEN location
+&#x20;           WHEN filterTerm = 'a-z' THEN location
 
-&#x20;       END DESC,
+&#x20;       END ASC,
+
+&#x20;
 
 &#x20;       CASE
 
-&#x20;           WHEN p\_filter = 'asc' OR p\_filter IS NULL OR p\_filter = '' THEN location
+&#x20;           WHEN filterTerm = 'z-a' THEN location
 
-&#x20;       END ASC;
+&#x20;       END DESC,
+
+&#x20;
+
+&#x20;       CASE
+
+&#x20;           WHEN filterTerm = 'oldest' THEN created\_at
+
+&#x20;       END ASC,
+
+&#x20;
+
+&#x20;       CASE
+
+&#x20;           WHEN filterTerm = 'newest' THEN created\_at
+
+&#x20;       END DESC;
+
+
 
 END //
 
@@ -414,7 +778,7 @@ BEGIN
 
 &#x20;       description,
 
-&#x20;       created\_at
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM locker\_logs
 
@@ -442,11 +806,17 @@ CREATE OR REPLACE PROCEDURE getLockerSizes()
 
 BEGIN
 
-&#x20;   SELECT id, size, price
+&#x20;   SELECT id,
 
-&#x20;   FROM locker\_sizes
+&#x20;       size,
 
-&#x20;   ORDER BY id ASC;
+&#x20;       price,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+
+&#x20;       FROM locker\_sizes
+
+&#x20;   ORDER BY created\_at DESC;
 
 END //
 
@@ -466,35 +836,93 @@ DELIMITER //
 
 CREATE OR REPLACE PROCEDURE getSearchFilterLockerSizes (
 
-&#x20;   IN p\_search VARCHAR(255),
+&#x20;   IN searchTerm VARCHAR(255),
 
-&#x20;   IN p\_filter VARCHAR(10)
+&#x20;   IN filterTerm VARCHAR(255)
 
 )
 
 BEGIN
 
-&#x20;   SELECT id, size, price
+
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+&#x20;       size,
+
+&#x20;       price,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM locker\_sizes
 
-&#x20;   WHERE (p\_search IS NULL OR p\_search = ''
 
-&#x20;          OR size LIKE CONCAT('%', p\_search, '%'))
+
+&#x20;   WHERE (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+&#x20;       OR size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR price LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
+
+
 
 &#x20;   ORDER BY
 
 &#x20;       CASE
 
-&#x20;           WHEN p\_filter = 'desc' THEN size
+&#x20;           WHEN filterTerm = 'a-z' THEN size
 
-&#x20;       END DESC,
+&#x20;       END ASC,
+
+
 
 &#x20;       CASE
 
-&#x20;           WHEN p\_filter = 'asc' OR p\_filter IS NULL OR p\_filter = '' THEN size
+&#x20;           WHEN filterTerm = 'z-a' THEN size
 
-&#x20;       END ASC;
+&#x20;       END DESC,
+
+
+
+&#x20;       CASE
+
+&#x20;           WHEN filterTerm = 'oldest' THEN created\_at
+
+&#x20;       END ASC,
+
+
+
+&#x20;       CASE
+
+&#x20;           WHEN filterTerm = 'newest' THEN created\_at
+
+&#x20;       END DESC,
+
+
+
+&#x20;       CASE
+
+&#x20;           WHEN filterTerm = 'cheaper' THEN price
+
+&#x20;       END ASC,
+
+
+
+&#x20;       CASE
+
+&#x20;           WHEN filterTerm = 'expensive' THEN price
+
+&#x20;       END DESC;
+
+
 
 END //
 
@@ -906,7 +1334,7 @@ BEGIN
 
 &#x20;   UPDATE locker\_applications
 
-&#x20;   SET status = 'Accepted'
+&#x20;   SET status = 'Accepted', updated\_at = NOW()
 
 &#x20;   WHERE id = p\_application\_id;
 
@@ -980,7 +1408,7 @@ BEGIN
 
 &#x20;   UPDATE locker\_applications
 
-&#x20;   SET status = 'Rejected'
+&#x20;   SET status = 'Rejected', updated\_at = NOW()
 
 &#x20;   WHERE id = p\_application\_id;
 
@@ -1050,7 +1478,7 @@ BEGIN
 
 &#x20;   UPDATE locker\_applications
 
-&#x20;   SET status = 'Revoked'
+&#x20;   SET status = 'Revoked', updated\_at = NOW()
 
 &#x20;   WHERE id = p\_application\_id;
 
@@ -1100,7 +1528,9 @@ BEGIN
 
 &#x20;       sz.size,
 
-&#x20;       sz.price
+&#x20;       sz.price,
+
+&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -1114,7 +1544,7 @@ BEGIN
 
 &#x20;     AND la.status IN ('Pending')
 
-&#x20;   ORDER BY la.id DESC;
+&#x20;   ORDER BY la.created\_at DESC;
 
 END //
 
@@ -1148,7 +1578,9 @@ BEGIN
 
 &#x20;       sz.size,
 
-&#x20;       sz.price
+&#x20;       sz.price,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -1162,7 +1594,7 @@ BEGIN
 
 &#x20;     AND la.status IN ('Accepted')
 
-&#x20;   ORDER BY la.id DESC;
+&#x20;   ORDER BY la.updated\_at DESC;
 
 END //
 
@@ -1196,7 +1628,9 @@ BEGIN
 
 &#x20;       sz.size,
 
-&#x20;       sz.price
+&#x20;       sz.price,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -1210,7 +1644,7 @@ BEGIN
 
 &#x20;     AND la.status IN ('Cancelled', 'Rejected', 'Revoked')
 
-&#x20;   ORDER BY la.id DESC;
+&#x20;   ORDER BY la.updated\_at DESC;
 
 END //
 
@@ -1342,7 +1776,7 @@ BEGIN
 
 &#x20;   UPDATE locker\_applications
 
-&#x20;   SET status = 'Cancelled'
+&#x20;   SET status = 'Cancelled', updated\_at = NOW()
 
 &#x20;   WHERE id = p\_application\_id
 
@@ -1594,11 +2028,31 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_recent\_locker\_application()
+CREATE OR REPLACE PROCEDURE get\_recent\_locker\_application()
 
 BEGIN
 
-&#x20;   SELECT \*
+&#x20;   SELECT
+
+&#x20;   	id,
+
+&#x20;       user\_id,
+
+&#x20;       firstname,
+
+&#x20;       middlename,
+
+&#x20;       lastname,
+
+&#x20;       location,
+
+&#x20;       slot\_number,
+
+&#x20;       size,
+
+&#x20;       price,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at 
 
 &#x20;   FROM recent\_locker\_application;
 

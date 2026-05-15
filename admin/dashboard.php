@@ -155,6 +155,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
     </nav>
 
     <section id="section">
+        <!-- Header -->
         <header>
             <div class="left">
                 <i class="fa-solid fa-bars menuToggleButton" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile"></i>
@@ -164,138 +165,119 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
         <div class="content">
             <div id="dashboard">
-                <?php
-                    // Get users count
-                    $stmtUsersCount = $conn_local->prepare("CALL get_users_count()");
-                    $stmtUsersCount->execute();
-
-                    $usersCountResultSet = $stmtUsersCount->get_result();
-                    $usersCountRow = $usersCountResultSet->fetch_assoc();
-
-                    $stmtUsersCount->close();
-                    $conn_local->next_result();
-
-                    // Get students count
-                    $stmtStudentsCount = $conn_remote->prepare("CALL get_students_count()");
-                    $stmtStudentsCount->execute();
-
-                    $studentsCountResultSet = $stmtStudentsCount->get_result();
-                    $studentsCountRow = $studentsCountResultSet->fetch_assoc();
-
-                    $stmtStudentsCount->close();
-                    $conn_local->next_result();
-
-                    // Get total lockers
-                    $stmtTotalLockersCount = $conn_local->prepare("CALL get_total_lockers_count()");
-                    $stmtTotalLockersCount->execute();
-
-                    $totalLockersCountResultSet = $stmtTotalLockersCount->get_result();
-                    $totalLockersCountRow = $totalLockersCountResultSet->fetch_assoc();
-
-                    $stmtTotalLockersCount->close();
-                    $conn_local->next_result();
-
-                    // Get available lockers
-                    $stmtAvailableLockersCount = $conn_local->prepare("CALL get_available_lockers_count()");
-                    $stmtAvailableLockersCount->execute();
-
-                    $availableLockersCountResultSet = $stmtAvailableLockersCount->get_result();
-                    $availableLockersCountRow = $availableLockersCountResultSet->fetch_assoc();
-
-                    $stmtAvailableLockersCount->close();
-                    $conn_local->next_result();
-
-                    // Get occupied lockers
-                    $stmtOccupiedLockersCount = $conn_local->prepare("CALL get_occupied_lockers_count()");
-                    $stmtOccupiedLockersCount->execute();
-
-                    $occupiedLockersCountResultSet = $stmtOccupiedLockersCount->get_result();
-                    $occupiedLockersCountRow = $occupiedLockersCountResultSet->fetch_assoc();
-
-                    $stmtOccupiedLockersCount->close();
-                    $conn_local->next_result();
-
-                    // Get total locker application
-                    $stmtTotalLockerApplicationsCount = $conn_local->prepare("CALL get_total_locker_applications_count()");
-                    $stmtTotalLockerApplicationsCount->execute();
-
-                    $totalLockerApplicationsCountResultSet = $stmtTotalLockerApplicationsCount->get_result();
-                    $totalLockerApplicationsCountRow = $totalLockerApplicationsCountResultSet->fetch_assoc();
-
-                    $stmtTotalLockerApplicationsCount->close();
-                    $conn_local->next_result();
-
-                    // Get pending locker application
-                    $stmtPendingLockerApplicationsCount = $conn_local->prepare("CALL get_pending_locker_applications_count()");
-                    $stmtPendingLockerApplicationsCount->execute();
-
-                    $pendingLockerApplicationsCountResultSet = $stmtPendingLockerApplicationsCount->get_result();
-                    $pendingLockerApplicationsCountRow = $pendingLockerApplicationsCountResultSet->fetch_assoc();
-
-                    $stmtPendingLockerApplicationsCount->close();
-                    $conn_local->next_result();
-
-                    // Get cancelled locker application
-                    $stmtCancelledLockerApplicationsCount = $conn_local->prepare("CALL get_cancelled_locker_applications_count()");
-                    $stmtCancelledLockerApplicationsCount->execute();
-
-                    $cancelledLockerApplicationsCountResultSet = $stmtCancelledLockerApplicationsCount->get_result();
-                    $cancelledLockerApplicationsCountRow = $cancelledLockerApplicationsCountResultSet->fetch_assoc();
-
-                    $stmtCancelledLockerApplicationsCount->close();
-                    $conn_local->next_result();
-
-                    // Get accepted locker application
-                    $stmtAcceptedLockerApplicationsCount = $conn_local->prepare("CALL get_accepted_locker_applications_count()");
-                    $stmtAcceptedLockerApplicationsCount->execute();
-
-                    $acceptedLockerApplicationsCountResultSet = $stmtAcceptedLockerApplicationsCount->get_result();
-                    $acceptedLockerApplicationsCountRow = $acceptedLockerApplicationsCountResultSet->fetch_assoc();
-
-                    $stmtAcceptedLockerApplicationsCount->close();
-                    $conn_local->next_result();
-
-                    // Get rejected locker application
-                    $stmtRejectedLockerApplicationsCount = $conn_local->prepare("CALL get_rejected_locker_applications_count()");
-                    $stmtRejectedLockerApplicationsCount->execute();
-
-                    $rejectedLockerApplicationsCountResultSet = $stmtRejectedLockerApplicationsCount->get_result();
-                    $rejectedLockerApplicationsCountRow = $rejectedLockerApplicationsCountResultSet->fetch_assoc();
-
-                    $stmtRejectedLockerApplicationsCount->close();
-                    $conn_local->next_result();
-
-                    // Get revoked locker application
-                    $stmtRevokedLockerApplicationsCount = $conn_local->prepare("CALL get_revoked_locker_applications_count()");
-                    $stmtRevokedLockerApplicationsCount->execute();
-
-                    $revokedLockerApplicationsCountResultSet = $stmtRevokedLockerApplicationsCount->get_result();
-                    $revokedLockerApplicationsCountRow = $revokedLockerApplicationsCountResultSet->fetch_assoc();
-
-                    $stmtRevokedLockerApplicationsCount->close();
-                    $conn_local->next_result();
-
-                    // Get recent activated user
-                    $stmtRecentActivatedUser = $conn_local->prepare("CALL get_recent_user_account_activation()");
-                    $stmtRecentActivatedUser->execute();
-
-                    $recentActivatedUserResultSet = $stmtRecentActivatedUser->get_result();
-                    $recentActivatedUserRow = $recentActivatedUserResultSet->fetch_assoc();
-
-                    $stmtRecentActivatedUser->close();
-                    $conn_local->next_result();
-
-                    // Get recent locker application
-                    $stmtRecentLockerApplication = $conn_local->prepare("CALL get_recent_locker_application()");
-                    $stmtRecentLockerApplication->execute();
-
-                    $recentLockerApplicationResultSet = $stmtRecentLockerApplication->get_result();
-
-                    $stmtRecentLockerApplication->close();
-                    $conn_local->next_result();
-                ?>
-
                 <div class="data-count-container">
+                    <?php
+                        // Get users count
+                        $stmtUsersCount = $conn_local->prepare("CALL get_users_count()");
+                        $stmtUsersCount->execute();
+
+                        $usersCountResultSet = $stmtUsersCount->get_result();
+                        $usersCountRow = $usersCountResultSet->fetch_assoc();
+
+                        $stmtUsersCount->close();
+                        $conn_local->next_result();
+
+                        // Get students count
+                        $stmtStudentsCount = $conn_remote->prepare("CALL get_students_count()");
+                        $stmtStudentsCount->execute();
+
+                        $studentsCountResultSet = $stmtStudentsCount->get_result();
+                        $studentsCountRow = $studentsCountResultSet->fetch_assoc();
+
+                        $stmtStudentsCount->close();
+                        $conn_local->next_result();
+
+                        // Get total lockers
+                        $stmtTotalLockersCount = $conn_local->prepare("CALL get_total_lockers_count()");
+                        $stmtTotalLockersCount->execute();
+
+                        $totalLockersCountResultSet = $stmtTotalLockersCount->get_result();
+                        $totalLockersCountRow = $totalLockersCountResultSet->fetch_assoc();
+
+                        $stmtTotalLockersCount->close();
+                        $conn_local->next_result();
+
+                        // Get available lockers
+                        $stmtAvailableLockersCount = $conn_local->prepare("CALL get_available_lockers_count()");
+                        $stmtAvailableLockersCount->execute();
+
+                        $availableLockersCountResultSet = $stmtAvailableLockersCount->get_result();
+                        $availableLockersCountRow = $availableLockersCountResultSet->fetch_assoc();
+
+                        $stmtAvailableLockersCount->close();
+                        $conn_local->next_result();
+
+                        // Get occupied lockers
+                        $stmtOccupiedLockersCount = $conn_local->prepare("CALL get_occupied_lockers_count()");
+                        $stmtOccupiedLockersCount->execute();
+
+                        $occupiedLockersCountResultSet = $stmtOccupiedLockersCount->get_result();
+                        $occupiedLockersCountRow = $occupiedLockersCountResultSet->fetch_assoc();
+
+                        $stmtOccupiedLockersCount->close();
+                        $conn_local->next_result();
+
+                        // Get total locker application
+                        $stmtTotalLockerApplicationsCount = $conn_local->prepare("CALL get_total_locker_applications_count()");
+                        $stmtTotalLockerApplicationsCount->execute();
+
+                        $totalLockerApplicationsCountResultSet = $stmtTotalLockerApplicationsCount->get_result();
+                        $totalLockerApplicationsCountRow = $totalLockerApplicationsCountResultSet->fetch_assoc();
+
+                        $stmtTotalLockerApplicationsCount->close();
+                        $conn_local->next_result();
+
+                        // Get pending locker application
+                        $stmtPendingLockerApplicationsCount = $conn_local->prepare("CALL get_pending_locker_applications_count()");
+                        $stmtPendingLockerApplicationsCount->execute();
+
+                        $pendingLockerApplicationsCountResultSet = $stmtPendingLockerApplicationsCount->get_result();
+                        $pendingLockerApplicationsCountRow = $pendingLockerApplicationsCountResultSet->fetch_assoc();
+
+                        $stmtPendingLockerApplicationsCount->close();
+                        $conn_local->next_result();
+
+                        // Get cancelled locker application
+                        $stmtCancelledLockerApplicationsCount = $conn_local->prepare("CALL get_cancelled_locker_applications_count()");
+                        $stmtCancelledLockerApplicationsCount->execute();
+
+                        $cancelledLockerApplicationsCountResultSet = $stmtCancelledLockerApplicationsCount->get_result();
+                        $cancelledLockerApplicationsCountRow = $cancelledLockerApplicationsCountResultSet->fetch_assoc();
+
+                        $stmtCancelledLockerApplicationsCount->close();
+                        $conn_local->next_result();
+
+                        // Get accepted locker application
+                        $stmtAcceptedLockerApplicationsCount = $conn_local->prepare("CALL get_accepted_locker_applications_count()");
+                        $stmtAcceptedLockerApplicationsCount->execute();
+
+                        $acceptedLockerApplicationsCountResultSet = $stmtAcceptedLockerApplicationsCount->get_result();
+                        $acceptedLockerApplicationsCountRow = $acceptedLockerApplicationsCountResultSet->fetch_assoc();
+
+                        $stmtAcceptedLockerApplicationsCount->close();
+                        $conn_local->next_result();
+
+                        // Get rejected locker application
+                        $stmtRejectedLockerApplicationsCount = $conn_local->prepare("CALL get_rejected_locker_applications_count()");
+                        $stmtRejectedLockerApplicationsCount->execute();
+
+                        $rejectedLockerApplicationsCountResultSet = $stmtRejectedLockerApplicationsCount->get_result();
+                        $rejectedLockerApplicationsCountRow = $rejectedLockerApplicationsCountResultSet->fetch_assoc();
+
+                        $stmtRejectedLockerApplicationsCount->close();
+                        $conn_local->next_result();
+
+                        // Get revoked locker application
+                        $stmtRevokedLockerApplicationsCount = $conn_local->prepare("CALL get_revoked_locker_applications_count()");
+                        $stmtRevokedLockerApplicationsCount->execute();
+
+                        $revokedLockerApplicationsCountResultSet = $stmtRevokedLockerApplicationsCount->get_result();
+                        $revokedLockerApplicationsCountRow = $revokedLockerApplicationsCountResultSet->fetch_assoc();
+
+                        $stmtRevokedLockerApplicationsCount->close();
+                        $conn_local->next_result();
+                    ?>
+
                     <!-- Activated users -->
                     <div class="data-count">
                         <div class="count">
@@ -348,6 +330,18 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="recent-container">
                     <!-- Recent user activation -->
                     <div class="recent-user-account-activation">
+                        <?php
+                            // Get recent activated user
+                            $stmtRecentActivatedUser = $conn_local->prepare("CALL get_recent_user_account_activation()");
+                            $stmtRecentActivatedUser->execute();
+
+                            $recentActivatedUserResultSet = $stmtRecentActivatedUser->get_result();
+                            $recentActivatedUserRow = $recentActivatedUserResultSet->fetch_assoc();
+
+                            $stmtRecentActivatedUser->close();
+                            $conn_local->next_result();
+                        ?>
+
                         <h4>Recent User Activation</h4>
 
                         <?php if ($recentActivatedUserRow): ?>
@@ -386,6 +380,17 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                     <!-- Recent locker application -->
                     <div class="recent-locker-application"> 
+                        <?php
+                            // Get recent locker application
+                            $stmtRecentLockerApplication = $conn_local->prepare("CALL get_recent_locker_application()");
+                            $stmtRecentLockerApplication->execute();
+
+                            $recentLockerApplicationResultSet = $stmtRecentLockerApplication->get_result();
+
+                            $stmtRecentLockerApplication->close();
+                            $conn_local->next_result();
+                        ?>
+
                         <h4>Recent Locker Applications</h4>
 
                         <?php if ($recentLockerApplicationResultSet->num_rows > 0): ?>
@@ -410,7 +415,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                 <td data-label="Location"><?= $recentLockerApplicationRow['location'] ?></td>
                                                 <td data-label="Slot"><?= $recentLockerApplicationRow['slot_number'] ?></td>
                                                 <td data-label="Size"><?= $recentLockerApplicationRow['size'] ?></td>
-                                                <td data-label="Price"><?= $recentLockerApplicationRow['price'] ?></td>
+                                                <td data-label="Price">&#8369;<?= $recentLockerApplicationRow['price'] ?></td>
                                                 <td data-label="Date"><?= $recentLockerApplicationRow['created_at'] ?></td>
                                             </tr>
                                         <?php endwhile; ?>

@@ -207,70 +207,30 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
         <div class="content">
             <div id="lockers">
-                <?php
-                    // Pending locker application
-                    $search = trim($_GET['searchPendingApplication'] ?? '');
-                    $filter = strtolower($_GET['filterPendingApplication'] ?? '');
-
-                    if (!empty($search) || !empty($filter)) {
-                        $stmtPending = $conn_local->prepare("CALL getSearchFilterPendingLockerApplications(?, ?)");
-                        $stmtPending->bind_param("ss", $search, $filter);
-                    } else {
-                        $stmtPending = $conn_local->prepare("CALL getPendingLockerApplications()");
-                    }
-
-                    $stmtPending->execute();
-                    $pendingResultSet = $stmtPending->get_result();
-                    $stmtPending->close();
-
-                    $conn_local->next_result();
-                    $conn_local->store_result();
-
-                    while ($conn_local->next_result()) { $conn_local->store_result(); }
-
-                    // Accepted locker application
-                    $search = trim($_GET['searchAcceptedApplication'] ?? '');
-                    $filter = strtolower($_GET['filterAcceptedApplication'] ?? '');
-
-                    if (!empty($search) || !empty($filter)) {
-                        $stmtAccepted = $conn_local->prepare("CALL getSearchFilterAcceptedLockerApplications(?, ?)");
-                        $stmtAccepted->bind_param("ss", $search, $filter);
-                    } else {
-                        $stmtAccepted = $conn_local->prepare("CALL getAcceptedLockerApplications()");
-                    }
-
-                    $stmtAccepted->execute();
-                    $acceptedResultSet = $stmtAccepted->get_result();
-                    $stmtAccepted->close();
-
-                    $conn_local->next_result();
-                    $conn_local->store_result();
-
-                    while ($conn_local->next_result()) { $conn_local->store_result(); }
-
-                    // Locker application history 
-                    $search = trim($_GET['searchApplicationHistory'] ?? '');
-                    $filter = strtolower($_GET['filterApplicationHistory'] ?? '');
-
-                    if (!empty($search) || !empty($filter)) {
-                        $stmtHistory = $conn_local->prepare("CALL getSearchFilterLockerApplicationHistory(?, ?)");
-                        $stmtHistory->bind_param("ss", $search, $filter);
-                    } else {
-                        $stmtHistory = $conn_local->prepare("CALL getLockerApplicationHistory()");
-                    }
-
-                    $stmtHistory->execute();
-                    $historyResultSet = $stmtHistory->get_result();
-                    $stmtHistory->close();
-
-                    $conn_local->next_result();
-                    $conn_local->store_result();
-
-                    while ($conn_local->next_result()) { $conn_local->store_result(); }
-                ?>
-                
-                <!--- Pending application offcanvas -->
+                <!-- Pending application offcanvas -->
                 <div class="offcanvas offcanvas-end" id="lockerPendingApplicationOffcanvas">
+                    <?php
+                        // Pending locker application
+                        $search = trim($_GET['searchPendingApplication'] ?? '');
+                        $filter = strtolower($_GET['filterPendingApplication'] ?? '');
+
+                        if (!empty($search) || !empty($filter)) {
+                            $stmtPending = $conn_local->prepare("CALL getSearchFilterPendingLockerApplications(?, ?)");
+                            $stmtPending->bind_param("ss", $search, $filter);
+                        } else {
+                            $stmtPending = $conn_local->prepare("CALL getPendingLockerApplications()");
+                        }
+
+                        $stmtPending->execute();
+                        $pendingResultSet = $stmtPending->get_result();
+                        $stmtPending->close();
+
+                        $conn_local->next_result();
+                        $conn_local->store_result();
+
+                        while ($conn_local->next_result()) { $conn_local->store_result(); }
+                    ?>
+
                     <div class="offcanvas-header">
                         <h3 class="offcanvas-title">Pending Applications</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
@@ -405,8 +365,30 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </div>
                 <?php } ?>
 
-                <!--- Accepted application offcanvas -->
+                <!-- Accepted application offcanvas -->
                 <div class="offcanvas offcanvas-end" id="lockerAcceptedApplicationOffcanvas">
+                    <?php
+                        // Accepted locker application
+                        $search = trim($_GET['searchAcceptedApplication'] ?? '');
+                        $filter = strtolower($_GET['filterAcceptedApplication'] ?? '');
+
+                        if (!empty($search) || !empty($filter)) {
+                            $stmtAccepted = $conn_local->prepare("CALL getSearchFilterAcceptedLockerApplications(?, ?)");
+                            $stmtAccepted->bind_param("ss", $search, $filter);
+                        } else {
+                            $stmtAccepted = $conn_local->prepare("CALL getAcceptedLockerApplications()");
+                        }
+
+                        $stmtAccepted->execute();
+                        $acceptedResultSet = $stmtAccepted->get_result();
+                        $stmtAccepted->close();
+
+                        $conn_local->next_result();
+                        $conn_local->store_result();
+
+                        while ($conn_local->next_result()) { $conn_local->store_result(); }
+                    ?>
+
                     <div class="offcanvas-header">
                         <h3 class="offcanvas-title">Accepted Applications</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
@@ -505,8 +487,30 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </div>
                 <?php } ?>
 
-                <!--- Application history offcanvas -->
+                <!-- Application history offcanvas -->
                 <div class="offcanvas offcanvas-end" id="lockerApplicationHistoryOffcanvas">
+                    <?php
+                        // Locker application history 
+                        $search = trim($_GET['searchApplicationHistory'] ?? '');
+                        $filter = strtolower($_GET['filterApplicationHistory'] ?? '');
+
+                        if (!empty($search) || !empty($filter)) {
+                            $stmtHistory = $conn_local->prepare("CALL getSearchFilterLockerApplicationHistory(?, ?)");
+                            $stmtHistory->bind_param("ss", $search, $filter);
+                        } else {
+                            $stmtHistory = $conn_local->prepare("CALL getLockerApplicationHistory()");
+                        }
+
+                        $stmtHistory->execute();
+                        $historyResultSet = $stmtHistory->get_result();
+                        $stmtHistory->close();
+
+                        $conn_local->next_result();
+                        $conn_local->store_result();
+
+                        while ($conn_local->next_result()) { $conn_local->store_result(); }
+                    ?>
+                    
                     <div class="offcanvas-header">
                         <h3 class="offcanvas-title">Application History</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
@@ -592,6 +596,28 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 
                 <!-- Offcanvas for locker locations -->
                 <div class="offcanvas offcanvas-end" id="lockerLocationsOffcanvas">
+                    <?php
+                        // Get locker locations
+                        $search = trim($_GET['searchLockerLocations'] ?? '');
+                        $filter = strtolower($_GET['filterLockerLocations'] ?? '');
+
+                        if (!empty($search) || !empty($filter)) {
+                            // Use search and filter
+                            $stmtLockerLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?)");
+                            $stmtLockerLocation->bind_param("ss", $search, $filter);
+                        } else {
+                            // Use raw
+                            $stmtLockerLocation = $conn_local->prepare("CALL getLockerLocations()");
+                        }
+
+                        $stmtLockerLocation->execute();
+                        $lockerLocationResultSet = $stmtLockerLocation->get_result();
+                        $stmtLockerLocation->close();
+
+                        $conn_local->next_result();
+                        $conn_local->store_result();
+                    ?>
+
                     <div class="offcanvas-header">
                         <div>
                             <h3 class="offcanvas-title">Lockers Locations</h3>
@@ -631,28 +657,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         </header>
 
                         <div class="table-container">
-                            <?php
-                                // Get locker locations
-                                $search = trim($_GET['searchLockerLocations'] ?? '');
-                                $filter = strtolower($_GET['filterLockerLocations'] ?? '');
-
-                                if (!empty($search) || !empty($filter)) {
-                                    // Use search and filter
-                                    $stmtLockerLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?)");
-                                    $stmtLockerLocation->bind_param("ss", $search, $filter);
-                                } else {
-                                    // Use raw
-                                    $stmtLockerLocation = $conn_local->prepare("CALL getLockerLocations()");
-                                }
-
-                                $stmtLockerLocation->execute();
-                                $lockerLocationResultSet = $stmtLockerLocation->get_result();
-                                $stmtLockerLocation->close();
-
-                                $conn_local->next_result();
-                                $conn_local->store_result();
-                            ?>
-
                             <?php if ($lockerLocationResultSet->num_rows > 0): ?>
                                 <table class="table table-borderless">
                                     <thead>
@@ -799,6 +803,28 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                 <!-- Offcanvas for locker sizes -->
                 <div class="offcanvas offcanvas-end" id="lockerSizesOffcanvas">
+                    <?php
+                        // Get locker sizes
+                        $search = trim($_GET['searchLockerSizes'] ?? '');
+                        $filter = strtolower($_GET['filterLockerSizes'] ?? '');
+
+                        if (!empty($search) || !empty($filter)) {
+                            // Use search and filter
+                            $stmtLockerSizes = $conn_local->prepare("CALL getSearchFilterLockerSizes(?, ?)");
+                            $stmtLockerSizes->bind_param("ss", $search, $filter);
+                        } else {
+                            // Use raw
+                            $stmtLockerSizes = $conn_local->prepare("CALL getLockerSizes()");
+                        }
+
+                        $stmtLockerSizes->execute();
+                        $lockerSizesResultSet = $stmtLockerSizes->get_result();
+                        $stmtLockerSizes->close();
+
+                        $conn_local->next_result();
+                        $conn_local->store_result();
+                    ?>
+
                     <div class="offcanvas-header">
                         <h3 class="offcanvas-title">Lockers Sizes & Prices</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
@@ -837,28 +863,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         </header>
 
                         <div class="table-container">
-                            <?php
-                                // Get locker sizes
-                                $search = trim($_GET['searchLockerSizes'] ?? '');
-                                $filter = strtolower($_GET['filterLockerSizes'] ?? '');
-
-                                if (!empty($search) || !empty($filter)) {
-                                    // Use search and filter
-                                    $stmtLockerSizes = $conn_local->prepare("CALL getSearchFilterLockerSizes(?, ?)");
-                                    $stmtLockerSizes->bind_param("ss", $search, $filter);
-                                } else {
-                                    // Use raw
-                                    $stmtLockerSizes = $conn_local->prepare("CALL getLockerSizes()");
-                                }
-
-                                $stmtLockerSizes->execute();
-                                $lockerSizesResultSet = $stmtLockerSizes->get_result();
-                                $stmtLockerSizes->close();
-
-                                $conn_local->next_result();
-                                $conn_local->store_result();
-                            ?>
-
                             <?php if ($lockerSizesResultSet->num_rows > 0): ?>
                                 <table class="table table-borderless">
                                     <thead>
@@ -1021,6 +1025,25 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                 <!-- Offcanvas for locker logs -->
                 <div class="offcanvas offcanvas-end" id="lockerLogsOffcanvas">
+                    <?php
+                        // Get user account logs
+                        $limit = 18;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+                        if ($page < 1) $page = 1;
+
+                        $offset = ($page - 1) * $limit;
+
+                        $stmtLockerLogs = $conn_local->prepare("CALL getLockerLogs(?, ?)");
+                        $stmtLockerLogs->bind_param("ii", $limit, $offset);
+
+                        $stmtLockerLogs->execute();
+                        $userLockerLogsResultSet = $stmtLockerLogs->get_result();
+                        $stmtLockerLogs->close();
+
+                        $conn_local->next_result();
+                    ?>
+
                     <div class="offcanvas-header">
                         <h3 class="offcanvas-title">Locker Logs</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
@@ -1028,25 +1051,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                     <div class="offcanvas-body">
                         <div class="table-container">
-                            <?php
-                                // Get user account logs
-                                $limit = 18;
-                                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-
-                                if ($page < 1) $page = 1;
-
-                                $offset = ($page - 1) * $limit;
-
-                                $stmtLockerLogs = $conn_local->prepare("CALL getLockerLogs(?, ?)");
-                                $stmtLockerLogs->bind_param("ii", $limit, $offset);
-
-                                $stmtLockerLogs->execute();
-                                $userLockerLogsResultSet = $stmtLockerLogs->get_result();
-                                $stmtLockerLogs->close();
-
-                                $conn_local->next_result();
-                            ?>
-
                             <?php if ($userLockerLogsResultSet->num_rows > 0): ?>
                                 <table class="table table-borderless">
                                     <thead>
@@ -1102,7 +1106,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </div>
                 </div>
 
-                <!-- Lockers -->
+                <!-- Lockers header -->
                 <header>
                     <form method="GET">
                         <div class="search-group">
@@ -1128,6 +1132,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </form>
                 </header>
                 
+                <!-- Lockers -->
                 <div class="table-container">
                     <?php
                         // Get locker locations

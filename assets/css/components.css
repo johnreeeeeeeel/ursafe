@@ -153,6 +153,22 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
     color: var(--text-dark-secondary);
 }
 
+/* Pagination */
+.pagination {
+    margin: 0 auto;
+}
+
+.pagination .page-item.active {
+    background-color: var(--color-primary-base);
+    color: var(--text-light-secondary);
+}
+
+.pagination .page-item a {
+    box-shadow: none;
+    border: 1px solid var(--color-primary-base);
+    color: var(--color-primary-base);
+}
+
 /* Button */
 .btn {
     outline: none;
@@ -299,31 +315,27 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
     color: var(--text-dark-tertiary);
 }
 
-/* Pending badges */
+/* Badges */
 .pending-badge {
     background-color: var(--warning-base);
     color: var(--text-light-primary);
 }
 
-/* Pending badges */
 .accepted-badge {
     background-color: var(--color-primary-base);
     color: var(--text-light-primary);
 }
 
-/* Revoked badges */
 .revoked-badge {
     background-color: var(--danger-base);
     color: var(--text-light-primary);
 }
 
-/* Rejected badges */
 .rejected-badge {
     background-color: var(--danger-base);
     color: var(--text-light-primary);
 }
 
-/* Cancelled badges */
 .cancelled-badge {
     background-color: var(--success-base);
     color: var(--text-light-primary);

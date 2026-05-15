@@ -163,6 +163,7 @@ body #links div:nth-child(2) a:hover {
   padding: 0;
 }
 
+/* Forgot password */
 .auth-container .auth-form form .forgot-password {
   display: flex;
   justify-content: flex-end;
@@ -171,6 +172,7 @@ body #links div:nth-child(2) a:hover {
   cursor: pointer;
 }
 
+/* Verify OTP */
 .verify-otp-container {
   width: 350px;
 }

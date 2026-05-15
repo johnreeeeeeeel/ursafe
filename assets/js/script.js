@@ -36,7 +36,7 @@ document.querySelectorAll(".toggle-password").forEach(icon => {
     });
 });
 
-// Alert message timout    
+// Alert message    
 document.addEventListener("DOMContentLoaded", function () {
     const toastEl = document.getElementById('messageAlert');
     if (toastEl) {
@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// Remove focus when modal closes
 document.addEventListener('hide.bs.modal', function (e) {
     const modal = e.target;
 

@@ -36,11 +36,13 @@ BEGIN
 
 &#x20;       username,
 
-&#x20;       email
+&#x20;       email,
+
+&#x09;DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM users
 
-&#x20;   ORDER BY lastname ASC;
+&#x20;   ORDER BY created\_at DESC;
 
 END //
 
@@ -68,6 +70,8 @@ CREATE OR REPLACE PROCEDURE getSearchFilterUsers (
 
 BEGIN
 
+
+
 &#x20;   SELECT
 
 &#x20;       id,
@@ -78,7 +82,9 @@ BEGIN
 
 &#x20;       lastname,
 
-&#x20;       TRIM(CONCAT(firstname, ' ',
+&#x20;       TRIM(CONCAT(
+
+&#x20;           firstname, ' ',
 
 &#x20;           IFNULL(CONCAT(middlename, ' '), ''),
 
@@ -96,13 +102,19 @@ BEGIN
 
 &#x20;       username,
 
-&#x20;       email
+&#x20;       email,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM users
 
-&#x20;   WHERE (
 
-&#x20;       searchTerm IS NULL OR searchTerm = ''
+
+&#x20;   WHERE
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
 
 &#x20;       OR id LIKE CONCAT('%', searchTerm, '%')
 
@@ -116,43 +128,39 @@ BEGIN
 
 &#x20;       OR email LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;       OR TRIM(CONCAT(firstname, ' ',
 
-&#x20;           IFNULL(CONCAT(middlename, ' '), ''),
-
-&#x20;           lastname
-
-&#x20;       )) LIKE CONCAT('%', searchTerm, '%')
-
-&#x20;   )
 
 &#x20;   ORDER BY
 
+&#x20;   	CASE
+
+&#x20;           WHEN sortOrder = 'a-z' THEN firstname
+
+&#x20;       END ASC,
+
+&#x20;
+
 &#x20;       CASE
 
-&#x20;           WHEN sortOrder = 'desc' THEN TRIM(CONCAT(firstname, ' ',
-
-&#x20;               IFNULL(CONCAT(middlename, ' '), ''),
-
-&#x20;               lastname))
+&#x20;           WHEN sortOrder = 'z-a' THEN firstname
 
 &#x20;       END DESC,
 
-
+&#x20;
 
 &#x20;       CASE
 
-&#x20;           WHEN sortOrder = 'asc'
+&#x20;           WHEN sortOrder = 'oldest' THEN created\_at
 
-&#x20;             OR sortOrder = ''
+&#x20;       END ASC,
 
-&#x20;             OR sortOrder IS NULL THEN TRIM(CONCAT(firstname, ' ',
+&#x20;
 
-&#x20;               IFNULL(CONCAT(middlename, ' '), ''),
+&#x20;       CASE
 
-&#x20;               lastname))
+&#x20;           WHEN sortOrder = 'newest' THEN created\_at
 
-&#x20;       END ASC;
+&#x20;       END DESC;
 
 END //
 
@@ -188,7 +196,7 @@ BEGIN
 
 &#x20;       description,
 
-&#x20;       created\_at
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM user\_account\_logs
 
@@ -236,7 +244,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_students\_count()
+CREATE OR REPLACE PROCEDURE get\_students\_count()
 
 BEGIN
 
@@ -260,11 +268,23 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_recent\_user\_account\_activation()
+CREATE OR REPLACE PROCEDURE get\_recent\_user\_account\_activation()
 
 BEGIN
 
-&#x20;   SELECT \*
+&#x20;   SELECT 
+
+&#x20;       id,
+
+&#x20;       username,
+
+&#x20;       lastname,
+
+&#x09;firstname,
+
+&#x09;middlename,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at 
 
 &#x20;   FROM recent\_user\_account\_activation;
 

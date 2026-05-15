@@ -182,6 +182,26 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
             <div id="users">
                 <!-- Offcanvas for user logs -->
                 <div class="offcanvas offcanvas-end" id="userAccountLogsOffcanvas">
+                    <?php
+                        // Get user account logs
+                        $limit = 18;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+                        if ($page < 1) $page = 1;
+
+                        $offset = ($page - 1) * $limit;
+
+                        $stmtUserAccountLogs = $conn_local->prepare("CALL getUserAccountLogs(?, ?)");
+                        $stmtUserAccountLogs->bind_param("ii", $limit, $offset);
+
+                        $stmtUserAccountLogs->execute();
+                        $userAccountLogsResultSet = $stmtUserAccountLogs->get_result();
+                        $stmtUserAccountLogs->close();
+
+                        $conn_local->next_result();
+                        $conn_local->store_result();
+                    ?>
+
                     <div class="offcanvas-header">
                         <h3 class="offcanvas-title">User Account Logs</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
@@ -189,26 +209,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                     <div class="offcanvas-body">
                         <div class="table-container">
-                            <?php
-                                // Get user account logs
-                                $limit = 18;
-                                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-
-                                if ($page < 1) $page = 1;
-
-                                $offset = ($page - 1) * $limit;
-
-                                $stmtUserAccountLogs = $conn_local->prepare("CALL getUserAccountLogs(?, ?)");
-                                $stmtUserAccountLogs->bind_param("ii", $limit, $offset);
-
-                                $stmtUserAccountLogs->execute();
-                                $userAccountLogsResultSet = $stmtUserAccountLogs->get_result();
-                                $stmtUserAccountLogs->close();
-
-                                $conn_local->next_result();
-                                $conn_local->store_result();
-                            ?>
-
                             <?php if ($userAccountLogsResultSet->num_rows > 0): ?>
                                 <table class="table table-borderless">
                                     <thead>
@@ -264,7 +264,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </div>
                 </div>
 
-                <!-- Users -->
+                <!-- Users header -->
                 <header>
                     <form method="GET">
                         <div class="search-group">
@@ -290,6 +290,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </form>
                 </header>
 
+                <!-- Users -->
                 <div class="table-container">
                     <?php
                         // Get users

@@ -415,9 +415,7 @@ section .content {
     }
 }
 
-
-
-
+/* My locker application */ 
 #lockers #myLockerApplicationOffcanvas {
     background-color: var(--bg-secondary) !important;
     width: 100vw !important;
