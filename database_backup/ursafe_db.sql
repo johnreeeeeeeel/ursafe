@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 12, 2026 at 01:01 PM
+-- Generation Time: May 18, 2026 at 07:33 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -51,7 +51,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `acceptLockerApplication` (IN `p_app
     END IF;
 
     UPDATE locker_applications
-    SET status = 'Accepted'
+    SET status = 'Accepted', updated_at = NOW()
     WHERE id = p_application_id;
 
     UPDATE locker_slots
@@ -87,6 +87,21 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `activateUserAccount` (IN `p_id` VAR
         p_username,
         p_email,
         p_password
+    );
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `addLocker` (IN `p_slot_number` INT, IN `p_location_id` INT, IN `p_size_id` INT)   BEGIN
+    INSERT INTO locker_slots (
+        slot_number,
+        location_id,
+        size_id,
+        status
+    )
+    VALUES (
+        p_slot_number,
+        p_location_id,
+        p_size_id,
+        'Available'
     );
 END$$
 
@@ -144,9 +159,14 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `cancelLockerApplication` (IN `p_application_id` INT)   BEGIN
     UPDATE locker_applications
-    SET status = 'Cancelled'
+    SET status = 'Cancelled', updated_at = NOW()
     WHERE id = p_application_id
       AND status = 'Pending';
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteLocker` (IN `p_id` INT)   BEGIN
+    DELETE FROM locker_slots
+    WHERE id = p_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteLockerLocation` (IN `p_id` INT)   BEGIN
@@ -177,8 +197,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcceptedLockerApplications` ()  
         ll.location,
         ls.size_id,
         lsz.size,
-        lsz.price
-
+        lsz.price,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
     FROM locker_applications la
 
     INNER JOIN users u ON la.user_id = u.id
@@ -187,7 +207,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcceptedLockerApplications` ()  
     INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
     WHERE la.status IN ('Accepted')
 
-    ORDER BY la.id DESC;
+    ORDER BY la.updated_at DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getAdminByEmail` (IN `p_email` VARCHAR(255))   BEGIN
@@ -227,8 +247,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerApplicationHistory` ()   B
         ll.location,
         ls.size_id,
         lsz.size,
-        lsz.price
-
+        lsz.price,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
     FROM locker_applications la
 
     INNER JOIN users u ON la.user_id = u.id
@@ -237,11 +257,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerApplicationHistory` ()   B
     INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
     WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked')
 
-    ORDER BY la.id DESC;
+    ORDER BY la.updated_at DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerLocations` ()   BEGIN
-    SELECT id, location FROM locker_locations;
+    SELECT id,
+	location,
+	DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
+	FROM locker_locations
+    ORDER BY created_at DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerLogs` (IN `p_limit` INT, IN `p_offset` INT)   BEGIN
@@ -249,7 +273,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerLogs` (IN `p_limit` INT, I
         id,
         action,
         description,
-        created_at
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     FROM locker_logs
     ORDER BY created_at DESC
     LIMIT p_offset, p_limit;
@@ -269,9 +293,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockersByLocation` (IN `p_locati
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerSizes` ()   BEGIN
-    SELECT id, size, price
-    FROM locker_sizes
-    ORDER BY id ASC;
+    SELECT id,
+        size,
+        price,
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
+        FROM locker_sizes
+    ORDER BY created_at DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyAcceptedLockerApplications` (IN `p_user_id` VARCHAR(255))   BEGIN
@@ -281,14 +308,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyAcceptedLockerApplications` (I
         ls.slot_number,
         ll.location,
         sz.size,
-        sz.price
+        sz.price,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
     FROM locker_applications la
     INNER JOIN locker_slots ls ON la.slot_id = ls.id
     INNER JOIN locker_locations ll ON ls.location_id = ll.id
     INNER JOIN locker_sizes sz ON ls.size_id = sz.id
     WHERE la.user_id = p_user_id
       AND la.status IN ('Accepted')
-    ORDER BY la.id DESC;
+    ORDER BY la.updated_at DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyLockerApplicationHistory` (IN `p_user_id` VARCHAR(255))   BEGIN
@@ -298,14 +326,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyLockerApplicationHistory` (IN 
         ls.slot_number,
         ll.location,
         sz.size,
-        sz.price
+        sz.price,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
     FROM locker_applications la
     INNER JOIN locker_slots ls ON la.slot_id = ls.id
     INNER JOIN locker_locations ll ON ls.location_id = ll.id
     INNER JOIN locker_sizes sz ON ls.size_id = sz.id
     WHERE la.user_id = p_user_id
       AND la.status IN ('Cancelled', 'Rejected', 'Revoked')
-    ORDER BY la.id DESC;
+    ORDER BY la.updated_at DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyPendingLockerApplications` (IN `p_user_id` VARCHAR(255))   BEGIN
@@ -315,14 +344,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyPendingLockerApplications` (IN
         ls.slot_number,
         ll.location,
         sz.size,
-        sz.price
+        sz.price,
+        DATE_FORMAT(la.created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     FROM locker_applications la
     INNER JOIN locker_slots ls ON la.slot_id = ls.id
     INNER JOIN locker_locations ll ON ls.location_id = ll.id
     INNER JOIN locker_sizes sz ON ls.size_id = sz.id
     WHERE la.user_id = p_user_id
       AND la.status IN ('Pending')
-    ORDER BY la.id DESC;
+    ORDER BY la.created_at DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getPendingLockerApplications` ()   BEGIN
@@ -343,8 +373,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getPendingLockerApplications` ()   
         ll.location,
         ls.size_id,
         lsz.size,
-        lsz.price
-
+        lsz.price,
+        DATE_FORMAT(la.created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     FROM locker_applications la
 
     INNER JOIN users u ON la.user_id = u.id
@@ -353,44 +383,223 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getPendingLockerApplications` ()   
     INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
     WHERE la.status IN ('Pending')
 
-    ORDER BY la.id DESC;
+    ORDER BY la.created_at DESC;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerLocation` (IN `p_search` VARCHAR(255), IN `p_filter` VARCHAR(10))   BEGIN
-    SELECT id, location
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterAcceptedLockerApplications` (IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255))   BEGIN
+    SELECT
+        la.id AS application_id,
+        la.user_id,
+        la.slot_id,
+        la.status,
+
+        TRIM(CONCAT(
+            u.firstname, ' ',
+            IFNULL(CONCAT(u.middlename, ' '), ''),
+            u.lastname
+        )) AS fullname,
+
+        u.email,
+        ls.slot_number,
+        ll.location,
+        lsz.size,
+        lsz.price,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+
+    FROM locker_applications la
+    INNER JOIN users u ON la.user_id = u.id
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
+
+    WHERE la.status = 'Accepted'
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+        OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+        OR u.email LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+    )
+
+    ORDER BY
+        CASE WHEN filterTerm = 'newest' THEN la.updated_at END DESC,
+        CASE WHEN filterTerm = 'oldest' THEN la.updated_at END ASC,
+        la.updated_at DESC;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerApplicationHistory` (IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255))   BEGIN
+    SELECT
+        la.id AS application_id,
+        la.user_id,
+        la.slot_id,
+        la.status,
+
+        TRIM(CONCAT(
+            u.firstname, ' ',
+            IFNULL(CONCAT(u.middlename, ' '), ''),
+            u.lastname
+        )) AS fullname,
+
+        u.email,
+        ls.slot_number,
+        ll.location,
+        lsz.size,
+        lsz.price,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+
+    FROM locker_applications la
+    INNER JOIN users u ON la.user_id = u.id
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
+
+    WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked')
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+        OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+        OR u.email LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+    )
+
+    ORDER BY
+        CASE WHEN filterTerm = 'newest' THEN la.updated_at END DESC,
+        CASE WHEN filterTerm = 'oldest' THEN la.updated_at END ASC,
+        la.updated_at DESC;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerLocation` (IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255))   BEGIN
+    SELECT id,
+    location,
+    DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     FROM locker_locations
-    WHERE (p_search IS NULL OR p_search = ''
-           OR location LIKE CONCAT('%', p_search, '%'))
+
+    WHERE
+    	searchTerm IS NULL
+        OR searchTerm = ''
+        OR location LIKE CONCAT('%', searchTerm, '%')
+ 
     ORDER BY
         CASE
-            WHEN p_filter = 'desc' THEN location
-        END DESC,
+            WHEN filterTerm = 'a-z' THEN location
+        END ASC,
+ 
         CASE
-            WHEN p_filter = 'asc' OR p_filter IS NULL OR p_filter = '' THEN location
-        END ASC;
+            WHEN filterTerm = 'z-a' THEN location
+        END DESC,
+ 
+        CASE
+            WHEN filterTerm = 'oldest' THEN created_at
+        END ASC,
+ 
+        CASE
+            WHEN filterTerm = 'newest' THEN created_at
+        END DESC;
+
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerSizes` (IN `p_search` VARCHAR(255), IN `p_filter` VARCHAR(10))   BEGIN
-    SELECT id, size, price
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerSizes` (IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255))   BEGIN
+
+    SELECT
+        id,
+        size,
+        price,
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     FROM locker_sizes
-    WHERE (p_search IS NULL OR p_search = ''
-           OR size LIKE CONCAT('%', p_search, '%'))
+
+    WHERE (
+        searchTerm IS NULL
+        OR searchTerm = ''
+        OR size LIKE CONCAT('%', searchTerm, '%')
+        OR price LIKE CONCAT('%', searchTerm, '%')
+    )
+
     ORDER BY
         CASE
-            WHEN p_filter = 'desc' THEN size
-        END DESC,
+            WHEN filterTerm = 'a-z' THEN size
+        END ASC,
+
         CASE
-            WHEN p_filter = 'asc' OR p_filter IS NULL OR p_filter = '' THEN size
-        END ASC;
+            WHEN filterTerm = 'z-a' THEN size
+        END DESC,
+
+        CASE
+            WHEN filterTerm = 'oldest' THEN created_at
+        END ASC,
+
+        CASE
+            WHEN filterTerm = 'newest' THEN created_at
+        END DESC,
+
+        CASE
+            WHEN filterTerm = 'cheaper' THEN price
+        END ASC,
+
+        CASE
+            WHEN filterTerm = 'expensive' THEN price
+        END DESC;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterPendingLockerApplications` (IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255))   BEGIN
+    SELECT
+        la.id AS application_id,
+        la.user_id,
+        la.slot_id,
+        la.status,
+
+        TRIM(CONCAT(
+            u.firstname, ' ',
+            IFNULL(CONCAT(u.middlename, ' '), ''),
+            u.lastname
+        )) AS fullname,
+
+        u.email,
+        ls.slot_number,
+        ll.location,
+        lsz.size,
+        lsz.price,
+        DATE_FORMAT(la.created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
+
+    FROM locker_applications la
+    INNER JOIN users u ON la.user_id = u.id
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
+
+    WHERE la.status = 'Pending'
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+        OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+        OR u.email LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+    )
+
+    ORDER BY
+        CASE WHEN filterTerm = 'newest' THEN la.created_at END DESC,
+        CASE WHEN filterTerm = 'oldest' THEN la.created_at END ASC,
+        la.created_at DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterUsers` (IN `searchTerm` VARCHAR(255), IN `sortOrder` VARCHAR(255))   BEGIN
+
     SELECT
         id,
         firstname,
         middlename,
         lastname,
-        TRIM(CONCAT(firstname, ' ',
+        TRIM(CONCAT(
+            firstname, ' ',
             IFNULL(CONCAT(middlename, ' '), ''),
             lastname
         )) AS fullname,
@@ -399,35 +608,36 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterUsers` (IN `searchTe
         institute,
         program,
         username,
-        email
+        email,
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     FROM users
-    WHERE (
-        searchTerm IS NULL OR searchTerm = ''
+
+    WHERE
+        searchTerm IS NULL
+        OR searchTerm = ''
         OR id LIKE CONCAT('%', searchTerm, '%')
         OR firstname LIKE CONCAT('%', searchTerm, '%')
         OR middlename LIKE CONCAT('%', searchTerm, '%')
         OR lastname LIKE CONCAT('%', searchTerm, '%')
         OR username LIKE CONCAT('%', searchTerm, '%')
         OR email LIKE CONCAT('%', searchTerm, '%')
-        OR TRIM(CONCAT(firstname, ' ',
-            IFNULL(CONCAT(middlename, ' '), ''),
-            lastname
-        )) LIKE CONCAT('%', searchTerm, '%')
-    )
-    ORDER BY
-        CASE
-            WHEN sortOrder = 'desc' THEN TRIM(CONCAT(firstname, ' ',
-                IFNULL(CONCAT(middlename, ' '), ''),
-                lastname))
-        END DESC,
 
+    ORDER BY
+    	CASE
+            WHEN sortOrder = 'a-z' THEN firstname
+        END ASC,
+ 
         CASE
-            WHEN sortOrder = 'asc'
-              OR sortOrder = ''
-              OR sortOrder IS NULL THEN TRIM(CONCAT(firstname, ' ',
-                IFNULL(CONCAT(middlename, ' '), ''),
-                lastname))
-        END ASC;
+            WHEN sortOrder = 'z-a' THEN firstname
+        END DESC,
+ 
+        CASE
+            WHEN sortOrder = 'oldest' THEN created_at
+        END ASC,
+ 
+        CASE
+            WHEN sortOrder = 'newest' THEN created_at
+        END DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getUserAccountLogs` (IN `p_limit` INT, IN `p_offset` INT)   BEGIN
@@ -435,7 +645,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getUserAccountLogs` (IN `p_limit` I
         id,
 	action,
         description,
-        created_at
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     FROM user_account_logs
     ORDER BY created_at DESC
     LIMIT p_offset, p_limit;
@@ -520,9 +730,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getUsers` ()   BEGIN
         institute,
         program,
         username,
-        email
+        email,
+	DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     FROM users
-    ORDER BY lastname ASC;
+    ORDER BY created_at DESC;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `get_accepted_locker_applications_count` ()   BEGIN
@@ -556,12 +767,28 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `get_pending_locker_applications_cou
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `get_recent_locker_application` ()   BEGIN
-    SELECT *
+    SELECT
+    	id,
+        user_id,
+        firstname,
+        middlename,
+        lastname,
+        location,
+        slot_number,
+        size,
+        price,
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at 
     FROM recent_locker_application;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `get_recent_user_account_activation` ()   BEGIN
-    SELECT *
+    SELECT 
+        id,
+        username,
+        lastname,
+	firstname,
+	middlename,
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at 
     FROM recent_user_account_activation;
 END$$
 
@@ -610,7 +837,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `rejectLockerApplication` (IN `p_app
     END IF;
 
     UPDATE locker_applications
-    SET status = 'Rejected'
+    SET status = 'Rejected', updated_at = NOW()
     WHERE id = p_application_id;
 
 END$$
@@ -636,7 +863,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `revokeLockerApplication` (IN `p_app
     END IF;
 
     UPDATE locker_applications
-    SET status = 'Revoked'
+    SET status = 'Revoked', updated_at = NOW()
     WHERE id = p_application_id;
 
     UPDATE locker_slots
@@ -645,6 +872,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `revokeLockerApplication` (IN `p_app
 
     COMMIT;
 
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLocker` (IN `p_id` INT, IN `p_slot_number` INT, IN `p_status` VARCHAR(255))   BEGIN
+    UPDATE locker_slots
+    SET
+        slot_number = p_slot_number,
+        status = p_status
+    WHERE id = p_id;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerLocation` (IN `p_id` INT, IN `p_location` VARCHAR(255))   BEGIN
@@ -700,7 +935,8 @@ CREATE TABLE `locker_applications` (
   `user_id` varchar(255) NOT NULL,
   `slot_id` int(11) NOT NULL,
   `status` varchar(255) NOT NULL DEFAULT 'Pending',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -848,18 +1084,19 @@ DELIMITER ;
 
 CREATE TABLE `locker_locations` (
   `id` int(11) NOT NULL,
-  `location` varchar(255) NOT NULL
+  `location` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `locker_locations`
 --
 
-INSERT INTO `locker_locations` (`id`, `location`) VALUES
-(5, 'AB 1st Floor'),
-(2, 'AB 2nd Floor'),
-(3, 'AB 3rd Floor'),
-(4, 'AB 4th Floor');
+INSERT INTO `locker_locations` (`id`, `location`, `created_at`) VALUES
+(18, 'AB 1st Floor', '2026-05-13 09:57:44'),
+(19, 'AB 2nd Floor', '2026-05-13 09:57:47'),
+(20, 'AB 3rd Floor', '2026-05-13 09:57:51'),
+(21, 'AB 4th Floor', '2026-05-13 09:57:54');
 
 --
 -- Triggers `locker_locations`
@@ -938,17 +1175,18 @@ CREATE TABLE `locker_logs` (
 CREATE TABLE `locker_sizes` (
   `id` int(11) NOT NULL,
   `size` varchar(255) NOT NULL,
-  `price` double(10,2) NOT NULL
+  `price` double(10,2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `locker_sizes`
 --
 
-INSERT INTO `locker_sizes` (`id`, `size`, `price`) VALUES
-(1, 'Small', 80.00),
-(2, 'Medium ', 100.00),
-(3, 'Large', 150.00);
+INSERT INTO `locker_sizes` (`id`, `size`, `price`, `created_at`) VALUES
+(10, 'Small', 80.00, '2026-05-13 09:58:07'),
+(11, 'Medium ', 100.00, '2026-05-13 09:58:12'),
+(12, 'Large', 150.00, '2026-05-13 09:58:32');
 
 --
 -- Triggers `locker_sizes`
@@ -1021,26 +1259,9 @@ CREATE TABLE `locker_slots` (
   `slot_number` int(11) NOT NULL,
   `location_id` int(11) NOT NULL,
   `size_id` int(11) NOT NULL,
-  `status` varchar(255) DEFAULT 'Available'
+  `status` varchar(255) DEFAULT 'Available',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `locker_slots`
---
-
-INSERT INTO `locker_slots` (`id`, `slot_number`, `location_id`, `size_id`, `status`) VALUES
-(3, 1, 5, 1, 'Available'),
-(4, 2, 5, 1, 'Available'),
-(5, 3, 5, 1, 'Available'),
-(6, 1, 2, 1, 'Available'),
-(7, 2, 2, 1, 'Available'),
-(8, 3, 2, 1, 'Available'),
-(9, 1, 3, 1, 'Available'),
-(10, 2, 3, 1, 'Available'),
-(11, 3, 3, 1, 'Available'),
-(12, 1, 4, 1, 'Available'),
-(13, 2, 4, 1, 'Available'),
-(14, 3, 4, 1, 'Available');
 
 --
 -- Triggers `locker_slots`
@@ -1162,7 +1383,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `lastname`, `firstname`, `middlename`, `sex`, `dob`, `institute`, `program`, `username`, `email`, `password`, `created_at`) VALUES
-('2024-31214', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'febyjohnrelmalbino', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com', '$2y$10$KMGelGC//8hacGZ9IOF6..AGuc2b0wdTIj5NUxVpR5L7JFUXSPyN.', '2026-05-12 04:49:14');
+('2024-31214', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'febyjohnrelmalbino', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com', '$2y$10$64btR9Y3CFUeqi0c.xQf/Ono03Ap8BySNOXruU723sr7qmcvQDO2O', '2026-05-13 09:57:23');
 
 --
 -- Triggers `users`
@@ -1310,37 +1531,37 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `locker_applications`
 --
 ALTER TABLE `locker_applications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `locker_locations`
 --
 ALTER TABLE `locker_locations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `locker_logs`
 --
 ALTER TABLE `locker_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=152;
 
 --
 -- AUTO_INCREMENT for table `locker_sizes`
 --
 ALTER TABLE `locker_sizes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `locker_slots`
 --
 ALTER TABLE `locker_slots`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `user_account_logs`
 --
 ALTER TABLE `user_account_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables
