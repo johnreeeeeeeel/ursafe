@@ -260,21 +260,52 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             </form>
                         </header>
 
-                        <div class="locker-applications-container">
-                            <div class="card-container">
-                                <?php if ($pendingResultSet->num_rows > 0): ?>
-                                    <div class="cards">
-                                        <?php while ($row = $pendingResultSet->fetch_assoc()) { ?>
-                                            <div class="card pending">
-                                                <p><span>Application ID</span> <span><?= $row['application_id'] ?></span></p>
-                                                <p><span>User ID</span> <span><?= $row['user_id'] ?></span></p>
-                                                <p><span>Fullname</span> <span><?= $row['fullname'] ?></span></p>
-                                                <p><span>Location</span> <span><?= $row['location'] ?></span></p>
-                                                <p><span>Slot</span> <span><?= $row['slot_number'] ?></span></p>
-                                                <p><span>Size</span> <span><?= $row['size'] ?></span></p>
-                                                <p><span>Price</span> <span>&#8369;<?= $row['price'] ?></span></p>
-                                                <p><span>Date Applied</span> <span><?= $row['created_at'] ?></span></p>
+                        <div class="card-container">
+                            <?php if ($pendingResultSet->num_rows > 0): ?>
+                                <div class="cards">
+                                    <?php while ($row = $pendingResultSet->fetch_assoc()) { ?>
+                                        <div class="card pending">
+                                            <div class="card-header">
+                                                <h4>Slot <?= $row['slot_number'] ?></h4>
+                                                <p><?= $row['location'] ?></p>
 
+                                                <span class="badge rounded-pill pending-badge"><?= $row['status'] ?></span>
+                                            </div>
+
+                                            <div class="card-body">
+                                                <div class="locker-details">
+                                                    <p class="label">
+                                                        <i class="fa-solid fa-vault"></i>
+                                                        Locker Details
+                                                    </p>
+                                                    <p>Size: <?= $row['size'] ?></p>
+                                                    <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                    <p>Start on: <?= $row['start_at'] ?></p>
+                                                    <p>End on: <?= $row['end_at'] ?></p>
+                                                </div>
+                                                
+                                                <div class="user-details">
+                                                    <p class="label">
+                                                        <i class="fa-solid fa-address-card"></i>
+                                                        User Details
+                                                    </p>
+
+                                                    <p>User ID: #<?= $row['user_id'] ?></p>
+                                                    <p>Full Name: <?= $row['fullname'] ?></p>
+                                                </div>
+
+                                                <div class="application-details">
+                                                    <p class="label">
+                                                        <i class="fa-brands fa-jxl"></i>
+                                                        Application Details
+                                                    </p>
+
+                                                    <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                    <p>Applied on: <?= $row['created_at'] ?></p>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-footer">
                                                 <div class="action-buttons">
                                                     <button class="sm-btn primary-btn"
                                                         data-bs-toggle="modal"
@@ -291,16 +322,16 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                     </button>
                                                 </div>
                                             </div>
-                                        <?php } ?>
-                                    </div>
-                                <?php else: ?>
-                                    <div id="empty">
-                                        <i class="fa-solid fa-ban"></i>
-                                        <small>No pending application yet</small>
-                                        <small>Try to reload page</small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            <?php else: ?>
+                                <div id="empty">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <small>No pending application yet</small>
+                                    <small>Try to reload page</small>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -418,21 +449,53 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             </form>
                         </header>
 
-                        <div class="locker-applications-container">
-                            <div class="card-container">
-                                <?php if ($acceptedResultSet->num_rows > 0): ?>
-                                    <div class="cards">
-                                        <?php while ($row = $acceptedResultSet->fetch_assoc()) { ?>
-                                            <div class="card accepted">
-                                                <p><span>Application ID</span> <span><?= $row['application_id'] ?></span></p>
-                                                <p><span>User ID</span> <span><?= $row['user_id'] ?></span></p>
-                                                <p><span>Fullname</span> <span><?= $row['fullname'] ?></span></p>
-                                                <p><span>Location</span> <span><?= $row['location'] ?></span></p>
-                                                <p><span>Slot</span> <span><?= $row['slot_number'] ?></span></p>
-                                                <p><span>Size</span> <span><?= $row['size'] ?></span></p>
-                                                <p><span>Price</span> <span>&#8369;<?= $row['price'] ?></span></p>
-                                                <p><span>Date Accepted</span> <span><?= $row['updated_at'] ?></span></p>
+                        <div class="card-container">
+                            <?php if ($acceptedResultSet->num_rows > 0): ?>
+                                <div class="cards">
+                                    <?php while ($row = $acceptedResultSet->fetch_assoc()) { ?>
+                                        <div class="card accepted">
+                                            <div class="card-header">
+                                                <h4>Slot <?= $row['slot_number'] ?></h4>
+                                                <p><?= $row['location'] ?></p>
 
+                                                <span class="badge rounded-pill accepted-badge"><?= $row['status'] ?></span>
+                                            </div>
+
+                                            <div class="card-body">
+                                                <div class="locker-details">
+                                                    <p class="label">
+                                                        <i class="fa-solid fa-vault"></i>
+                                                        Locker Details
+                                                    </p>
+
+                                                    <p>Size: <?= $row['size'] ?></p>
+                                                    <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                    <p>Start on: <?= $row['start_at'] ?></p>
+                                                    <p>End on: <?= $row['end_at'] ?></p>
+                                                </div>
+
+                                                <div class="user-details">
+                                                    <p class="label">
+                                                        <i class="fa-solid fa-address-card"></i>
+                                                        User Details
+                                                    </p>
+
+                                                    <p>User ID: #<?= $row['user_id'] ?></p>
+                                                    <p>Full Name: <?= $row['fullname'] ?></p>
+                                                </div>
+
+                                                <div class="application-details">
+                                                    <p class="label">
+                                                        <i class="fa-brands fa-jxl"></i>
+                                                        Application Details
+                                                    </p>
+
+                                                    <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                    <p>Accepted on: <?= $row['updated_at'] ?></p>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-footer">
                                                 <div class="action-buttons">
                                                     <button class="sm-btn danger-btn"
                                                         data-bs-toggle="modal"
@@ -442,16 +505,16 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                     </button>
                                                 </div>
                                             </div>
-                                        <?php } ?>
-                                    </div>
-                                <?php else: ?>
-                                    <div id="empty">
-                                        <i class="fa-solid fa-ban"></i>
-                                        <small>No accepted application yet</small>
-                                        <small>Try to reload page</small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            <?php else: ?>
+                                <div id="empty">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <small>No accepted application yet</small>
+                                    <small>Try to reload page</small>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -552,6 +615,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                             <th>Slot</th>
                                             <th>Size</th>
                                             <th>Price</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
                                             <th>Status</th>
                                             <th>Date</th>
                                         </tr>
@@ -567,17 +632,21 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                 <td data-label="Slot"><?= $row['slot_number'] ?></td>
                                                 <td data-label="Size"><?= $row['size'] ?></td>
                                                 <td data-label="Price">&#8369;<?= $row['price'] ?></td>
+                                                <td data-label="Start Date"><?= $row['start_at'] ?></td>
+                                                <td data-label="End Date"><?= $row['end_at'] ?></td>
 
                                                 <td data-label="Status">
                                                     <?php if ($row['status'] == 'Revoked') { ?>
                                                         <span class="badge rounded-pill revoked-badge">Revoked</span>
                                                     <?php } elseif ($row['status'] == 'Cancelled') { ?>
                                                         <span class="badge rounded-pill cancelled-badge">Cancelled</span>
+                                                    <?php } elseif ($row['status'] == 'Ended') { ?>
+                                                        <span class="badge rounded-pill ended-badge">Ended</span>
                                                     <?php } else { ?>
                                                         <span class="badge rounded-pill rejected-badge">Rejected</span>
                                                     <?php } ?>
                                                 </td>
-
+                                                
                                                 <td data-label="Date"><?= $row['updated_at'] ?></td>
                                             </tr>
                                         <?php } ?>
@@ -1216,6 +1285,20 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                         </div>
                                                     </div>
 
+                                                    <div class="form-group">
+                                                        <label class="input-label">Start Date</label>
+                                                        <div class="input-box">
+                                                            <input type="date" name="start_at" required>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label class="input-label">End Date</label>
+                                                        <div class="input-box">
+                                                            <input type="date" name="end_at" required>
+                                                        </div>
+                                                    </div>
+
                                                     <div class="action-buttons">
                                                         <button type="submit" class="btn primary-btn">Add Slot</button>
                                                         <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
@@ -1245,6 +1328,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                 <th>Slot Number</th>
                                                 <th>Size</th>
                                                 <th>Price</th>
+                                                <th>Start Date</th>
+                                                <th>End Date</th>
                                                 <th>Status</th>
                                                 <th>Action</th>
                                             </tr>
@@ -1256,6 +1341,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                     <td data-label="Slot Number"><?= $lockerRow['slot_number'] ?></td>
                                                     <td data-label="Size"><?= $lockerRow['size'] ?></td>
                                                     <td data-label="Price">&#8369;<?= $lockerRow['price'] ?></td>
+                                                    <td data-label="Start Date"><?= $lockerRow['start_at'] ?></td>
+                                                    <td data-label="End Date"><?= $lockerRow['end_at'] ?></td>
                                                     <td data-label="Status"><?= $lockerRow['status'] ?></td>
 
                                                     <td data-label="Action">
@@ -1299,6 +1386,20 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                                         <label class="input-label">Slot Number</label>
                                                                         <div class="input-box">
                                                                             <input type="number" name="slot_number" value="<?= $lockerRow['slot_number'] ?>" required>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label class="input-label">Start Date</label>
+                                                                        <div class="input-box">
+                                                                            <input type="date" name="start_at" value="<?= date('Y-m-d', strtotime($lockerRow['start_at'])) ?>" required>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label class="input-label">End Date</label>
+                                                                        <div class="input-box">
+                                                                            <input type="date" name="end_at" value="<?= date('Y-m-d', strtotime($lockerRow['end_at'])) ?>" required>
                                                                         </div>
                                                                     </div>
 

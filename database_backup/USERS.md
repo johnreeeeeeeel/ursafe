@@ -272,7 +272,7 @@ CREATE OR REPLACE PROCEDURE get\_recent\_user\_account\_activation()
 
 BEGIN
 
-&#x20;   SELECT 
+&#x20;   SELECT
 
 &#x20;       id,
 
@@ -284,7 +284,7 @@ BEGIN
 
 &#x09;middlename,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at 
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM recent\_user\_account\_activation;
 

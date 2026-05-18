@@ -366,3 +366,21 @@ END //
 
 DELIMITER ;
 
+
+
+# RESET AI (URSAFE\_DB)
+
+
+
+ALTER TABLE locker\_applications AUTO\_INCREMENT = 1;
+
+ALTER TABLE locker\_locations AUTO\_INCREMENT = 1;
+
+ALTER TABLE locker\_logs AUTO\_INCREMENT = 1;
+
+ALTER TABLE locker\_sizes AUTO\_INCREMENT = 1;
+
+ALTER TABLE locker\_slots AUTO\_INCREMENT = 1;
+
+ALTER TABLE user\_account\_logs AUTO\_INCREMENT = 1;
+

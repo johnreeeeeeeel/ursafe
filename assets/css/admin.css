@@ -328,6 +328,7 @@ section .content {
     font-weight: 500 !important;
     vertical-align: middle !important;
     color: var(--text-dark-secondary) !important;
+    font-size: 14px;
 }
 
 #dashboard .recent-container .recent-locker-application .table tbody tr td {
@@ -335,6 +336,7 @@ section .content {
     font-weight: 400 !important;
     vertical-align: middle !important;
     color: var(--text-dark-tertiary) !important;
+    font-size: 14px;
 }
 
 #dashboard .recent-container .recent-locker-application .table .location-header {
@@ -624,90 +626,142 @@ section .content {
     border-color: var(--color-primary-base) !important;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container {
-    background: #ffffff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container {
     padding: 12px;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-}
-
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container {
-    display: flex;
-    flex-direction: column;
     gap: 12px;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container h3,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container h3,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container h3 {
-    color: var(--text-dark-secondary);
-    font-weight: 500;
-}
-
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .cards,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .cards,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container .cards {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .cards,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .cards,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 12px;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container .card {
-    flex: 1 1 300px;
-    padding: 12px;
-    border-radius: 12px;
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card {
+    width: 100%;
+    max-width: 340px;
     background-color: #ffffff;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card.accepted {
-    border: 1px solid var(--color-primary-base);
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-header,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-header,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-header,
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-body,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-body,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-body,
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-footer,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-footer,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-footer {
+    border: none;
+    background-color: #ffffff;
+    padding: 12px;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card.pending {
-    border: 1px solid var(--success-base);
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-header {
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--success-base), var(--success-6));
+    position: relative;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container .card p {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-header {
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--color-primary-base), var(--color-primary-6));
+    position: relative;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(1),
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(1),
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(1) {
-    font-weight: 400;
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-header h4,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-header h4, 
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-header h4 {
     color: var(--text-dark-secondary);
+    text-transform: uppercase;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(2),
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(2),
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(2) {
-    font-weight: 400;
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-header p,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-header p, 
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-header p {
+    color: var(--text-dark-secondary);
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-header .badge,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-header .badge, 
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-header .badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-body,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-body,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+}
+
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-body div,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-body div,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-body div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}   
+
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-body div .label,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-body div .label,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-body div .label {
     color: var(--text-dark-tertiary);
+    text-transform: uppercase;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card .action-buttons,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card .action-buttons,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container .card .action-buttons {
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-body div p,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-body div p,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-body div p {
+    color: var(--text-dark-secondary);
+}   
+
+
+
+
+
+
+
+
+
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .card-footer,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .card-footer,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .card-footer {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+
+
+
+
+
+
+
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .action-buttons,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .action-buttons,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .action-buttons {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -715,40 +769,57 @@ section .content {
     justify-content: space-between;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card .action-buttons .sm-btn,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card .action-buttons .sm-btn,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container .card .action-buttons .sm-btn {
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card .action-buttons .sm-btn,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card .action-buttons .sm-btn,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card .action-buttons .sm-btn {
     flex: 1;
     width: auto;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table {
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table,
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table thead,
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table tbody,
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table tr,
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table th,
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table td,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table thead,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table tbody,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table tr,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table th,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table td,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table thead,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table tbody,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table tr,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table th,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table td {
     background-color: transparent !important;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table thead tr th,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table thead tr th,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table thead tr th {
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table thead tr th,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table thead tr th,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table thead tr th {
     text-align: left;
     font-weight: 500;
+    font-size: 14px;
     vertical-align: middle;
     color: var(--text-dark-secondary);
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table tbody tr td,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table tbody tr td,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table tbody tr td {
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table tbody tr td,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table tbody tr td,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table tbody tr td {
     text-align: left;
     font-weight: 400;
+    font-size: 14px;
     vertical-align: middle;
     color: var(--text-dark-tertiary);
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-containertable .location-header,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-containertable .location-header,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-containertable .location-header {
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .location-header,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .location-header,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .location-header {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -756,66 +827,54 @@ section .content {
     gap: 12px;
 }
 
-#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table .location-header h3,
-#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table .location-header h3,
-#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table .location-header h3 {
+#lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table .location-header h3,
+#lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table .location-header h3,
+#lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table .location-header h3 {
     font-weight: 500;
     color: var(--text-dark-secondary);
 }
 
 @media (max-width: 768px) {
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(1),
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(1),
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(1) {
-        font-size: 14px !important;
-    }
-
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(2),
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(2),
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .card-container .card p span:nth-child(2) {
-        font-size: 14px !important;
-    }
-
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table thead,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table thead,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table thead {
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table thead,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table thead,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table thead {
         display: none;
     }
 
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table,
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table tbody,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table tbody,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table tbody,
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table tr,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table tr,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table tr,
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table td,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table td,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table td {
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table,
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table tbody,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table tbody,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table tbody,
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table tr,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table tr,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table tr,
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table td,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table td,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table td {
         display: block;
     }
 
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table tbody,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table tbody,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table tbody {
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table tbody,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table tbody,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table tbody {
         display: flex;
         flex-direction: column;
         gap: 24px;
     }
 
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table tr,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table tr,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table tr {
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table tr,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table tr,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table tr {
         margin-bottom: 10px;
         padding: 12px;
         border-radius: 8px;
     }
 
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table td,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table td,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table td {
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table td,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table td,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table td {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -828,18 +887,18 @@ section .content {
         text-overflow: ellipsis;
     }
 
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table td::before,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table td::before,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table td::before {
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table td::before,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table td::before,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table td::before {
         content: attr(data-label);
         font-weight: 400;
         color: var(--text-dark-secondary);
         flex-shrink: 0;
     }
 
-    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .locker-applications-container .table td:last-child .action-buttons,
-    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .locker-applications-container .table td:last-child .action-buttons,
-    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .locker-applications-container .table td:last-child .action-buttons {
+    #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table td:last-child .action-buttons,
+    #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table td:last-child .action-buttons,
+    #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table td:last-child .action-buttons {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
@@ -921,6 +980,7 @@ section #lockers #lockerLogsOffcanvas .offcanvas-body table thead tr th {
     font-weight: 500;
     vertical-align: middle;
     color: var(--text-dark-secondary);
+    font-size: 14px;
 }
 
 section #lockers #lockerLocationsOffcanvas .offcanvas-body table tbody tr td,
@@ -930,6 +990,7 @@ section #lockers #lockerLogsOffcanvas .offcanvas-body table tbody tr td {
     font-weight: 400;
     vertical-align: middle;
     color: var(--text-dark-tertiary);
+    font-size: 14px;
 }
 
 section #lockers :is( #lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas ) .offcanvas-body {
@@ -1063,6 +1124,7 @@ section #lockers .table-container .location-slot-section table thead tr th {
     font-weight: 500;
     vertical-align: middle;
     color: var(--text-dark-secondary);
+    font-size: 14px;
 }
 
 section #lockers .table-container .location-slot-section table tbody tr td {
@@ -1070,6 +1132,7 @@ section #lockers .table-container .location-slot-section table tbody tr td {
     font-weight: 400;
     vertical-align: middle;
     color: var(--text-dark-tertiary);
+    font-size: 14px;
 }
 
 @media (max-width: 768px) {

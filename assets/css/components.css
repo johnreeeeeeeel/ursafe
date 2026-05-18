@@ -331,6 +331,11 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
     color: var(--text-light-primary);
 }
 
+.ended-badge {
+    background-color: var(--danger-base);
+    color: var(--text-light-primary);
+}
+
 .rejected-badge {
     background-color: var(--danger-base);
     color: var(--text-light-primary);

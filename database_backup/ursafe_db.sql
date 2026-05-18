@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 18, 2026 at 07:33 AM
+-- Generation Time: May 18, 2026 at 04:31 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -90,17 +90,21 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `activateUserAccount` (IN `p_id` VAR
     );
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `addLocker` (IN `p_slot_number` INT, IN `p_location_id` INT, IN `p_size_id` INT)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `addLocker` (IN `p_slot_number` INT, IN `p_location_id` INT, IN `p_size_id` INT, IN `p_start_at` DATE, IN `p_end_at` DATE)   BEGIN
     INSERT INTO locker_slots (
         slot_number,
         location_id,
         size_id,
+        start_at,
+        end_at,
         status
     )
     VALUES (
         p_slot_number,
         p_location_id,
         p_size_id,
+        p_start_at,
+        p_end_at,
         'Available'
     );
 END$$
@@ -118,19 +122,34 @@ END$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `applyLocker` (IN `u_user_id` VARCHAR(255), IN `u_slot_id` INT)   BEGIN
     DECLARE active_application_count INT DEFAULT 0;
     DECLARE slot_status VARCHAR(50);
+    DECLARE v_start_at DATE;
+    DECLARE v_end_at DATE;
+    DECLARE slot_exists INT DEFAULT 1;
 
-    SELECT status
-    INTO slot_status
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET slot_exists = 0;
+
+    SELECT status, start_at, end_at
+    INTO slot_status, v_start_at, v_end_at
     FROM locker_slots
     WHERE id = u_slot_id;
 
-    IF slot_status IS NULL THEN
+    IF slot_exists = 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Slot not found';
+    END IF;
 
-    ELSEIF slot_status <> 'Available' THEN
+    IF slot_status <> 'Available' THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'This slot is not available for application';
+    END IF;
+
+    IF CURDATE() < v_start_at THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Application has not started yet';
+
+    ELSEIF CURDATE() >= v_end_at THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Application period has ended';
     END IF;
 
     SELECT COUNT(*)
@@ -142,7 +161,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `applyLocker` (IN `u_user_id` VARCHA
 
     IF active_application_count > 0 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'You already have an active application for this slot';
+        SET MESSAGE_TEXT = 'You already applied for this slot';
+
     ELSE
         INSERT INTO locker_applications (
             user_id,
@@ -155,6 +175,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `applyLocker` (IN `u_user_id` VARCHA
             'Pending'
         );
     END IF;
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `cancelLockerApplication` (IN `p_application_id` INT)   BEGIN
@@ -179,6 +200,16 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteLockerSize` (IN `p_id` INT)  
     WHERE id = p_id;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `endLockerApplication` ()   BEGIN
+    UPDATE locker_slots SET status = 'Available' 
+    WHERE end_at <= CURDATE() AND status = 'Occupied';
+
+    UPDATE locker_applications la
+    JOIN locker_slots ls ON la.slot_id = ls.id
+    SET la.status = 'Ended', la.updated_at = NOW()
+    WHERE ls.end_at <= CURDATE() AND la.status IN ('Pending', 'Accepted');
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcceptedLockerApplications` ()   BEGIN
     SELECT
         la.id AS application_id,
@@ -198,7 +229,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcceptedLockerApplications` ()  
         ls.size_id,
         lsz.size,
         lsz.price,
-        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
 
     INNER JOIN users u ON la.user_id = u.id
@@ -248,14 +281,16 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerApplicationHistory` ()   B
         ls.size_id,
         lsz.size,
         lsz.price,
-        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
 
     INNER JOIN users u ON la.user_id = u.id
     INNER JOIN locker_slots ls ON la.slot_id = ls.id
     INNER JOIN locker_locations ll ON ls.location_id = ll.id
     INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
-    WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked')
+    WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
     ORDER BY la.updated_at DESC;
 END$$
@@ -284,6 +319,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockersByLocation` (IN `p_locati
         ls.id,
         ls.slot_number,
         lsz.size,
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
         lsz.price,
         ls.status
     FROM locker_slots ls
@@ -309,7 +346,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyAcceptedLockerApplications` (I
         ll.location,
         sz.size,
         sz.price,
-        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
     INNER JOIN locker_slots ls ON la.slot_id = ls.id
     INNER JOIN locker_locations ll ON ls.location_id = ll.id
@@ -327,13 +366,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyLockerApplicationHistory` (IN 
         ll.location,
         sz.size,
         sz.price,
-        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
     INNER JOIN locker_slots ls ON la.slot_id = ls.id
     INNER JOIN locker_locations ll ON ls.location_id = ll.id
     INNER JOIN locker_sizes sz ON ls.size_id = sz.id
     WHERE la.user_id = p_user_id
-      AND la.status IN ('Cancelled', 'Rejected', 'Revoked')
+      AND la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
     ORDER BY la.updated_at DESC;
 END$$
 
@@ -345,7 +386,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyPendingLockerApplications` (IN
         ll.location,
         sz.size,
         sz.price,
-        DATE_FORMAT(la.created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.created_at, '%M %d, %Y') AS created_at
     FROM locker_applications la
     INNER JOIN locker_slots ls ON la.slot_id = ls.id
     INNER JOIN locker_locations ll ON ls.location_id = ll.id
@@ -374,7 +417,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getPendingLockerApplications` ()   
         ls.size_id,
         lsz.size,
         lsz.price,
-        DATE_FORMAT(la.created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.created_at, '%M %d, %Y') AS created_at
     FROM locker_applications la
 
     INNER JOIN users u ON la.user_id = u.id
@@ -404,7 +449,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterAcceptedLockerApplic
         ll.location,
         lsz.size,
         lsz.price,
-        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
 
     FROM locker_applications la
     INNER JOIN users u ON la.user_id = u.id
@@ -448,7 +495,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerApplicationHis
         ll.location,
         lsz.size,
         lsz.price,
-        DATE_FORMAT(la.updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
 
     FROM locker_applications la
     INNER JOIN users u ON la.user_id = u.id
@@ -565,7 +614,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterPendingLockerApplica
         ll.location,
         lsz.size,
         lsz.price,
-        DATE_FORMAT(la.created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
+        DATE_FORMAT(ls.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ls.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.created_at, '%M %d, %Y') AS created_at
 
     FROM locker_applications la
     INNER JOIN users u ON la.user_id = u.id
@@ -874,11 +925,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `revokeLockerApplication` (IN `p_app
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLocker` (IN `p_id` INT, IN `p_slot_number` INT, IN `p_status` VARCHAR(255))   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLocker` (IN `p_id` INT, IN `p_slot_number` INT, IN `p_start_at` DATE, IN `p_end_at` DATE, IN `p_status` VARCHAR(255))   BEGIN
     UPDATE locker_slots
     SET
         slot_number = p_slot_number,
-        status = p_status
+        start_at = p_start_at,
+        end_at = p_end_at,
+        status = p_status,
+        updated_at = NOW()
     WHERE id = p_id;
 END$$
 
@@ -1089,16 +1143,6 @@ CREATE TABLE `locker_locations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `locker_locations`
---
-
-INSERT INTO `locker_locations` (`id`, `location`, `created_at`) VALUES
-(18, 'AB 1st Floor', '2026-05-13 09:57:44'),
-(19, 'AB 2nd Floor', '2026-05-13 09:57:47'),
-(20, 'AB 3rd Floor', '2026-05-13 09:57:51'),
-(21, 'AB 4th Floor', '2026-05-13 09:57:54');
-
---
 -- Triggers `locker_locations`
 --
 DELIMITER $$
@@ -1166,6 +1210,16 @@ CREATE TABLE `locker_logs` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `locker_logs`
+--
+
+INSERT INTO `locker_logs` (`id`, `action`, `description`, `created_at`) VALUES
+(253, 'Deletion', 'Location AB 1st Floor has been deleted.', '2026-05-18 14:27:14'),
+(254, 'Deletion', 'Location AB 2nd Floor has been deleted.', '2026-05-18 14:27:14'),
+(255, 'Deletion', 'Location AB 3rd Floor has been deleted.', '2026-05-18 14:27:14'),
+(256, 'Deletion', 'Location AB 4th Floor has been deleted.', '2026-05-18 14:27:14');
+
 -- --------------------------------------------------------
 
 --
@@ -1178,15 +1232,6 @@ CREATE TABLE `locker_sizes` (
   `price` double(10,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `locker_sizes`
---
-
-INSERT INTO `locker_sizes` (`id`, `size`, `price`, `created_at`) VALUES
-(10, 'Small', 80.00, '2026-05-13 09:58:07'),
-(11, 'Medium ', 100.00, '2026-05-13 09:58:12'),
-(12, 'Large', 150.00, '2026-05-13 09:58:32');
 
 --
 -- Triggers `locker_sizes`
@@ -1260,7 +1305,10 @@ CREATE TABLE `locker_slots` (
   `location_id` int(11) NOT NULL,
   `size_id` int(11) NOT NULL,
   `status` varchar(255) DEFAULT 'Available',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `start_at` date NOT NULL,
+  `end_at` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1303,13 +1351,31 @@ DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `after_locker_slot_updation` AFTER UPDATE ON `locker_slots` FOR EACH ROW BEGIN
     DECLARE action VARCHAR(255) DEFAULT 'Updation';
-    DECLARE description VARCHAR(255);
+    DECLARE description VARCHAR(255) DEFAULT 'Locker updated.';
 
-	IF OLD.slot_number <> NEW.slot_number THEN
-		SET description = CONCAT('Slot #', OLD.slot_number, ' has been updated to ', 'Slot #', NEW.slot_number, '.');
-	ELSEIF OLD.status <> NEW.status THEN
-		SET description = CONCAT('Slot #', NEW.slot_number, ' status of ', OLD.status, ' has been updated to ', NEW.status, '.');
-	END IF;
+    IF OLD.slot_number <> NEW.slot_number THEN
+
+        SET description = CONCAT(
+            'Slot #',
+            OLD.slot_number,
+            ' has been updated to Slot #',
+            NEW.slot_number,
+            '.'
+        );
+
+    ELSEIF OLD.status <> NEW.status THEN
+
+        SET description = CONCAT(
+            'Slot #',
+            NEW.slot_number,
+            ' status of ',
+            OLD.status,
+            ' has been updated to ',
+            NEW.status,
+            '.'
+        );
+
+    END IF;
 
     INSERT INTO locker_logs (
         action,
@@ -1531,37 +1597,37 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `locker_applications`
 --
 ALTER TABLE `locker_applications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `locker_locations`
 --
 ALTER TABLE `locker_locations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `locker_logs`
 --
 ALTER TABLE `locker_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=152;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=257;
 
 --
 -- AUTO_INCREMENT for table `locker_sizes`
 --
 ALTER TABLE `locker_sizes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `locker_slots`
 --
 ALTER TABLE `locker_slots`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `user_account_logs`
 --
 ALTER TABLE `user_account_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -1580,6 +1646,16 @@ ALTER TABLE `locker_applications`
 ALTER TABLE `locker_slots`
   ADD CONSTRAINT `slot_location` FOREIGN KEY (`location_id`) REFERENCES `locker_locations` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `slot_size` FOREIGN KEY (`size_id`) REFERENCES `locker_sizes` (`id`) ON UPDATE CASCADE;
+
+DELIMITER $$
+--
+-- Events
+--
+CREATE DEFINER=`root`@`localhost` EVENT `auto_end_locker` ON SCHEDULE EVERY 1 DAY STARTS '2026-05-18 16:13:31' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+    CALL endLockerApplication();
+END$$
+
+DELIMITER ;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

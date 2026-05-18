@@ -50,7 +50,11 @@ BEGIN
 
 &#x20;       lsz.price,
 
-&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y') AS created\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -130,7 +134,11 @@ BEGIN
 
 &#x20;       lsz.price,
 
-&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y') AS created\_at
 
 
 
@@ -234,7 +242,11 @@ BEGIN
 
 &#x20;       lsz.price,
 
-&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -314,7 +326,11 @@ BEGIN
 
 &#x20;       lsz.price,
 
-&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
 
 
@@ -418,7 +434,11 @@ BEGIN
 
 &#x20;       lsz.price,
 
-&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -432,7 +452,7 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked')
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
 
 
@@ -498,7 +518,11 @@ BEGIN
 
 &#x20;       lsz.price,
 
-&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
 
 
@@ -1050,6 +1074,10 @@ BEGIN
 
 &#x20;       lsz.size,
 
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
 &#x20;       lsz.price,
 
 &#x20;       ls.status
@@ -1164,7 +1192,11 @@ CREATE OR REPLACE PROCEDURE addLocker (
 
 &#x20;   IN p\_location\_id INT,
 
-&#x20;   IN p\_size\_id INT
+&#x20;   IN p\_size\_id INT,
+
+&#x20;   IN p\_start\_at DATE,
+
+&#x20;   IN p\_end\_at DATE
 
 )
 
@@ -1178,6 +1210,10 @@ BEGIN
 
 &#x20;       size\_id,
 
+&#x20;       start\_at,
+
+&#x20;       end\_at,
+
 &#x20;       status
 
 &#x20;   )
@@ -1189,6 +1225,10 @@ BEGIN
 &#x20;       p\_location\_id,
 
 &#x20;       p\_size\_id,
+
+&#x20;       p\_start\_at,
+
+&#x20;       p\_end\_at,
 
 &#x20;       'Available'
 
@@ -1216,6 +1256,10 @@ CREATE OR REPLACE PROCEDURE updateLocker (
 
 &#x20;   IN p\_slot\_number INT,
 
+&#x09;IN p\_start\_date DATE,
+
+&#x20;   IN p\_end\_date DATE,
+
 &#x20;   IN p\_status VARCHAR(255)
 
 )
@@ -1228,7 +1272,13 @@ BEGIN
 
 &#x20;       slot\_number = p\_slot\_number,
 
-&#x20;       status = p\_status
+&#x20;       start\_at = p\_start\_date,
+
+&#x20;       end\_at = p\_end\_date,
+
+&#x20;       status = p\_status,
+
+&#x20;       updated\_at = NOW()
 
 &#x20;   WHERE id = p\_id;
 
@@ -1504,6 +1554,40 @@ DELIMITER ;
 
 
 
+##### END LOCKER APPLICATION
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE endLockerApplication()
+
+BEGIN
+
+&#x20;   UPDATE locker\_slots SET status = 'Available' 
+
+&#x20;   WHERE end\_at <= CURDATE() AND status = 'Occupied';
+
+
+
+&#x20;   UPDATE locker\_applications la
+
+&#x20;   JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   SET la.status = 'Ended', la.updated\_at = NOW()
+
+&#x20;   WHERE ls.end\_at <= CURDATE() AND la.status IN ('Pending', 'Accepted');
+
+END //
+
+
+
+DELIMITER ;
+
+
+
 ##### GET MY PENDING LOCKER APPLICATIONS
 
 
@@ -1530,7 +1614,11 @@ BEGIN
 
 &#x20;       sz.price,
 
-&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y') AS created\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -1580,7 +1668,11 @@ BEGIN
 
 &#x20;       sz.price,
 
-&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -1630,7 +1722,11 @@ BEGIN
 
 &#x20;       sz.price,
 
-&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
 &#x20;   FROM locker\_applications la
 
@@ -1642,7 +1738,7 @@ BEGIN
 
 &#x20;   WHERE la.user\_id = p\_user\_id
 
-&#x20;     AND la.status IN ('Cancelled', 'Rejected', 'Revoked')
+&#x20;     AND la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
 &#x20;   ORDER BY la.updated\_at DESC;
 
@@ -1676,11 +1772,21 @@ BEGIN
 
 &#x20;   DECLARE slot\_status VARCHAR(50);
 
+&#x20;   DECLARE v\_start\_at DATE;
+
+&#x20;   DECLARE v\_end\_at DATE;
+
+&#x20;   DECLARE slot\_exists INT DEFAULT 1;
 
 
-&#x20;   SELECT status
 
-&#x20;   INTO slot\_status
+&#x20;   DECLARE CONTINUE HANDLER FOR NOT FOUND SET slot\_exists = 0;
+
+
+
+&#x20;   SELECT status, start\_at, end\_at
+
+&#x20;   INTO slot\_status, v\_start\_at, v\_end\_at
 
 &#x20;   FROM locker\_slots
 
@@ -1688,19 +1794,39 @@ BEGIN
 
 
 
-&#x20;   IF slot\_status IS NULL THEN
+&#x20;   IF slot\_exists = 0 THEN
 
 &#x20;       SIGNAL SQLSTATE '45000'
 
 &#x20;       SET MESSAGE\_TEXT = 'Slot not found';
 
+&#x20;   END IF;
 
 
-&#x20;   ELSEIF slot\_status <> 'Available' THEN
+
+&#x20;   IF slot\_status <> 'Available' THEN
 
 &#x20;       SIGNAL SQLSTATE '45000'
 
 &#x20;       SET MESSAGE\_TEXT = 'This slot is not available for application';
+
+&#x20;   END IF;
+
+
+
+&#x20;   IF CURDATE() < v\_start\_at THEN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Application has not started yet';
+
+
+
+&#x20;   ELSEIF CURDATE() >= v\_end\_at THEN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Application period has ended';
 
 &#x20;   END IF;
 
@@ -1724,7 +1850,9 @@ BEGIN
 
 &#x20;       SIGNAL SQLSTATE '45000'
 
-&#x20;       SET MESSAGE\_TEXT = 'You already have an active application for this slot';
+&#x20;       SET MESSAGE\_TEXT = 'You already applied for this slot';
+
+
 
 &#x20;   ELSE
 
@@ -1749,6 +1877,8 @@ BEGIN
 &#x20;       );
 
 &#x20;   END IF;
+
+
 
 END //
 
@@ -2052,7 +2182,7 @@ BEGIN
 
 &#x20;       price,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at 
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM recent\_locker\_application;
 
@@ -2348,19 +2478,55 @@ BEGIN
 
 &#x20;   DECLARE action VARCHAR(255) DEFAULT 'Updation';
 
-&#x20;   DECLARE description VARCHAR(255);
+&#x20;   DECLARE description VARCHAR(255) DEFAULT 'Locker updated.';
 
 
 
-&#x09;IF OLD.slot\_number <> NEW.slot\_number THEN
+&#x20;   IF OLD.slot\_number <> NEW.slot\_number THEN
 
-&#x09;	SET description = CONCAT('Slot #', OLD.slot\_number, ' has been updated to ', 'Slot #', NEW.slot\_number, '.');
 
-&#x09;ELSEIF OLD.status <> NEW.status THEN
 
-&#x09;	SET description = CONCAT('Slot #', NEW.slot\_number, ' status of ', OLD.status, ' has been updated to ', NEW.status, '.');
+&#x20;       SET description = CONCAT(
 
-&#x09;END IF;
+&#x20;           'Slot #',
+
+&#x20;           OLD.slot\_number,
+
+&#x20;           ' has been updated to Slot #',
+
+&#x20;           NEW.slot\_number,
+
+&#x20;           '.'
+
+&#x20;       );
+
+
+
+&#x20;   ELSEIF OLD.status <> NEW.status THEN
+
+
+
+&#x20;       SET description = CONCAT(
+
+&#x20;           'Slot #',
+
+&#x20;           NEW.slot\_number,
+
+&#x20;           ' status of ',
+
+&#x20;           OLD.status,
+
+&#x20;           ' has been updated to ',
+
+&#x20;           NEW.status,
+
+&#x20;           '.'
+
+&#x20;       );
+
+
+
+&#x20;   END IF;
 
 
 
@@ -2381,6 +2547,8 @@ BEGIN
 
 
 END //
+
+
 
 
 
@@ -2877,6 +3045,34 @@ BEGIN
 
 
 END //
+
+
+
+DELIMITER ;
+
+
+
+# LOCKERS (EVENT)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE EVENT auto\_end\_locker
+
+ON SCHEDULE EVERY 1 DAY
+
+STARTS CURRENT\_TIMESTAMP
+
+DO
+
+BEGIN
+
+&#x20;   CALL endLockerApplication();
+
+END//
 
 
 

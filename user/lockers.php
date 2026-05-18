@@ -225,12 +225,36 @@ $password = $_SESSION['password'] ?? '';
                                     <div class="cards">
                                         <?php while ($row = $acceptedResultSet->fetch_assoc()) { ?>
                                             <div class="card accepted">
-                                                <p><span>Application ID</span> <span><?= $row['application_id'] ?></span></p>
-                                                <p><span>Location</span> <span><?= $row['location'] ?></span></p>
-                                                <p><span>Slot</span> <span><?= $row['slot_number'] ?></span></p>
-                                                <p><span>Size</span> <span><?= $row['size'] ?></span></p>
-                                                <p><span>Price</span> <span>&#8369;<?= $row['price'] ?></span></p>
-                                                <p><span>Date Accepted</span> <span><?= $row['updated_at'] ?></span></p>
+                                                <div class="card-header">
+                                                    <h4>Slot <?= $row['slot_number'] ?></h4>
+                                                    <p><?= $row['location'] ?></p>
+
+                                                    <span class="badge rounded-pill accepted-badge">Accepted</span>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <div class="locker-details">
+                                                        <p class="label">
+                                                            <i class="fa-solid fa-vault"></i>
+                                                            Locker Details
+                                                        </p>
+
+                                                        <p>Size: <?= $row['size'] ?></p>
+                                                        <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                        <p>Start on: <?= $row['start_at'] ?></p>
+                                                        <p>End on: <?= $row['end_at'] ?></p>
+                                                    </div>
+
+                                                    <div class="application-details">
+                                                        <p class="label">
+                                                            <i class="fa-brands fa-jxl"></i>
+                                                            Application Details
+                                                        </p>
+
+                                                        <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                        <p>Accepted on: <?= $row['updated_at'] ?></p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         <?php } ?>
                                     </div>
@@ -262,18 +286,46 @@ $password = $_SESSION['password'] ?? '';
                                     <div class="cards">
                                         <?php while ($row = $pendingResultSet->fetch_assoc()) { ?>
                                             <div class="card pending">
-                                                <p><span>Application ID</span> <span><?= $row['application_id'] ?></span></p>
-                                                <p><span>Location</span> <span><?= $row['location'] ?></span></p>
-                                                <p><span>Slot</span> <span><?= $row['slot_number'] ?></span></p>
-                                                <p><span>Size</span> <span><?= $row['size'] ?></span></p>
-                                                <p><span>Price</span> <span>&#8369;<?= $row['price'] ?></span></p>
-                                                <p><span>Date Applied</span> <span><?= $row['created_at'] ?></span></p>
+                                                <div class="card-header">
+                                                    <h4>Slot <?= $row['slot_number'] ?></h4>
+                                                    <p><?= $row['location'] ?></p>
 
-                                                <div class="action-buttons">
-                                                    <button class="sm-btn danger-btn" data-bs-toggle="modal" data-bs-target="#cancelApplicationModal<?= $row['application_id'] ?>">
-                                                        <i class="fa-solid fa-xmark"></i>
-                                                        Cancel Application
-                                                    </button>
+                                                    <span class="badge rounded-pill pending-badge">Pending</span>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <div class="locker-details">
+                                                        <p class="label">
+                                                            <i class="fa-solid fa-vault"></i>
+                                                            Locker Details
+                                                        </p>
+
+                                                        <p>Size: <?= $row['size'] ?></p>
+                                                        <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                        <p>Start on: <?= $row['start_at'] ?></p>
+                                                        <p>End on: <?= $row['end_at'] ?></p>
+                                                    </div>
+
+                                                    <div class="application-details">
+                                                        <p class="label">
+                                                            <i class="fa-brands fa-jxl"></i>
+                                                            Application Details
+                                                        </p>
+
+                                                        <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                        <p>Applied on: <?= $row['created_at'] ?></p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card-footer">
+                                                    <div class="action-buttons">
+                                                        <button class="sm-btn danger-btn"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#cancelApplicationModal<?= $row['application_id'] ?>">
+                                                            <i class="fa-solid fa-xmark"></i>
+                                                            Cancel Application
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         <?php } ?>
@@ -288,66 +340,72 @@ $password = $_SESSION['password'] ?? '';
                             </div>
 
                             <!-- Application history -->
-                            <table class="table table-borderless">
-                                <?php
-                                    // Locker application history 
-                                    $stmtHistory = $conn_local->prepare("CALL getMyLockerApplicationHistory(?)");
-                                    $stmtHistory->bind_param("s", $id);
-                                    $stmtHistory->execute();
-                                    $historyResultSet = $stmtHistory->get_result();
-                                    $stmtHistory->close();
-
-                                    while ($conn_local->next_result()) { $conn_local->store_result(); }
-                                ?>
-
+                            <div class="table-container">
                                 <h3>Application History</h3>
+                                
+                                <table class="table table-borderless">
+                                    <?php
+                                        // Locker application history 
+                                        $stmtHistory = $conn_local->prepare("CALL getMyLockerApplicationHistory(?)");
+                                        $stmtHistory->bind_param("s", $id);
+                                        $stmtHistory->execute();
+                                        $historyResultSet = $stmtHistory->get_result();
+                                        $stmtHistory->close();
 
-                                <?php if ($historyResultSet->num_rows > 0): ?>
-                                    <thead>
-                                        <tr>
-                                            <th>Application ID</th>
-                                            <th>Location</th>
-                                            <th>Slot</th>
-                                            <th>Size</th>
-                                            <th>Price</th>
-                                            <th>Status</th>
-                                            <th>Date</th>
-                                        </tr>
-                                    </thead>
+                                        while ($conn_local->next_result()) { $conn_local->store_result(); }
+                                    ?>
 
-                                    <tbody>
-                                        <?php while ($row = $historyResultSet->fetch_assoc()) { ?>
+                                    <?php if ($historyResultSet->num_rows > 0): ?>
+                                        <thead>
                                             <tr>
-                                                <td data-label="Application ID"><?= $row['application_id'] ?></td>
-                                                <td data-label="Location"><?= $row['location'] ?></td>
-                                                <td data-label="Slot"><?= $row['slot_number'] ?></td>
-                                                <td data-label="Size"><?= $row['size'] ?></td>
-                                                <td data-label="Price">&#8369;<?= $row['price'] ?></td>
-
-                                                <td data-label="Status">
-                                                    <?php if ($row['status'] == 'Revoked') { ?>
-                                                        <span class="badge rounded-pill revoked-badge">Revoked</span>
-
-                                                    <?php } elseif ($row['status'] == 'Cancelled') { ?>
-                                                        <span class="badge rounded-pill cancelled-badge">Cancelled</span>
-
-                                                    <?php } else { ?>
-                                                        <span class="badge rounded-pill rejected-badge">Rejected</span>
-                                                    <?php } ?>
-                                                </td>
-
-                                                <td data-label="Date"><?= $row['updated_at'] ?></td>
+                                                <th>Application ID</th>
+                                                <th>Location</th>
+                                                <th>Slot</th>
+                                                <th>Size</th>
+                                                <th>Price</th>
+                                                <th>Start Date</th>
+                                                <th>End Date</th>
+                                                <th>Status</th>
+                                                <th>Date</th>
                                             </tr>
-                                        <?php } ?>
-                                    </tbody>
-                                <?php else: ?>
-                                    <div id="empty">
-                                        <i class="fa-solid fa-ban"></i>
-                                        <small>No application history yet</small>
-                                        <small>Try to reload page</small>
-                                    </div>
-                                <?php endif; ?>
-                            </table>
+                                        </thead>
+
+                                        <tbody>
+                                            <?php while ($row = $historyResultSet->fetch_assoc()) { ?>
+                                                <tr>
+                                                    <td data-label="Application ID"><?= $row['application_id'] ?></td>
+                                                    <td data-label="Location"><?= $row['location'] ?></td>
+                                                    <td data-label="Slot"><?= $row['slot_number'] ?></td>
+                                                    <td data-label="Size"><?= $row['size'] ?></td>
+                                                    <td data-label="Price">&#8369;<?= $row['price'] ?></td>
+                                                    <td data-label="Start Date"><?= $row['start_at'] ?></td>
+                                                    <td data-label="End Date"><?= $row['end_at'] ?></td>
+
+                                                    <td data-label="Status">
+                                                        <?php if ($row['status'] == 'Revoked') { ?>
+                                                            <span class="badge rounded-pill revoked-badge">Revoked</span>
+                                                        <?php } elseif ($row['status'] == 'Cancelled') { ?>
+                                                            <span class="badge rounded-pill cancelled-badge">Cancelled</span>
+                                                        <?php } elseif ($row['status'] == 'Ended') { ?>
+                                                            <span class="badge rounded-pill ended-badge">Ended</span>
+                                                        <?php } else { ?>
+                                                            <span class="badge rounded-pill rejected-badge">Rejected</span>
+                                                        <?php } ?>
+                                                    </td>
+
+                                                    <td data-label="Date"><?= $row['updated_at'] ?></td>
+                                                </tr>
+                                            <?php } ?>
+                                        </tbody>
+                                    <?php else: ?>
+                                        <div id="empty">
+                                            <i class="fa-solid fa-ban"></i>
+                                            <small>No application history yet</small>
+                                            <small>Try to reload page</small>
+                                        </div>
+                                    <?php endif; ?>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -458,6 +516,8 @@ $password = $_SESSION['password'] ?? '';
                                                 <th>Slot Number</th>
                                                 <th>Size</th>
                                                 <th>Price</th>
+                                                <th>Start Date</th>
+                                                <th>End Date</th>
                                                 <th>Status</th>
                                                 <th>Action</th>
                                             </tr>
@@ -469,6 +529,8 @@ $password = $_SESSION['password'] ?? '';
                                                 <td data-label="Slot Number"><?= $lockerRow['slot_number'] ?></td>
                                                 <td data-label="Size"><?= $lockerRow['size'] ?></td>
                                                 <td data-label="Price">&#8369;<?= $lockerRow['price'] ?></td>
+                                                <td data-label="Status"><?= $lockerRow['start_at'] ?></td>
+                                                <td data-label="Status"><?= $lockerRow['end_at'] ?></td>
                                                 <td data-label="Status"><?= $lockerRow['status'] ?></td>
 
                                                 <td data-label="Action">
