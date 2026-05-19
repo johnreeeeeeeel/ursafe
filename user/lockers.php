@@ -268,6 +268,7 @@ $password = $_SESSION['password'] ?? '';
                                                         </p>
 
                                                         <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                        <p>Payment: <?= $row['payment'] ?></p>
                                                         <p>Accepted on: <?= $row['updated_at'] ?></p>
                                                     </div>
                                                 </div>
@@ -364,6 +365,7 @@ $password = $_SESSION['password'] ?? '';
                                                         </p>
 
                                                         <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                        <p>Payment: <?= $row['payment'] ?></p>
                                                         <p>Applied on: <?= $row['created_at'] ?></p>
                                                     </div>
                                                 </div>
@@ -404,6 +406,103 @@ $password = $_SESSION['password'] ?? '';
                                     <div id="empty">
                                         <i class="fa-solid fa-ban"></i>
                                         <small>No pending application yet</small>
+                                        <small>Try to reload page</small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Ended applications -->
+                            <div class="card-container">
+                                <?php
+                                    // Ended locker application
+                                    $limit = 4;
+                                    $endedPage = isset($_GET['endedPage']) ? (int)$_GET['endedPage'] : 1;
+                                    if ($endedPage < 1) $endedPage = 1;
+
+                                    $offset = ($endedPage - 1) * $limit;
+
+                                    $stmtEnded = $conn_local->prepare("CALL getMyEndedLockerApplications(?, ?, ?)");
+                                    $stmtEnded->bind_param("sii", $id, $limit, $offset);
+
+                                    $stmtEnded->execute();
+
+                                    $endedResultSet = $stmtEnded->get_result();
+
+                                    $stmtEnded->next_result();
+                                    $totalEndedRow = $stmtEnded->get_result()->fetch_assoc()['myEndedTotal'];
+
+                                    $totalPagesAccepted = ceil($totalEndedRow / $limit);
+
+                                    $stmtEnded->close();
+
+                                    while ($conn_local->next_result()) {
+                                        $conn_local->store_result();
+                                    }
+                                ?>
+
+                                <h3>Ended Applications</h3>
+
+                                <?php if ($endedResultSet->num_rows > 0): ?>
+                                    <div class="cards">
+                                        <?php while ($row = $endedResultSet->fetch_assoc()) { ?>
+                                            <div class="card ended">
+                                                <div class="card-header">
+                                                    <h4>Slot <?= $row['slot_number'] ?></h4>
+                                                    <p><?= $row['location'] ?></p>
+
+                                                    <span class="badge rounded-pill ended-badge">Ended</span>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <div class="locker-details">
+                                                        <p class="label">
+                                                            <i class="fa-solid fa-vault"></i>
+                                                            Locker Details
+                                                        </p>
+
+                                                        <p>Size: <?= $row['size'] ?></p>
+                                                        <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                        <p>Start on: <?= $row['start_at'] ?></p>
+                                                        <p>End on: <?= $row['end_at'] ?></p>
+                                                    </div>
+
+                                                    <div class="application-details">
+                                                        <p class="label">
+                                                            <i class="fa-brands fa-jxl"></i>
+                                                            Application Details
+                                                        </p>
+
+                                                        <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                        <p>Payment: <?= $row['payment'] ?></p>
+                                                        <p>Ended on: <?= $row['updated_at'] ?></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php } ?>
+                                    </div>
+                                    <ul class="pagination">
+                                        <li class="page-item <?= ($endedPage <= 1) ? 'disabled' : '' ?>">
+                                            <a class="page-link"
+                                            href="?endedPage=<?= $endedPage - 1 ?>#myLockerApplicationOffcanvas">
+                                                Previous
+                                            </a>
+                                        </li>
+
+                                        <li class="page-item active">
+                                            <span class="page-link"><?= $endedPage ?></span>
+                                        </li>
+
+                                        <li class="page-item <?= ($endedPage >= $totalPagesAccepted) ? 'disabled' : '' ?>">
+                                            <a class="page-link"
+                                            href="?endedPage=<?= $endedPage + 1 ?>#myLockerApplicationOffcanvas">
+                                                Next
+                                            </a>
+                                        </li>
+                                    </ul>
+                                <?php else: ?>
+                                    <div id="empty">
+                                        <i class="fa-solid fa-ban"></i>
+                                        <small>No ended application yet</small>
                                         <small>Try to reload page</small>
                                     </div>
                                 <?php endif; ?>
@@ -473,8 +572,10 @@ $password = $_SESSION['password'] ?? '';
                                                                     <span class="badge rounded-pill revoked-badge">Revoked</span>
                                                                 <?php } elseif ($row['status'] == 'Cancelled') { ?>
                                                                     <span class="badge rounded-pill cancelled-badge">Cancelled</span>
-                                                                <?php } elseif ($row['status'] == 'Ended') { ?>
-                                                                    <span class="badge rounded-pill ended-badge">Ended</span>
+                                                                <?php } elseif ($row['payment'] == 'Paid') { ?>
+                                                                    <span class="badge rounded-pill ended-badge">Ended - Paid</span>
+                                                                <?php } elseif ($row['payment'] == 'Unpaid') { ?>
+                                                                    <span class="badge rounded-pill ended-badge">Ended - Unpaid</span>
                                                                 <?php } else { ?>
                                                                     <span class="badge rounded-pill rejected-badge">Rejected</span>
                                                                 <?php } ?>

@@ -764,6 +764,8 @@ BEGIN
 
 &#x20;       la.status,
 
+&#x09;la.payment,
+
 &#x20;       TRIM(CONCAT(
 
 &#x20;           u.firstname, ' ',
@@ -857,6 +859,8 @@ BEGIN
 &#x20;       la.slot\_id,
 
 &#x20;       la.status,
+
+&#x09;la.payment,
 
 &#x20;       TRIM(CONCAT(
 
@@ -998,6 +1002,8 @@ BEGIN
 
 &#x20;       la.status,
 
+&#x09;la.payment,
+
 &#x20;       TRIM(CONCAT(
 
 &#x20;           u.firstname, ' ',
@@ -1091,6 +1097,8 @@ BEGIN
 &#x20;       la.slot\_id,
 
 &#x20;       la.status,
+
+&#x09;la.payment,
 
 &#x20;       TRIM(CONCAT(
 
@@ -1200,6 +1208,248 @@ DELIMITER ;
 
 
 
+##### GET ENDED LOCKER APPLICATIONS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getEndedLockerApplications(
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.user\_id,
+
+&#x20;       la.slot\_id,
+
+&#x20;       la.status,
+
+&#x09;la.payment,
+
+&#x20;       TRIM(CONCAT(
+
+&#x20;           u.firstname, ' ',
+
+&#x20;           IFNULL(CONCAT(u.middlename, ' '), ''),
+
+&#x20;           u.lastname
+
+&#x20;       )) AS fullname,
+
+&#x20;       u.email,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       ls.size\_id,
+
+&#x20;       lsz.size,
+
+&#x20;       lsz.price,
+
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   WHERE la.status = 'Ended'
+
+&#x20;   AND la.payment = 'Unpaid'
+
+&#x20;   ORDER BY la.updated\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS acceptedTotal
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE status = 'Ended'
+
+&#x20;   AND payment = 'Unpaid';
+
+
+
+END//
+
+
+
+DELIMITER ;
+
+
+
+##### GET SEARCH AND FILTER ENDED LOCKER APPLICATIONS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getSearchFilterEndedLockerApplications(
+
+&#x20;   IN searchTerm VARCHAR(255),
+
+&#x20;   IN filterTerm VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.user\_id,
+
+&#x20;       la.slot\_id,
+
+&#x20;       la.status,
+
+&#x09;la.payment,
+
+&#x20;       TRIM(CONCAT(
+
+&#x20;           u.firstname, ' ',
+
+&#x20;           IFNULL(CONCAT(u.middlename, ' '), ''),
+
+&#x20;           u.lastname
+
+&#x20;       )) AS fullname,
+
+&#x20;       u.email,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       lsz.size,
+
+&#x20;       lsz.price,
+
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   WHERE la.status = 'Ended'
+
+&#x20;   AND la.payment = 'Unpaid'
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL OR searchTerm = ''
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
+
+&#x20;   ORDER BY
+
+&#x20;       CASE WHEN filterTerm = 'newest' THEN la.updated\_at END DESC,
+
+&#x20;       CASE WHEN filterTerm = 'oldest' THEN la.updated\_at END ASC,
+
+&#x20;       la.updated\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS acceptedTotal
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   WHERE la.status = 'Ended'
+
+&#x20;   AND payment = 'Unpaid'
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL OR searchTerm = ''
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   );
+
+
+
+END//
+
+
+
+DELIMITER ;
+
+
+
 ##### GET LOCKER APPLICATIONS HISTORY (PROCEDURE)
 
 
@@ -1227,6 +1477,8 @@ BEGIN
 &#x20;       la.slot\_id,
 
 &#x20;       la.status,
+
+&#x20;       la.payment,
 
 &#x20;       TRIM(CONCAT(
 
@@ -1268,6 +1520,8 @@ BEGIN
 
 &#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
+&#x20;   AND la.payment IN ('Paid', 'Unpaid')
+
 &#x20;   ORDER BY la.updated\_at DESC
 
 &#x20;   LIMIT p\_limit OFFSET p\_offset;
@@ -1276,9 +1530,11 @@ BEGIN
 
 &#x20;   SELECT COUNT(\*) AS historyTotal
 
-&#x20;   FROM locker\_applications
+&#x20;   FROM locker\_applications la
 
-&#x20;   WHERE status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended');
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
+
+&#x20;   AND la.payment IN ('Paid', 'Unpaid');
 
 
 
@@ -1322,6 +1578,8 @@ BEGIN
 
 &#x20;       la.status,
 
+&#x20;       la.payment,
+
 &#x20;       TRIM(CONCAT(
 
 &#x20;           u.firstname, ' ',
@@ -1360,11 +1618,13 @@ BEGIN
 
 &#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
+&#x20;   AND la.payment IN ('Paid', 'Unpaid')
+
 &#x20;   AND (
 
 &#x20;       searchTerm IS NULL OR searchTerm = ''
 
-&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+&#x20;       OR CAST(la.id AS CHAR) LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
 
@@ -1400,7 +1660,27 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
-&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended');
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
+
+&#x20;   AND la.payment IN ('Paid', 'Unpaid')
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL OR searchTerm = ''
+
+&#x20;       OR CAST(la.id AS CHAR) LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   );
 
 
 
@@ -2408,19 +2688,113 @@ CREATE OR REPLACE PROCEDURE endLockerApplication()
 
 BEGIN
 
-&#x20;   UPDATE locker\_slots SET status = 'Available'
+&#x20;   UPDATE locker\_slots
 
-&#x20;   WHERE end\_at <= CURDATE() AND status = 'Occupied';
+&#x20;   SET status = 'Available'
+
+&#x20;   WHERE status = 'Occupied';
 
 
 
 &#x20;   UPDATE locker\_applications la
 
-&#x20;   JOIN locker\_slots ls ON la.slot\_id = ls.id
+&#x20;   SET
 
-&#x20;   SET la.status = 'Ended', la.updated\_at = NOW()
+&#x20;       la.status = 'Ended',
 
-&#x20;   WHERE ls.end\_at <= CURDATE() AND la.status IN ('Pending', 'Accepted');
+&#x20;       la.payment = 'Unpaid',
+
+&#x20;       la.updated\_at = NOW()
+
+&#x20;   WHERE la.status = 'Accepted';
+
+
+
+&#x20;   UPDATE locker\_applications la
+
+&#x20;   SET 
+
+&#x20;   	la.status = 'Cancelled',
+
+&#x20;       la.updated\_at = NOW()
+
+&#x20;   WHERE la.status = 'Pending';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### PAID LOCKER APPLICATION (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE paidLockerApplication(
+
+&#x20;   IN p\_application\_id INT
+
+)
+
+BEGIN
+
+&#x20;   DECLARE v\_slot\_id INT;
+
+&#x20;   DECLARE v\_status VARCHAR(255);
+
+&#x20;   DECLARE v\_payment VARCHAR(255);
+
+
+
+&#x20;   START TRANSACTION;
+
+
+
+&#x20;   SELECT slot\_id, status, payment
+
+&#x20;   INTO v\_slot\_id, v\_status, v\_payment
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE id = p\_application\_id;
+
+
+
+&#x20;   IF v\_status IS NULL THEN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Application not found';
+
+
+
+&#x20;   ELSEIF v\_status <> 'Ended' THEN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Only ended applications can be paid';
+
+&#x20;   END IF;
+
+
+
+&#x20;   UPDATE locker\_applications
+
+&#x20;   SET payment = 'Paid', updated\_at = NOW()
+
+&#x20;   WHERE id = p\_application\_id;
+
+
+
+&#x20;   COMMIT;
+
+
 
 END //
 
@@ -2455,6 +2829,8 @@ BEGIN
 &#x20;       la.id AS application\_id,
 
 &#x20;       la.status,
+
+&#x09;la.payment,
 
 &#x20;       ls.slot\_number,
 
@@ -2532,6 +2908,8 @@ BEGIN
 
 &#x20;       la.status,
 
+&#x09;la.payment,
+
 &#x20;       ls.slot\_number,
 
 &#x20;       ll.location,
@@ -2582,6 +2960,88 @@ DELIMITER ;
 
 
 
+##### GET MY ENDED LOCKER APPLICATIONS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getMyEndedLockerApplications(
+
+&#x20;   IN p\_user\_id VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.status,
+
+&#x09; 	la.payment,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       sz.size,
+
+&#x20;       sz.price,
+
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;     AND la.status = 'Ended'
+
+&#x20;     AND la.payment = 'Unpaid'
+
+&#x20;   ORDER BY la.updated\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS myEndedTotal
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE user\_id = p\_user\_id
+
+&#x20;     AND status = 'Ended'
+
+&#x20;     AND payment = 'Unpaid';
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
 ##### GET MY LOCKER APPLICATION HISTORY (PROCEDURE)
 
 
@@ -2607,6 +3067,8 @@ BEGIN
 &#x20;       la.id AS application\_id,
 
 &#x20;       la.status,
+
+&#x09;	la.payment,
 
 &#x20;       ls.slot\_number,
 
@@ -2634,6 +3096,8 @@ BEGIN
 
 &#x20;     AND la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
+&#x20;     AND la.payment IN ('Paid', 'Unpaid')
+
 &#x20;   ORDER BY la.updated\_at DESC
 
 &#x20;   LIMIT p\_limit OFFSET p\_offset;
@@ -2646,7 +3110,9 @@ BEGIN
 
 &#x20;   WHERE user\_id = p\_user\_id
 
-&#x20;     AND status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended');
+&#x20;     AND status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
+
+&#x20;     AND payment IN ('Paid', 'Unpaid');
 
 
 

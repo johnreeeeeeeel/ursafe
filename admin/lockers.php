@@ -179,6 +179,11 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             </button>
                         </li>
                         <li>
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerEndedApplicationOffcanvas" onclick="window.location.hash='lockerEndedApplicationOffcanvas';">
+                                Ended Application
+                            </button>
+                        </li>
+                        <li>
                             <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerApplicationHistoryOffcanvas" onclick="window.location.hash='lockerApplicationHistoryOffcanvas';">
                                 Application History
                             </button>
@@ -318,6 +323,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                     </p>
 
                                                     <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                    <p>Payment: <?= $row['payment'] ?></p>
                                                     <p>Applied on: <?= $row['created_at'] ?></p>
                                                 </div>
                                             </div>
@@ -553,6 +559,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                     </p>
 
                                                     <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                    <p>Payment: <?= $row['payment'] ?></p>
                                                     <p>Accepted on: <?= $row['updated_at'] ?></p>
                                                 </div>
                                             </div>
@@ -630,6 +637,206 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                                             <button type="submit" class="btn primary-btn">
                                                 Yes, Revoke
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+
+                <!-- Ended application offcanvas -->
+                <div class="offcanvas offcanvas-end" id="lockerEndedApplicationOffcanvas">
+                    <?php
+                        // Ended locker application
+                        $limit = 4;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+                        if ($page < 1) $page = 1;
+
+                        $offset = ($page - 1) * $limit;
+                        
+                        $search = trim($_GET['searchEndedApplication'] ?? '');
+                        $filter = strtolower($_GET['filterEndedApplication'] ?? '');
+
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
+                            $stmtEnded = $conn_local->prepare("CALL getSearchFilterEndedLockerApplications(?, ?, ?, ?)");
+                            $stmtEnded->bind_param("ssii", $search, $filter, $limit, $offset);
+                        } else {
+                            $stmtEnded = $conn_local->prepare("CALL getEndedLockerApplications(?, ?)");
+                            $stmtEnded->bind_param("ii", $limit, $offset);
+                        }
+
+                        $stmtEnded->execute();
+
+                        $endedResultSet = $stmtEnded->get_result();
+
+                        $stmtEnded->next_result();
+                        $totalEndedRow = $stmtEnded->get_result()->fetch_assoc()['acceptedTotal'];
+
+                        $totalPages = ceil($totalEndedRow / $limit);
+
+                        $stmtEnded->close();
+
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
+                    ?>
+
+                    <div class="offcanvas-header">
+                        <h3 class="offcanvas-title">Ended Applications</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                    </div>
+
+                    <div class="offcanvas-body">
+                        <header>
+                            <form method="GET">
+                                <div class="search-group">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="search"
+                                        name="searchEndedApplication"
+                                        placeholder="Search..."
+                                        value="<?= htmlspecialchars($_GET['searchEndedApplication'] ?? '') ?>">
+                                </div>
+
+                                <div class="filter-group">
+                                    <i class="fa-solid fa-filter"></i>
+                                    <select name="filterEndedApplication" onchange="this.form.submit()">
+                                        <option value="">All</option>
+                                        <option value="newest" <?= (($_GET['filterEndedApplication'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
+                                        <option value="oldest" <?= (($_GET['filterEndedApplication'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" hidden></button>
+                            </form>
+                        </header>
+
+                        <div class="card-container">
+                            <?php if ($endedResultSet->num_rows > 0): ?>
+                                <div class="cards">
+                                    <?php while ($row = $endedResultSet->fetch_assoc()) { ?>
+                                        <div class="card accepted">
+                                            <div class="card-header">
+                                                <h4>Slot <?= $row['slot_number'] ?></h4>
+                                                <p><?= $row['location'] ?></p>
+
+                                                <span class="badge rounded-pill ended-badge"><?= $row['status'] ?></span>
+                                            </div>
+
+                                            <div class="card-body">
+                                                <div class="locker-details">
+                                                    <p class="label">
+                                                        <i class="fa-solid fa-vault"></i>
+                                                        Locker Details
+                                                    </p>
+
+                                                    <p>Size: <?= $row['size'] ?></p>
+                                                    <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                    <p>Start on: <?= $row['start_at'] ?></p>
+                                                    <p>End on: <?= $row['end_at'] ?></p>
+                                                </div>
+
+                                                <div class="user-details">
+                                                    <p class="label">
+                                                        <i class="fa-solid fa-address-card"></i>
+                                                        User Details
+                                                    </p>
+
+                                                    <p>User ID: #<?= $row['user_id'] ?></p>
+                                                    <p>Full Name: <?= $row['fullname'] ?></p>
+                                                </div>
+
+                                                <div class="application-details">
+                                                    <p class="label">
+                                                        <i class="fa-brands fa-jxl"></i>
+                                                        Application Details
+                                                    </p>
+
+                                                    <p>Application ID: #<?= $row['application_id'] ?></p>
+                                                    <p>Payment: <?= $row['payment'] ?></p>
+                                                    <p>Ended on: <?= $row['updated_at'] ?></p>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-footer">
+                                                <div class="action-buttons">
+                                                    <button class="sm-btn secondary-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#paidLockerApplicationModal<?= $row['application_id'] ?>">
+                                                        <i class="fa-brands fa-cash-app"></i>
+                                                        Paid
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                                <ul class="pagination">
+                                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                        <?php if ($page > 1): ?>
+                                            <a class="page-link"
+                                            href="?page=<?= $page - 1 ?>&searchEndedApplication=<?= urlencode($_GET['searchEndedApplication'] ?? '') ?>&filterEndedApplication=<?= urlencode($_GET['filterEndedApplication'] ?? '') ?>#lockerEndedApplicationOffcanvas">
+                                                Previous
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Previous</span>
+                                        <?php endif; ?>
+                                    </li>
+
+                                    <li class="page-item active">
+                                        <span class="page-link"><?= $page ?></span>
+                                    </li>
+
+                                    <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                                        <?php if (mysqli_num_rows($endedResultSet) == $limit): ?>
+                                            <a class="page-link"
+                                            href="?page=<?= $page + 1 ?>&searchEndedApplication=<?= urlencode($_GET['searchEndedApplication'] ?? '') ?>&filterEndedApplication=<?= urlencode($_GET['filterEndedApplication'] ?? '') ?>#lockerEndedApplicationOffcanvas">
+                                                Next
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Next</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
+                            <?php else: ?>
+                                <div id="empty">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <small>No ended application yet</small>
+                                    <small>Try to reload page</small>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <?php foreach ($endedResultSet as $row) { ?>
+                    <!-- Paid locker application modals -->
+                    <div class="modal fade success-modal" id="paidLockerApplicationModal<?= $row['application_id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="message">
+                                        <i class="fa-brands fa-cash-app"></i>
+                                        <h5>Paid Application</h5>
+                                        <p>Are you sure you want to set paid <span>application <?= $row['application_id'] ?></span>?</p>
+                                    </div>
+
+                                    <div class="action-buttons">
+                                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                                            Cancel
+                                        </button>
+
+                                        <form method="POST" action="../app/locker/paid_locker_application.php">
+                                            <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
+
+                                            <button type="submit" class="btn primary-btn">
+                                                Yes, Paid
                                             </button>
                                         </form>
                                     </div>
@@ -747,8 +954,10 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                         <span class="badge rounded-pill revoked-badge">Revoked</span>
                                                     <?php } elseif ($row['status'] == 'Cancelled') { ?>
                                                         <span class="badge rounded-pill cancelled-badge">Cancelled</span>
-                                                    <?php } elseif ($row['status'] == 'Ended') { ?>
-                                                        <span class="badge rounded-pill ended-badge">Ended</span>
+                                                    <?php } elseif ($row['payment'] == 'Paid') { ?>
+                                                        <span class="badge rounded-pill ended-badge">Ended - Paid</span>
+                                                    <?php } elseif ($row['payment'] == 'Unpaid') { ?>
+                                                        <span class="badge rounded-pill ended-badge">Ended - Unpaid</span>
                                                     <?php } else { ?>
                                                         <span class="badge rounded-pill rejected-badge">Rejected</span>
                                                     <?php } ?>

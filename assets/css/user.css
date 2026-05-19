@@ -580,6 +580,12 @@ section .content {
     position: relative;
 }
 
+#lockers #myLockerApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .cards .card.ended .card-header {
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--danger-base), var(--danger-6));
+    position: relative;
+}
+
 #lockers #myLockerApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .cards .card .card-header h4 {
     color: var(--text-dark-secondary);
     text-transform: uppercase;
