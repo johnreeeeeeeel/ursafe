@@ -210,13 +210,29 @@ $password = $_SESSION['password'] ?? '';
                             <div class="card-container">
                                 <?php
                                     // Accepted locker application
-                                    $stmtAccepted = $conn_local->prepare("CALL getMyAcceptedLockerApplications(?)");
-                                    $stmtAccepted->bind_param("s", $id);
+                                    $limit = 4;
+                                    $acceptedPage = isset($_GET['acceptedPage']) ? (int)$_GET['acceptedPage'] : 1;
+                                    if ($acceptedPage < 1) $acceptedPage = 1;
+
+                                    $offset = ($acceptedPage - 1) * $limit;
+
+                                    $stmtAccepted = $conn_local->prepare("CALL getMyAcceptedLockerApplications(?, ?, ?)");
+                                    $stmtAccepted->bind_param("sii", $id, $limit, $offset);
+
                                     $stmtAccepted->execute();
+
                                     $acceptedResultSet = $stmtAccepted->get_result();
+
+                                    $stmtAccepted->next_result();
+                                    $totalAcceptedRow = $stmtAccepted->get_result()->fetch_assoc()['myAcceptedTotal'];
+
+                                    $totalPagesAccepted = ceil($totalAcceptedRow / $limit);
+
                                     $stmtAccepted->close();
 
-                                    while ($conn_local->next_result()) { $conn_local->store_result(); }
+                                    while ($conn_local->next_result()) {
+                                        $conn_local->store_result();
+                                    }
                                 ?>
 
                                 <h3>Accepted Applications</h3>
@@ -258,6 +274,25 @@ $password = $_SESSION['password'] ?? '';
                                             </div>
                                         <?php } ?>
                                     </div>
+                                    <ul class="pagination">
+                                        <li class="page-item <?= ($acceptedPage <= 1) ? 'disabled' : '' ?>">
+                                            <a class="page-link"
+                                            href="?acceptedPage=<?= $acceptedPage - 1 ?>#myLockerApplicationOffcanvas">
+                                                Previous
+                                            </a>
+                                        </li>
+
+                                        <li class="page-item active">
+                                            <span class="page-link"><?= $acceptedPage ?></span>
+                                        </li>
+
+                                        <li class="page-item <?= ($acceptedPage >= $totalPagesAccepted) ? 'disabled' : '' ?>">
+                                            <a class="page-link"
+                                            href="?acceptedPage=<?= $acceptedPage + 1 ?>#myLockerApplicationOffcanvas">
+                                                Next
+                                            </a>
+                                        </li>
+                                    </ul>
                                 <?php else: ?>
                                     <div id="empty">
                                         <i class="fa-solid fa-ban"></i>
@@ -271,13 +306,29 @@ $password = $_SESSION['password'] ?? '';
                             <div class="card-container">
                                 <?php
                                     // Pending locker application
-                                    $stmtPending = $conn_local->prepare("CALL getMyPendingLockerApplications(?)");
-                                    $stmtPending->bind_param("s", $id);
+                                    $limit = 4;
+                                    $pendingPage = isset($_GET['pendingPage']) ? (int)$_GET['pendingPage'] : 1;
+                                    if ($pendingPage < 1) $pendingPage = 1;
+
+                                    $offset = ($pendingPage - 1) * $limit;
+
+                                    $stmtPending = $conn_local->prepare("CALL getMyPendingLockerApplications(?, ?, ?)");
+                                    $stmtPending->bind_param("sii", $id, $limit, $offset);
+
                                     $stmtPending->execute();
+
                                     $pendingResultSet = $stmtPending->get_result();
+
+                                    $stmtPending->next_result();
+                                    $totalPendingRow = $stmtPending->get_result()->fetch_assoc()['myPendingTotal'];
+
+                                    $totalPagesPending = ceil($totalPendingRow / $limit);
+
                                     $stmtPending->close();
 
-                                    while ($conn_local->next_result()) { $conn_local->store_result(); }
+                                    while ($conn_local->next_result()) {
+                                        $conn_local->store_result();
+                                    }
                                 ?>
 
                                 <h3>Pending Applications</h3>
@@ -330,6 +381,25 @@ $password = $_SESSION['password'] ?? '';
                                             </div>
                                         <?php } ?>
                                     </div>
+                                    <ul class="pagination">
+                                        <li class="page-item <?= ($pendingPage <= 1) ? 'disabled' : '' ?>">
+                                            <a class="page-link"
+                                            href="?pendingPage=<?= $pendingPage - 1 ?>#myLockerApplicationOffcanvas">
+                                                Previous
+                                            </a>
+                                        </li>
+
+                                        <li class="page-item active">
+                                            <span class="page-link"><?= $pendingPage ?></span>
+                                        </li>
+
+                                        <li class="page-item <?= ($pendingPage >= $totalPagesPending) ? 'disabled' : '' ?>">
+                                            <a class="page-link"
+                                            href="?pendingPage=<?= $pendingPage + 1 ?>#myLockerApplicationOffcanvas">
+                                                Next
+                                            </a>
+                                        </li>
+                                    </ul>
                                 <?php else: ?>
                                     <div id="empty">
                                         <i class="fa-solid fa-ban"></i>
@@ -342,61 +412,98 @@ $password = $_SESSION['password'] ?? '';
                             <!-- Application history -->
                             <div class="table-container">
                                 <h3>Application History</h3>
-                                
-                                <table class="table table-borderless">
-                                    <?php
-                                        // Locker application history 
-                                        $stmtHistory = $conn_local->prepare("CALL getMyLockerApplicationHistory(?)");
-                                        $stmtHistory->bind_param("s", $id);
-                                        $stmtHistory->execute();
-                                        $historyResultSet = $stmtHistory->get_result();
-                                        $stmtHistory->close();
 
-                                        while ($conn_local->next_result()) { $conn_local->store_result(); }
-                                    ?>
+                                <?php
+                                    // Locker application history 
+                                    $limit = 8;
+                                    $historyPage = isset($_GET['historyPage']) ? (int)$_GET['historyPage'] : 1;
+                                    if ($historyPage < 1) $historyPage = 1;
 
+                                    $offset = ($historyPage - 1) * $limit;
+
+                                    $stmtHistory = $conn_local->prepare("CALL getMyLockerApplicationHistory(?, ?, ?)");
+                                    $stmtHistory->bind_param("sii", $id, $limit, $offset);
+
+                                    $stmtHistory->execute();
+
+                                    $historyResultSet = $stmtHistory->get_result();
+
+                                    $stmtHistory->next_result();
+                                    $totalHistoryRow = $stmtHistory->get_result()->fetch_assoc()['myHistoryTotal'];
+
+                                    $totalPagesHistory = ceil($totalHistoryRow / $limit);
+
+                                    $stmtHistory->close();
+
+                                    while ($conn_local->next_result()) {
+                                        $conn_local->store_result();
+                                    }
+                                ?>
+
+                                <div class="table-container">
                                     <?php if ($historyResultSet->num_rows > 0): ?>
-                                        <thead>
-                                            <tr>
-                                                <th>Application ID</th>
-                                                <th>Location</th>
-                                                <th>Slot</th>
-                                                <th>Size</th>
-                                                <th>Price</th>
-                                                <th>Start Date</th>
-                                                <th>End Date</th>
-                                                <th>Status</th>
-                                                <th>Date</th>
-                                            </tr>
-                                        </thead>
+                                        <table class="table table-borderless">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Application ID</th>
+                                                        <th>Location</th>
+                                                        <th>Slot</th>
+                                                        <th>Size</th>
+                                                        <th>Price</th>
+                                                        <th>Start Date</th>
+                                                        <th>End Date</th>
+                                                        <th>Status</th>
+                                                        <th>Date</th>
+                                                    </tr>
+                                                </thead>
 
-                                        <tbody>
-                                            <?php while ($row = $historyResultSet->fetch_assoc()) { ?>
-                                                <tr>
-                                                    <td data-label="Application ID"><?= $row['application_id'] ?></td>
-                                                    <td data-label="Location"><?= $row['location'] ?></td>
-                                                    <td data-label="Slot"><?= $row['slot_number'] ?></td>
-                                                    <td data-label="Size"><?= $row['size'] ?></td>
-                                                    <td data-label="Price">&#8369;<?= $row['price'] ?></td>
-                                                    <td data-label="Start Date"><?= $row['start_at'] ?></td>
-                                                    <td data-label="End Date"><?= $row['end_at'] ?></td>
+                                                <tbody>
+                                                    <?php while ($row = $historyResultSet->fetch_assoc()) { ?>
+                                                        <tr>
+                                                            <td data-label="Application ID"><?= $row['application_id'] ?></td>
+                                                            <td data-label="Location"><?= $row['location'] ?></td>
+                                                            <td data-label="Slot"><?= $row['slot_number'] ?></td>
+                                                            <td data-label="Size"><?= $row['size'] ?></td>
+                                                            <td data-label="Price">&#8369;<?= $row['price'] ?></td>
+                                                            <td data-label="Start Date"><?= $row['start_at'] ?></td>
+                                                            <td data-label="End Date"><?= $row['end_at'] ?></td>
 
-                                                    <td data-label="Status">
-                                                        <?php if ($row['status'] == 'Revoked') { ?>
-                                                            <span class="badge rounded-pill revoked-badge">Revoked</span>
-                                                        <?php } elseif ($row['status'] == 'Cancelled') { ?>
-                                                            <span class="badge rounded-pill cancelled-badge">Cancelled</span>
-                                                        <?php } elseif ($row['status'] == 'Ended') { ?>
-                                                            <span class="badge rounded-pill ended-badge">Ended</span>
-                                                        <?php } else { ?>
-                                                            <span class="badge rounded-pill rejected-badge">Rejected</span>
-                                                        <?php } ?>
-                                                    </td>
+                                                            <td data-label="Status">
+                                                                <?php if ($row['status'] == 'Revoked') { ?>
+                                                                    <span class="badge rounded-pill revoked-badge">Revoked</span>
+                                                                <?php } elseif ($row['status'] == 'Cancelled') { ?>
+                                                                    <span class="badge rounded-pill cancelled-badge">Cancelled</span>
+                                                                <?php } elseif ($row['status'] == 'Ended') { ?>
+                                                                    <span class="badge rounded-pill ended-badge">Ended</span>
+                                                                <?php } else { ?>
+                                                                    <span class="badge rounded-pill rejected-badge">Rejected</span>
+                                                                <?php } ?>
+                                                            </td>
 
-                                                    <td data-label="Date"><?= $row['updated_at'] ?></td>
-                                                </tr>
-                                            <?php } ?>
-                                        </tbody>
+                                                            <td data-label="Date"><?= $row['updated_at'] ?></td>
+                                                        </tr>
+                                                    <?php } ?>
+                                                </tbody>
+                                        </table>
+                                        <ul class="pagination">
+                                            <li class="page-item <?= ($historyPage <= 1) ? 'disabled' : '' ?>">
+                                                <a class="page-link"
+                                                href="?historyPage=<?= $historyPage - 1 ?>#myLockerApplicationOffcanvas">
+                                                    Previous
+                                                </a>
+                                            </li>
+
+                                            <li class="page-item active">
+                                                <span class="page-link"><?= $historyPage ?></span>
+                                            </li>
+
+                                            <li class="page-item <?= ($historyPage >= $totalPagesHistory) ? 'disabled' : '' ?>">
+                                                <a class="page-link"
+                                                href="?historyPage=<?= $historyPage + 1 ?>#myLockerApplicationOffcanvas">
+                                                    Next
+                                                </a>
+                                            </li>
+                                        </ul>
                                     <?php else: ?>
                                         <div id="empty">
                                             <i class="fa-solid fa-ban"></i>
@@ -404,7 +511,7 @@ $password = $_SESSION['password'] ?? '';
                                             <small>Try to reload page</small>
                                         </div>
                                     <?php endif; ?>
-                                </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -541,7 +648,7 @@ $password = $_SESSION['password'] ?? '';
                                                             data-bs-toggle="modal" 
                                                             data-bs-target="#applyLockerSlotModal<?= $lockerRow['id'] ?>">
 
-                                                            <i class="fa-solid fa-file"></i>
+                                                            <i class="fa-brands fa-jxl"></i>
                                                             Apply
                                                         </button>
                                                     </div>
@@ -558,7 +665,7 @@ $password = $_SESSION['password'] ?? '';
 
                                                             <div class="modal-body">
                                                                 <div class="message">
-                                                                    <i class="fa-solid fa-circle-check"></i>
+                                                                    <i class="fa-brands fa-jxl"></i>
                                                                     <h5>Apply</h5>
                                                                     <p>
                                                                         Are you sure you want to apply <span>slot <?= $lockerRow['slot_number'] ?></span>?

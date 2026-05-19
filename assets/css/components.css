@@ -155,18 +155,20 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
 
 /* Pagination */
 .pagination {
+    display: flex;
+    justify-content: center;
     margin: 0 auto;
 }
 
 .pagination .page-item.active {
-    background-color: var(--color-primary-base);
-    color: var(--text-light-secondary);
+    background-color: var(--color-primary-base) !important;
+    color: var(--text-light-secondary) !important;
 }
 
 .pagination .page-item a {
     box-shadow: none;
-    border: 1px solid var(--color-primary-base);
-    color: var(--color-primary-base);
+    border: 1px solid var(--color-primary-base) !important;
+    color: var(--color-primary-base) !important;
 }
 
 /* Button */

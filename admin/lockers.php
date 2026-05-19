@@ -211,24 +211,41 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="offcanvas offcanvas-end" id="lockerPendingApplicationOffcanvas">
                     <?php
                         // Pending locker application
+                        $limit = 4;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                        if ($page < 1) $page = 1;
+
+                        $offset = ($page - 1) * $limit;
+
                         $search = trim($_GET['searchPendingApplication'] ?? '');
                         $filter = strtolower($_GET['filterPendingApplication'] ?? '');
 
-                        if (!empty($search) || !empty($filter)) {
-                            $stmtPending = $conn_local->prepare("CALL getSearchFilterPendingLockerApplications(?, ?)");
-                            $stmtPending->bind_param("ss", $search, $filter);
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
+                            $stmtPending = $conn_local->prepare("CALL getSearchFilterPendingLockerApplications(?, ?, ?, ?)");
+                            $stmtPending->bind_param("ssii", $search, $filter, $limit, $offset);
                         } else {
-                            $stmtPending = $conn_local->prepare("CALL getPendingLockerApplications()");
+                            $stmtPending = $conn_local->prepare("CALL getPendingLockerApplications(?, ?)");
+                            $stmtPending->bind_param("ii", $limit, $offset);
                         }
 
                         $stmtPending->execute();
+
                         $pendingResultSet = $stmtPending->get_result();
+
+                        $stmtPending->next_result();
+                        $totalPendingRow = $stmtPending->get_result()->fetch_assoc()['pendingTotal'];
+
+                        $totalPages = ceil($totalPendingRow / $limit);
+
                         $stmtPending->close();
 
-                        $conn_local->next_result();
-                        $conn_local->store_result();
-
-                        while ($conn_local->next_result()) { $conn_local->store_result(); }
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
 
                     <div class="offcanvas-header">
@@ -325,6 +342,33 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         </div>
                                     <?php } ?>
                                 </div>
+                                <ul class="pagination">
+                                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                        <?php if ($page > 1): ?>
+                                            <a class="page-link"
+                                                href="?page=<?= $page - 1 ?>&searchPendingApplication=<?= urlencode($_GET['searchPendingApplication'] ?? '') ?>&filterPendingApplication=<?= urlencode($_GET['filterPendingApplication'] ?? '') ?>#lockerPendingApplicationOffcanvas">
+                                                Previous
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Previous</span>
+                                        <?php endif; ?>
+                                    </li>
+
+                                    <li class="page-item active">
+                                        <span class="page-link"><?= $page ?></span>
+                                    </li>
+
+                                    <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                                        <?php if (mysqli_num_rows($pendingResultSet) == $limit): ?>
+                                            <a class="page-link"
+                                                href="?page=<?= $page + 1 ?>&searchPendingApplication=<?= urlencode($_GET['searchPendingApplication'] ?? '') ?>&filterPendingApplication=<?= urlencode($_GET['filterPendingApplication'] ?? '') ?>#lockerPendingApplicationOffcanvas">
+                                                Next
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Next</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
                             <?php else: ?>
                                 <div id="empty">
                                     <i class="fa-solid fa-ban"></i>
@@ -400,24 +444,42 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="offcanvas offcanvas-end" id="lockerAcceptedApplicationOffcanvas">
                     <?php
                         // Accepted locker application
+                        $limit = 4;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+                        if ($page < 1) $page = 1;
+
+                        $offset = ($page - 1) * $limit;
+                        
                         $search = trim($_GET['searchAcceptedApplication'] ?? '');
                         $filter = strtolower($_GET['filterAcceptedApplication'] ?? '');
 
-                        if (!empty($search) || !empty($filter)) {
-                            $stmtAccepted = $conn_local->prepare("CALL getSearchFilterAcceptedLockerApplications(?, ?)");
-                            $stmtAccepted->bind_param("ss", $search, $filter);
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
+                            $stmtAccepted = $conn_local->prepare("CALL getSearchFilterAcceptedLockerApplications(?, ?, ?, ?)");
+                            $stmtAccepted->bind_param("ssii", $search, $filter, $limit, $offset);
                         } else {
-                            $stmtAccepted = $conn_local->prepare("CALL getAcceptedLockerApplications()");
+                            $stmtAccepted = $conn_local->prepare("CALL getAcceptedLockerApplications(?, ?)");
+                            $stmtAccepted->bind_param("ii", $limit, $offset);
                         }
 
                         $stmtAccepted->execute();
+
                         $acceptedResultSet = $stmtAccepted->get_result();
+
+                        $stmtAccepted->next_result();
+                        $totalAcceptedRow = $stmtAccepted->get_result()->fetch_assoc()['acceptedTotal'];
+
+                        $totalPages = ceil($totalAcceptedRow / $limit);
+
                         $stmtAccepted->close();
 
-                        $conn_local->next_result();
-                        $conn_local->store_result();
-
-                        while ($conn_local->next_result()) { $conn_local->store_result(); }
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
 
                     <div class="offcanvas-header">
@@ -508,6 +570,33 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         </div>
                                     <?php } ?>
                                 </div>
+                                <ul class="pagination">
+                                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                        <?php if ($page > 1): ?>
+                                            <a class="page-link"
+                                            href="?page=<?= $page - 1 ?>&searchAcceptedApplication=<?= urlencode($_GET['searchAcceptedApplication'] ?? '') ?>&filterAcceptedApplication=<?= urlencode($_GET['filterAcceptedApplication'] ?? '') ?>#lockerAcceptedApplicationOffcanvas">
+                                                Previous
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Previous</span>
+                                        <?php endif; ?>
+                                    </li>
+
+                                    <li class="page-item active">
+                                        <span class="page-link"><?= $page ?></span>
+                                    </li>
+
+                                    <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                                        <?php if (mysqli_num_rows($acceptedResultSet) == $limit): ?>
+                                            <a class="page-link"
+                                            href="?page=<?= $page + 1 ?>&searchAcceptedApplication=<?= urlencode($_GET['searchAcceptedApplication'] ?? '') ?>&filterAcceptedApplication=<?= urlencode($_GET['filterAcceptedApplication'] ?? '') ?>#lockerAcceptedApplicationOffcanvas">
+                                                Next
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Next</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
                             <?php else: ?>
                                 <div id="empty">
                                     <i class="fa-solid fa-ban"></i>
@@ -554,24 +643,42 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="offcanvas offcanvas-end" id="lockerApplicationHistoryOffcanvas">
                     <?php
                         // Locker application history 
+                        $limit = 12;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+                        if ($page < 1) $page = 1;
+
+                        $offset = ($page - 1) * $limit;
+
                         $search = trim($_GET['searchApplicationHistory'] ?? '');
                         $filter = strtolower($_GET['filterApplicationHistory'] ?? '');
 
-                        if (!empty($search) || !empty($filter)) {
-                            $stmtHistory = $conn_local->prepare("CALL getSearchFilterLockerApplicationHistory(?, ?)");
-                            $stmtHistory->bind_param("ss", $search, $filter);
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
+                            $stmtHistory = $conn_local->prepare("CALL getSearchFilterLockerApplicationHistory(?, ?, ?, ?)");
+                            $stmtHistory->bind_param("ssii", $search, $filter, $limit, $offset);
                         } else {
-                            $stmtHistory = $conn_local->prepare("CALL getLockerApplicationHistory()");
+                            $stmtHistory = $conn_local->prepare("CALL getLockerApplicationHistory(?, ?)");
+                            $stmtHistory->bind_param("ii", $limit, $offset);
                         }
 
                         $stmtHistory->execute();
+
                         $historyResultSet = $stmtHistory->get_result();
+
+                        $stmtHistory->next_result();
+                        $totalHistoryRow = $stmtHistory->get_result()->fetch_assoc()['historyTotal'];
+
+                        $totalPages = ceil($totalHistoryRow / $limit);
+
                         $stmtHistory->close();
 
-                        $conn_local->next_result();
-                        $conn_local->store_result();
-
-                        while ($conn_local->next_result()) { $conn_local->store_result(); }
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
                     
                     <div class="offcanvas-header">
@@ -652,6 +759,34 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         <?php } ?>
                                     </tbody>
                                 </table>
+
+                                <ul class="pagination">
+                                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                        <?php if ($page > 1): ?>
+                                            <a class="page-link"
+                                            href="?page=<?= $page - 1 ?>&searchApplicationHistory=<?= urlencode($_GET['searchApplicationHistory'] ?? '') ?>&filterApplicationHistory=<?= urlencode($_GET['filterApplicationHistory'] ?? '') ?>#lockerApplicationHistoryOffcanvas">
+                                                Previous
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Previous</span>
+                                        <?php endif; ?>
+                                    </li>
+
+                                    <li class="page-item active">
+                                        <span class="page-link"><?= $page ?></span>
+                                    </li>
+
+                                    <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                                        <?php if (mysqli_num_rows($historyResultSet) == $limit): ?>
+                                            <a class="page-link"
+                                            href="?page=<?= $page + 1 ?>&searchApplicationHistory=<?= urlencode($_GET['searchApplicationHistory'] ?? '') ?>&filterApplicationHistory=<?= urlencode($_GET['filterApplicationHistory'] ?? '') ?>#lockerApplicationHistoryOffcanvas">
+                                                Next
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Next</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
                             <?php else: ?>
                                 <div id="empty">
                                     <i class="fa-solid fa-ban"></i>
@@ -1095,10 +1230,9 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <!-- Offcanvas for locker logs -->
                 <div class="offcanvas offcanvas-end" id="lockerLogsOffcanvas">
                     <?php
-                        // Get user account logs
-                        $limit = 18;
+                        // Get locker logs
+                        $limit = 16;
                         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-
                         if ($page < 1) $page = 1;
 
                         $offset = ($page - 1) * $limit;
@@ -1107,10 +1241,19 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $stmtLockerLogs->bind_param("ii", $limit, $offset);
 
                         $stmtLockerLogs->execute();
+
                         $userLockerLogsResultSet = $stmtLockerLogs->get_result();
+
+                        $stmtLockerLogs->next_result();
+                        $totalLockerLogsRow = $stmtLockerLogs->get_result()->fetch_assoc()['lockerLogsTotal'];
+
+                        $totalPages = ceil($totalLockerLogsRow / $limit);
+
                         $stmtLockerLogs->close();
 
-                        $conn_local->next_result();
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
 
                     <div class="offcanvas-header">
@@ -1164,7 +1307,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 <span class="page-link"><?= $page ?></span>
                             </li>
 
-                            <li class="page-item <?= (mysqli_num_rows($userLockerLogsResultSet) < $limit) ? 'disabled' : '' ?>">
+                            <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
                                 <?php if (mysqli_num_rows($userLockerLogsResultSet) == $limit): ?>
                                     <a class="page-link" href="?page=<?= $page + 1 ?>#lockerLogsOffcanvas">Next</a>
                                 <?php else: ?>

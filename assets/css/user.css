@@ -546,13 +546,12 @@ section .content {
 
 #lockers #myLockerApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 12px;
+    align-items: start;
 }
 
 #lockers #myLockerApplicationOffcanvas .offcanvas-body .locker-applications-container .card-container .cards .card {
-    width: 100%;
-    max-width: 340px;
     background-color: #ffffff;
     display: flex;
     flex-direction: column;

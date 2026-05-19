@@ -641,15 +641,14 @@ section .content {
 #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .cards,
 #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 12px;
+    align-items: start;
 }
 
 #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .card-container .card,
 #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .card-container .card,
 #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .card-container .card {
-    width: 100%;
-    max-width: 340px;
     background-color: #ffffff;
     display: flex;
     flex-direction: column;
@@ -1306,6 +1305,7 @@ section #users #userAccountLogsOffcanvas .offcanvas-body table thead tr th {
     font-weight: 500;
     vertical-align: middle;
     color: var(--text-dark-secondary);
+    font-size: 14px;
 }
 
 section #users #userAccountLogsOffcanvas .offcanvas-body table tbody tr td {
@@ -1313,6 +1313,7 @@ section #users #userAccountLogsOffcanvas .offcanvas-body table tbody tr td {
     font-weight: 400;
     vertical-align: middle;
     color: var(--text-dark-tertiary);
+    font-size: 14px;
 }
 
 /* User account logs offcanvas */
@@ -1350,6 +1351,7 @@ section #users #userAccountLogsOffcanvas .offcanvas-body .table-container table 
     font-weight: 500;
     vertical-align: middle;
     color: var(--text-dark-secondary);
+    font-size: 14px;
 }
 
 section #users #userAccountLogsOffcanvas .offcanvas-body .table-container table table tbody tr td {
@@ -1357,6 +1359,7 @@ section #users #userAccountLogsOffcanvas .offcanvas-body .table-container table 
     font-weight: 400;
     vertical-align: middle;
     color: var(--text-dark-tertiary);
+    font-size: 14px;
 }
 
 @media (max-width: 768px) {
@@ -1429,6 +1432,7 @@ section #users .table-container table thead tr th {
     font-weight: 500;
     vertical-align: middle;
     color: var(--text-dark-secondary);
+    font-size: 14px;
 }
 
 section #users .table-container table tbody tr td {
@@ -1436,6 +1440,7 @@ section #users .table-container table tbody tr td {
     font-weight: 400;
     vertical-align: middle;
     color: var(--text-dark-tertiary);
+    font-size: 14px;
 }
 
 @media (max-width: 768px) {

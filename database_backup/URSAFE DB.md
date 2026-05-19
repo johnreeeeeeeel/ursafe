@@ -1,8 +1,8 @@
-# LOCKERS
+# URSAFE DB
 
 
 
-##### GET PENDING LOCKER APPLICATIONS
+##### GET ADMIN BY EMAIL (PROCEDURE)
 
 
 
@@ -10,7 +10,747 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getPendingLockerApplications()
+CREATE OR REPLACE PROCEDURE getAdminByEmail(IN p\_email VARCHAR(255))
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+&#x20;       NULL AS lastname,
+
+&#x20;       NULL AS firstname,
+
+&#x20;       NULL AS middlename,
+
+&#x20;       NULL AS sex,
+
+&#x20;       NULL AS dob,
+
+&#x20;       NULL AS institute,
+
+&#x20;       NULL AS program,
+
+&#x20;       username,
+
+&#x20;       email,
+
+&#x20;       password
+
+
+
+&#x20;   FROM admin
+
+&#x20;   WHERE email = p\_email
+
+&#x20;   LIMIT 1;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET USER BY EMAIL (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getUserByEmail(IN p\_email VARCHAR(255))
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+&#x20;       lastname,
+
+&#x20;       firstname,
+
+&#x20;       middlename,
+
+&#x20;       sex,
+
+&#x20;       dob,
+
+&#x20;       institute,
+
+&#x20;       program,
+
+&#x20;       username,
+
+&#x20;       email,
+
+&#x20;       password
+
+
+
+&#x20;   FROM users
+
+&#x20;   WHERE email = p\_email
+
+&#x20;   LIMIT 1;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET USER BY ID (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getUserById(IN p\_id VARCHAR(255))
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+
+
+&#x20;       TRIM(CONCAT(
+
+&#x20;           firstname, ' ',
+
+&#x20;           IFNULL(CONCAT(middlename, ' '), ''),
+
+&#x20;           lastname
+
+&#x20;       )) AS fullname,
+
+
+
+&#x20;       lastname,
+
+&#x20;       firstname,
+
+&#x20;       middlename,
+
+&#x20;       sex,
+
+&#x20;       dob,
+
+&#x20;       institute,
+
+&#x20;       program,
+
+&#x20;       username,
+
+&#x20;       email,
+
+&#x20;       password
+
+
+
+&#x20;   FROM users
+
+&#x20;   WHERE id = p\_id
+
+&#x20;   LIMIT 1;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### ACTIVATE USER ACCOUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE activateUserAccount(
+
+&#x20;   IN p\_id VARCHAR(255),
+
+&#x20;   IN p\_lastname VARCHAR(255),
+
+&#x20;   IN p\_firstname VARCHAR(255),
+
+&#x20;   IN p\_middlename VARCHAR(255),
+
+&#x20;   IN p\_sex VARCHAR(6),
+
+&#x20;   IN p\_dob DATE,
+
+&#x20;   IN p\_institute VARCHAR(255),
+
+&#x20;   IN p\_program VARCHAR(255),
+
+&#x20;   IN p\_username VARCHAR(255),
+
+&#x20;   IN p\_email VARCHAR(255),
+
+&#x20;   IN p\_password VARCHAR(255)
+
+)
+
+BEGIN
+
+&#x20;   INSERT INTO users (
+
+&#x20;       id,
+
+&#x20;       lastname,
+
+&#x20;       firstname,
+
+&#x20;       middlename,
+
+&#x20;       sex,
+
+&#x20;       dob,
+
+&#x20;       institute,
+
+&#x20;       program,
+
+&#x20;       username,
+
+&#x20;       email,
+
+&#x20;       password
+
+&#x20;   )
+
+&#x20;   VALUES (
+
+&#x20;       p\_id,
+
+&#x20;       p\_lastname,
+
+&#x20;       p\_firstname,
+
+&#x20;       p\_middlename,
+
+&#x20;       p\_sex,
+
+&#x20;       p\_dob,
+
+&#x20;       p\_institute,
+
+&#x20;       p\_program,
+
+&#x20;       p\_username,
+
+&#x20;       p\_email,
+
+&#x20;       p\_password
+
+&#x20;   );
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### UPDATE USER PASSWORD (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE updateUserPassword(
+
+&#x20;   IN p\_email VARCHAR(255),
+
+&#x20;   IN p\_password VARCHAR(255)
+
+)
+
+BEGIN
+
+&#x20;   UPDATE users
+
+&#x20;   SET password = p\_password
+
+&#x20;   WHERE email = p\_email
+
+&#x20;   LIMIT 1;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET USERS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getUsers(
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+&#x20;       firstname,
+
+&#x20;       middlename,
+
+&#x20;       lastname,
+
+&#x20;       TRIM(CONCAT(firstname, ' ', IFNULL(CONCAT(middlename, ' '), ''), lastname)) AS fullname,
+
+&#x20;       sex,
+
+&#x20;       DATE\_FORMAT(dob, '%M %d, %Y') AS dob,
+
+&#x20;       institute,
+
+&#x20;       program,
+
+&#x20;       username,
+
+&#x20;       email,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y') AS created\_at
+
+&#x20;   FROM users
+
+&#x20;   ORDER BY created\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS usersTotal
+
+&#x20;   FROM users;
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+&#x20;
+
+##### GET SEARCH AND FILTER USERS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getSearchFilterUsers (
+
+&#x20;   IN searchTerm VARCHAR(255),
+
+&#x20;   IN sortOrder VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+&#x20;       firstname,
+
+&#x20;       middlename,
+
+&#x20;       lastname,
+
+&#x20;       TRIM(CONCAT(
+
+&#x20;           firstname, ' ',
+
+&#x20;           IFNULL(CONCAT(middlename, ' '), ''),
+
+&#x20;           lastname
+
+&#x20;       )) AS fullname,
+
+&#x20;       sex,
+
+&#x20;       DATE\_FORMAT(dob, '%M %d, %Y') AS dob,
+
+&#x20;       institute,
+
+&#x20;       program,
+
+&#x20;       username,
+
+&#x20;       email,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+
+&#x20;   FROM users
+
+
+
+&#x20;   WHERE
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+&#x20;       OR id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR middlename LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR username LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR email LIKE CONCAT('%', searchTerm, '%')
+
+
+
+&#x20;   ORDER BY
+
+&#x20;       CASE WHEN sortOrder = 'a-z' THEN firstname END ASC,
+
+&#x20;       CASE WHEN sortOrder = 'z-a' THEN firstname END DESC,
+
+&#x20;       CASE WHEN sortOrder = 'oldest' THEN created\_at END ASC,
+
+&#x20;       CASE WHEN sortOrder = 'newest' THEN created\_at END DESC
+
+
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS usersTotal
+
+&#x20;   FROM users
+
+&#x20;   WHERE
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+&#x20;       OR id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR middlename LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR username LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR email LIKE CONCAT('%', searchTerm, '%');
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET USER ACCOUNT LOGS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getUserAccountLogs(
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+&#x20;       action,
+
+&#x20;       description,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+
+&#x20;   FROM user\_account\_logs
+
+&#x20;   ORDER BY created\_at DESC
+
+&#x20;   LIMIT p\_offset, p\_limit;
+
+
+
+&#x20;   SELECT COUNT(\*) AS userLogsTotal
+
+&#x20;   FROM user\_account\_logs;
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET USERS COUNT
+
+
+
+DELIMITER //
+
+
+
+CREATE PROCEDURE get\_users\_count()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS users\_count
+
+&#x20;   FROM users;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET RECENT USER ACCOUNT ACTIVATION (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE get\_recent\_user\_account\_activation()
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+&#x20;       username,
+
+&#x20;       lastname,
+
+&#x09;firstname,
+
+&#x09;middlename,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+
+&#x20;   FROM recent\_user\_account\_activation;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### AFTER USER ACTIVATION (TRIGGER)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE TRIGGER after\_user\_activation
+
+AFTER INSERT ON users
+
+FOR EACH ROW
+
+
+
+BEGIN
+
+&#x09;DECLARE action VARCHAR(255) DEFAULT 'Activated';
+
+&#x20;   	DECLARE description VARCHAR(255);
+
+
+
+&#x09;SET description = CONCAT(NEW.username, ' (', '#', NEW.id, ') ', 'account has been activated.');
+
+&#x20;
+
+&#x09;INSERT INTO user\_account\_logs (
+
+&#x20;       action,
+
+&#x20;       description
+
+&#x20;   ) VALUES (
+
+&#x20;       action,
+
+&#x20;       description
+
+&#x20;   );
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### AFTER USER DELETION (TRIGGER)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE TRIGGER after\_user\_deletion
+
+AFTER DELETE ON users
+
+FOR EACH ROW
+
+
+
+BEGIN
+
+&#x09;DECLARE action VARCHAR(255) DEFAULT 'Deleted';
+
+&#x20;  	DECLARE description VARCHAR(255);
+
+
+
+&#x09;SET description = CONCAT(OLD.username, ' (', '#', OLD.id, ') ', 'account has been deleted.');
+
+&#x20;
+
+&#x09;INSERT INTO user\_account\_logs (
+
+&#x20;       action,
+
+&#x20;       description
+
+&#x20;   ) VALUES (
+
+&#x20;       action,
+
+&#x20;       description
+
+&#x20;   );
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET RECENT USER ACCOUNT ACTIVATION (VIEW)
+
+
+
+CREATE OR REPLACE VIEW recent\_user\_account\_activation AS
+
+
+
+SELECT
+
+&#x20;   id,
+
+&#x20;   lastname,
+
+&#x20;   firstname,
+
+&#x20;   middlename,
+
+&#x20;   created\_at
+
+FROM users
+
+ORDER BY created\_at DESC
+
+LIMIT 1;
+
+
+
+##### GET PENDING LOCKER APPLICATIONS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getPendingLockerApplications(
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
 
 BEGIN
 
@@ -24,8 +764,6 @@ BEGIN
 
 &#x20;       la.status,
 
-
-
 &#x20;       TRIM(CONCAT(
 
 &#x20;           u.firstname, ' ',
@@ -35,8 +773,6 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
-
-
 
 &#x20;       u.email,
 
@@ -58,8 +794,6 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
-
-
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -68,13 +802,23 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status IN ('Pending')
+&#x20;   WHERE la.status = 'Pending'
+
+&#x20;   ORDER BY la.created\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
 
 
 
-&#x20;   ORDER BY la.created\_at DESC;
+&#x20;   SELECT COUNT(\*) AS pendingTotal
 
-END //
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE status = 'Pending';
+
+
+
+END//
 
 
 
@@ -82,7 +826,7 @@ DELIMITER ;
 
 
 
-##### GET SEARCH AND FILTER PENDING LOCKER APPLICATIONS
+##### GET SEARCH AND FILTER PENDING LOCKER APPLICATIONS (PROCEDURE)
 
 
 
@@ -94,7 +838,11 @@ CREATE OR REPLACE PROCEDURE getSearchFilterPendingLockerApplications(
 
 &#x20;   IN searchTerm VARCHAR(255),
 
-&#x20;   IN filterTerm VARCHAR(255)
+&#x20;   IN filterTerm VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
 
 )
 
@@ -110,8 +858,6 @@ BEGIN
 
 &#x20;       la.status,
 
-
-
 &#x20;       TRIM(CONCAT(
 
 &#x20;           u.firstname, ' ',
@@ -121,8 +867,6 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
-
-
 
 &#x20;       u.email,
 
@@ -140,8 +884,6 @@ BEGIN
 
 &#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y') AS created\_at
 
-
-
 &#x20;   FROM locker\_applications la
 
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
@@ -151,8 +893,6 @@ BEGIN
 &#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
-
-
 
 &#x20;   WHERE la.status = 'Pending'
 
@@ -176,17 +916,53 @@ BEGIN
 
 &#x20;   )
 
-
-
 &#x20;   ORDER BY
 
 &#x20;       CASE WHEN filterTerm = 'newest' THEN la.created\_at END DESC,
 
 &#x20;       CASE WHEN filterTerm = 'oldest' THEN la.created\_at END ASC,
 
-&#x20;       la.created\_at DESC;
+&#x20;       la.created\_at DESC
 
-END //
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS pendingTotal
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   WHERE la.status = 'Pending'
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   );
+
+
+
+END//
 
 
 
@@ -194,7 +970,7 @@ DELIMITER ;
 
 
 
-##### GET ACCEPTED LOCKER APPLICATIONS
+##### GET ACCEPTED LOCKER APPLICATIONS (PROCEDURE)
 
 
 
@@ -202,7 +978,13 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getAcceptedLockerApplications()
+CREATE OR REPLACE PROCEDURE getAcceptedLockerApplications(
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
 
 BEGIN
 
@@ -216,8 +998,6 @@ BEGIN
 
 &#x20;       la.status,
 
-
-
 &#x20;       TRIM(CONCAT(
 
 &#x20;           u.firstname, ' ',
@@ -227,8 +1007,6 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
-
-
 
 &#x20;       u.email,
 
@@ -250,8 +1028,6 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
-
-
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -260,13 +1036,23 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status IN ('Accepted')
+&#x20;   WHERE la.status = 'Accepted'
+
+&#x20;   ORDER BY la.updated\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
 
 
 
-&#x20;   ORDER BY la.updated\_at DESC;
+&#x20;   SELECT COUNT(\*) AS acceptedTotal
 
-END //
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE status = 'Accepted';
+
+
+
+END//
 
 
 
@@ -274,7 +1060,7 @@ DELIMITER ;
 
 
 
-##### GET SEARCH AND FILTER ACCEPTED LOCKER APPLICATIONS
+##### GET SEARCH AND FILTER ACCEPTED LOCKER APPLICATIONS (PROCEDURE)
 
 
 
@@ -286,7 +1072,11 @@ CREATE OR REPLACE PROCEDURE getSearchFilterAcceptedLockerApplications(
 
 &#x20;   IN searchTerm VARCHAR(255),
 
-&#x20;   IN filterTerm VARCHAR(255)
+&#x20;   IN filterTerm VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
 
 )
 
@@ -302,8 +1092,6 @@ BEGIN
 
 &#x20;       la.status,
 
-
-
 &#x20;       TRIM(CONCAT(
 
 &#x20;           u.firstname, ' ',
@@ -313,8 +1101,6 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
-
-
 
 &#x20;       u.email,
 
@@ -332,8 +1118,6 @@ BEGIN
 
 &#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
-
-
 &#x20;   FROM locker\_applications la
 
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
@@ -344,15 +1128,11 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-
-
 &#x20;   WHERE la.status = 'Accepted'
 
 &#x20;   AND (
 
-&#x20;       searchTerm IS NULL
-
-&#x20;       OR searchTerm = ''
+&#x20;       searchTerm IS NULL OR searchTerm = ''
 
 &#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
@@ -368,17 +1148,51 @@ BEGIN
 
 &#x20;   )
 
-
-
 &#x20;   ORDER BY
 
 &#x20;       CASE WHEN filterTerm = 'newest' THEN la.updated\_at END DESC,
 
 &#x20;       CASE WHEN filterTerm = 'oldest' THEN la.updated\_at END ASC,
 
-&#x20;       la.updated\_at DESC;
+&#x20;       la.updated\_at DESC
 
-END //
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS acceptedTotal
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   WHERE la.status = 'Accepted'
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL OR searchTerm = ''
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   );
+
+
+
+END//
 
 
 
@@ -386,7 +1200,7 @@ DELIMITER ;
 
 
 
-##### GET LOCKER APPLICATIONS HISTORY
+##### GET LOCKER APPLICATIONS HISTORY (PROCEDURE)
 
 
 
@@ -394,7 +1208,13 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getLockerApplicationHistory()
+CREATE OR REPLACE PROCEDURE getLockerApplicationHistory(
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
 
 BEGIN
 
@@ -408,8 +1228,6 @@ BEGIN
 
 &#x20;       la.status,
 
-
-
 &#x20;       TRIM(CONCAT(
 
 &#x20;           u.firstname, ' ',
@@ -419,8 +1237,6 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
-
-
 
 &#x20;       u.email,
 
@@ -442,8 +1258,6 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
-
-
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -454,11 +1268,21 @@ BEGIN
 
 &#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
+&#x20;   ORDER BY la.updated\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
 
 
-&#x20;   ORDER BY la.updated\_at DESC;
 
-END //
+&#x20;   SELECT COUNT(\*) AS historyTotal
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended');
+
+
+
+END//
 
 
 
@@ -466,7 +1290,7 @@ DELIMITER ;
 
 
 
-##### GET SEARCH AND FILTER LOCKER APPLICATIONS HISTORY
+##### GET SEARCH AND FILTER LOCKER APPLICATIONS HISTORY (PROCEDURE)
 
 
 
@@ -478,7 +1302,11 @@ CREATE OR REPLACE PROCEDURE getSearchFilterLockerApplicationHistory(
 
 &#x20;   IN searchTerm VARCHAR(255),
 
-&#x20;   IN filterTerm VARCHAR(255)
+&#x20;   IN filterTerm VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
 
 )
 
@@ -494,8 +1322,6 @@ BEGIN
 
 &#x20;       la.status,
 
-
-
 &#x20;       TRIM(CONCAT(
 
 &#x20;           u.firstname, ' ',
@@ -505,8 +1331,6 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
-
-
 
 &#x20;       u.email,
 
@@ -524,8 +1348,6 @@ BEGIN
 
 &#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
-
-
 &#x20;   FROM locker\_applications la
 
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
@@ -536,15 +1358,11 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-
-
-&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked')
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
 &#x20;   AND (
 
-&#x20;       searchTerm IS NULL
-
-&#x20;       OR searchTerm = ''
+&#x20;       searchTerm IS NULL OR searchTerm = ''
 
 &#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
@@ -560,17 +1378,33 @@ BEGIN
 
 &#x20;   )
 
-
-
 &#x20;   ORDER BY
 
 &#x20;       CASE WHEN filterTerm = 'newest' THEN la.updated\_at END DESC,
 
 &#x20;       CASE WHEN filterTerm = 'oldest' THEN la.updated\_at END ASC,
 
-&#x20;       la.updated\_at DESC;
+&#x20;       la.updated\_at DESC
 
-END //
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS historyTotal
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended');
+
+
+
+END//
 
 
 
@@ -578,7 +1412,7 @@ DELIMITER ;
 
 
 
-##### GET LOCKER LOCATIONS
+##### GET LOCKER LOCATIONS (PROCEDURE)
 
 
 
@@ -608,7 +1442,7 @@ DELIMITER ;
 
 
 
-##### GET SEARCH AND FILTER LOCKER LOCATIONS
+##### GET SEARCH AND FILTER LOCKER LOCATIONS (PROCEDURE)
 
 
 
@@ -688,7 +1522,7 @@ DELIMITER ;
 
 
 
-##### ADD LOCKER LOCATION
+##### ADD LOCKER LOCATION (PROCEDURE)
 
 
 
@@ -716,7 +1550,7 @@ DELIMITER ;
 
 
 
-##### UPDATE LOCKER LOCATION
+##### UPDATE LOCKER LOCATION (PROCEDURE)
 
 
 
@@ -748,7 +1582,7 @@ DELIMITER ;
 
 
 
-##### DELETE LOCKER LOCATION
+##### DELETE LOCKER LOCATION (PROCEDURE)
 
 
 
@@ -776,7 +1610,7 @@ DELIMITER ;
 
 
 
-##### GET LOCKER LOCATION LOGS
+##### GET LOCKER LOCATION LOGS (PROCEDURE)
 
 
 
@@ -810,6 +1644,14 @@ BEGIN
 
 &#x20;   LIMIT p\_offset, p\_limit;
 
+
+
+&#x20;   SELECT COUNT(\*) AS lockerLogsTotal
+
+&#x20;   FROM locker\_logs;
+
+
+
 END //
 
 
@@ -818,7 +1660,7 @@ DELIMITER ;
 
 
 
-##### GET LOCKER SIZES
+##### GET LOCKER SIZES (PROCEDURE)
 
 
 
@@ -850,7 +1692,7 @@ DELIMITER ;
 
 
 
-##### GET SEARCH AND FILTER LOCKER SIZES
+##### GET SEARCH AND FILTER LOCKER SIZES (PROCEDURE)
 
 
 
@@ -956,7 +1798,7 @@ DELIMITER ;
 
 
 
-##### ADD LOCKER SIZE
+##### ADD LOCKER SIZE (PROCEDURE)
 
 
 
@@ -986,7 +1828,7 @@ DELIMITER ;
 
 
 
-##### UPDATE LOCKER SIZE
+##### UPDATE LOCKER SIZE (PROCEDURE)
 
 
 
@@ -1022,7 +1864,7 @@ DELIMITER ;
 
 
 
-##### DELETE LOCKER SIZE
+##### DELETE LOCKER SIZE (PROCEDURE)
 
 
 
@@ -1050,7 +1892,7 @@ DELIMITER ;
 
 
 
-##### GET LOCKERS BY LOCATIONS
+##### GET LOCKERS BY LOCATIONS (PROCEDURE)
 
 
 
@@ -1098,7 +1940,7 @@ DELIMITER ;
 
 
 
-##### GET USER LOCKER APPLICATION ID
+##### GET USER LOCKER APPLICATION ID (PROCEDURE)
 
 
 
@@ -1134,7 +1976,7 @@ DELIMITER ;
 
 
 
-##### GET USER LOCKER APPLICATION DETAILS
+##### GET USER LOCKER APPLICATION DETAILS (PROCEDURE)
 
 
 
@@ -1178,7 +2020,7 @@ DELIMITER ;
 
 
 
-##### ADD LOCKER
+##### ADD LOCKER (PROCEDURE)
 
 
 
@@ -1242,7 +2084,7 @@ DELIMITER ;
 
 
 
-##### UPDATE LOCKER
+##### UPDATE LOCKER (PROCEDURE)
 
 
 
@@ -1290,7 +2132,7 @@ DELIMITER ;
 
 
 
-##### DELETE LOCKER
+##### DELETE LOCKER (PROCEDURE)
 
 
 
@@ -1318,7 +2160,7 @@ DELIMITER ;
 
 
 
-##### ACCEPT LOCKER APPLICATION
+##### ACCEPT LOCKER APPLICATION (PROCEDURE)
 
 
 
@@ -1408,7 +2250,7 @@ DELIMITER ;
 
 
 
-##### REJECT LOCKER APPLICATION
+##### REJECT LOCKER APPLICATION (PROCEDURE)
 
 
 
@@ -1472,7 +2314,7 @@ DELIMITER ;
 
 
 
-##### REVOKE LOCKER APPLICATION
+##### REVOKE LOCKER APPLICATION (PROCEDURE)
 
 
 
@@ -1554,7 +2396,7 @@ DELIMITER ;
 
 
 
-##### END LOCKER APPLICATION
+##### END LOCKER APPLICATION (PROCEDURE)
 
 
 
@@ -1566,7 +2408,7 @@ CREATE OR REPLACE PROCEDURE endLockerApplication()
 
 BEGIN
 
-&#x20;   UPDATE locker\_slots SET status = 'Available' 
+&#x20;   UPDATE locker\_slots SET status = 'Available'
 
 &#x20;   WHERE end\_at <= CURDATE() AND status = 'Occupied';
 
@@ -1588,7 +2430,7 @@ DELIMITER ;
 
 
 
-##### GET MY PENDING LOCKER APPLICATIONS
+##### GET MY ACCEPTED LOCKER APPLICATIONS (PROCEDURE)
 
 
 
@@ -1596,61 +2438,15 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getMyPendingLockerApplications(IN p\_user\_id VARCHAR(255))
+CREATE OR REPLACE PROCEDURE getMyAcceptedLockerApplications(
 
-BEGIN
+&#x20;   IN p\_user\_id VARCHAR(255),
 
-&#x20;   SELECT
+&#x20;   IN p\_limit INT,
 
-&#x20;       la.id AS application\_id,
+&#x20;   IN p\_offset INT
 
-&#x20;       la.status,
-
-&#x20;       ls.slot\_number,
-
-&#x20;       ll.location,
-
-&#x20;       sz.size,
-
-&#x20;       sz.price,
-
-&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
-
-&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
-
-&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y') AS created\_at
-
-&#x20;   FROM locker\_applications la
-
-&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
-
-&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
-
-&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
-
-&#x20;   WHERE la.user\_id = p\_user\_id
-
-&#x20;     AND la.status IN ('Pending')
-
-&#x20;   ORDER BY la.created\_at DESC;
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### GET MY ACCEPTED LOCKER APPLICATIONS
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE getMyAcceptedLockerApplications(IN p\_user\_id VARCHAR(255))
+)
 
 BEGIN
 
@@ -1684,9 +2480,23 @@ BEGIN
 
 &#x20;   WHERE la.user\_id = p\_user\_id
 
-&#x20;     AND la.status IN ('Accepted')
+&#x20;     AND la.status = 'Accepted'
 
-&#x20;   ORDER BY la.updated\_at DESC;
+&#x20;   ORDER BY la.updated\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS myAcceptedTotal
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE user\_id = p\_user\_id
+
+&#x20;     AND status = 'Accepted';
+
+
 
 END //
 
@@ -1696,7 +2506,7 @@ DELIMITER ;
 
 
 
-##### GET MY LOCKER APPLICATION HISTORY
+##### GET MY PENDING LOCKER APPLICATIONS (PROCEDURE)
 
 
 
@@ -1704,7 +2514,91 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getMyLockerApplicationHistory(IN p\_user\_id VARCHAR(255))
+CREATE OR REPLACE PROCEDURE getMyPendingLockerApplications(
+
+&#x20;   IN p\_user\_id VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.status,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       sz.size,
+
+&#x20;       sz.price,
+
+&#x20;       DATE\_FORMAT(ls.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ls.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y') AS created\_at
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;     AND la.status = 'Pending'
+
+&#x20;   ORDER BY la.created\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS myPendingTotal
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE user\_id = p\_user\_id
+
+&#x20;     AND status = 'Pending';
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET MY LOCKER APPLICATION HISTORY (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getMyLockerApplicationHistory(
+
+&#x20;   IN p\_user\_id VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
 
 BEGIN
 
@@ -1740,7 +2634,21 @@ BEGIN
 
 &#x20;     AND la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
-&#x20;   ORDER BY la.updated\_at DESC;
+&#x20;   ORDER BY la.updated\_at DESC
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS myHistoryTotal
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE user\_id = p\_user\_id
+
+&#x20;     AND status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended');
+
+
 
 END //
 
@@ -1750,7 +2658,7 @@ DELIMITER ;
 
 
 
-##### APPLY LOCKER
+##### APPLY LOCKER (PROCEDURE)
 
 
 
@@ -1888,7 +2796,7 @@ DELIMITER ;
 
 
 
-##### CANCEL LOCKER APPLICATION
+##### CANCEL LOCKER APPLICATION (PROCEDURE)
 
 
 
@@ -1920,7 +2828,7 @@ DELIMITER ;
 
 
 
-##### GET TOTAL LOCKERS COUNT
+##### GET TOTAL LOCKERS COUNT (PROCEDURE)
 
 
 
@@ -1928,7 +2836,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_total\_lockers\_count()
+CREATE OR REPLACE PROCEDURE get\_total\_lockers\_count()
 
 BEGIN
 
@@ -1944,7 +2852,7 @@ DELIMITER ;
 
 
 
-##### GET AVAILABLE LOCKERS COUNT
+##### GET AVAILABLE LOCKERS COUNT (PROCEDURE)
 
 
 
@@ -1952,7 +2860,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_available\_lockers\_count()
+CREATE OR REPLACE PROCEDURE get\_available\_lockers\_count()
 
 BEGIN
 
@@ -1970,7 +2878,7 @@ DELIMITER ;
 
 
 
-##### GET OCCUPIED LOCKERS COUNT
+##### GET OCCUPIED LOCKERS COUNT (PROCEDURE)
 
 
 
@@ -1978,7 +2886,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_occupied\_lockers\_count()
+CREATE OR REPLACE PROCEDURE get\_occupied\_lockers\_count()
 
 BEGIN
 
@@ -1996,7 +2904,7 @@ DELIMITER ;
 
 
 
-##### GET TOTAL LOCKER APPLICATIONS COUNT
+##### GET TOTAL LOCKER APPLICATIONS COUNT (PROCEDURE)
 
 
 
@@ -2004,7 +2912,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_total\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE get\_total\_locker\_applications\_count()
 
 BEGIN
 
@@ -2020,7 +2928,7 @@ DELIMITER ;
 
 
 
-##### GET PENDING LOCKER APPLICATIONS COUNT
+##### GET PENDING LOCKER APPLICATIONS COUNT (PROCEDURE)
 
 
 
@@ -2028,7 +2936,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_pending\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE get\_pending\_locker\_applications\_count()
 
 BEGIN
 
@@ -2046,7 +2954,7 @@ DELIMITER ;
 
 
 
-##### GET CANCELLED LOCKER APPLICATIONS COUNT
+##### GET CANCELLED LOCKER APPLICATIONS COUNT (PROCEDURE)
 
 
 
@@ -2054,7 +2962,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_cancelled\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE get\_cancelled\_locker\_applications\_count()
 
 BEGIN
 
@@ -2072,7 +2980,7 @@ DELIMITER ;
 
 
 
-##### GET ACCEPTED LOCKER APPLICATIONS COUNT
+##### GET ACCEPTED LOCKER APPLICATIONS COUNT (PROCEDURE)
 
 
 
@@ -2080,7 +2988,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_accepted\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE get\_accepted\_locker\_applications\_count()
 
 BEGIN
 
@@ -2098,7 +3006,7 @@ DELIMITER ;
 
 
 
-##### GET REJECTED LOCKER APPLICATIONS COUNT
+##### GET REJECTED LOCKER APPLICATIONS COUNT (PROCEDURE)
 
 
 
@@ -2106,7 +3014,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_rejected\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE get\_rejected\_locker\_applications\_count()
 
 BEGIN
 
@@ -2124,7 +3032,7 @@ DELIMITER ;
 
 
 
-##### GET REVOKED LOCKER APPLICATIONS COUNT
+##### GET REVOKED LOCKER APPLICATIONS COUNT (PROCEDURE)
 
 
 
@@ -2132,7 +3040,7 @@ DELIMITER //
 
 
 
-CREATE PROCEDURE get\_revoked\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE get\_revoked\_locker\_applications\_count()
 
 BEGIN
 
@@ -2150,7 +3058,7 @@ DELIMITER ;
 
 
 
-##### GET RECENT LOCKER APPLICATION
+##### GET RECENT LOCKER APPLICATION (PROCEDURE)
 
 
 
@@ -2194,11 +3102,7 @@ DELIMITER ;
 
 
 
-# LOCKERS (TRIGGERS)
-
-
-
-##### AFTER LOCKER LOCATION INSERTION
+##### AFTER LOCKER LOCATION INSERTION (TRIGGER)
 
 
 
@@ -2248,7 +3152,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER SIZES INSERTION
+##### AFTER LOCKER SIZES INSERTION (TRIGGER)
 
 
 
@@ -2298,7 +3202,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER SLOT INSERTION
+##### AFTER LOCKER SLOT INSERTION (TRIGGER)
 
 
 
@@ -2348,7 +3252,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER LOCATION UPDATION
+##### AFTER LOCKER LOCATION UPDATION (TRIGGER)
 
 
 
@@ -2398,7 +3302,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER SIZES UPDATION
+##### AFTER LOCKER SIZES UPDATION (TRIGGER)
 
 
 
@@ -2458,7 +3362,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER SLOT UPDATION
+##### AFTER LOCKER SLOT UPDATION (TRIGGER)
 
 
 
@@ -2556,7 +3460,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER LOCATION DELETION
+##### AFTER LOCKER LOCATION DELETION (TRIGGER)
 
 
 
@@ -2606,7 +3510,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER SIZES DELETION
+##### AFTER LOCKER SIZES DELETION (TRIGGER)
 
 
 
@@ -2656,7 +3560,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER SLOT DELETION
+##### AFTER LOCKER SLOT DELETION (TRIGGER)
 
 
 
@@ -2706,7 +3610,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER APPLICATION
+##### AFTER LOCKER APPLICATION (TRIGGER)
 
 
 
@@ -2772,7 +3676,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER CANCELLATION
+##### AFTER LOCKER CANCELLATION (TRIGGER)
 
 
 
@@ -2842,7 +3746,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER ACCEPTATION
+##### AFTER LOCKER ACCEPTATION (TRIGGER)
 
 
 
@@ -2912,7 +3816,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER REJECTION
+##### AFTER LOCKER REJECTION (TRIGGER)
 
 
 
@@ -2982,7 +3886,7 @@ DELIMITER ;
 
 
 
-##### AFTER LOCKER REVOKING
+##### AFTER LOCKER REVOKING (TRIGGER)
 
 
 
@@ -3052,7 +3956,7 @@ DELIMITER ;
 
 
 
-# LOCKERS (EVENT)
+##### AUTO END LOCKER (EVENT)
 
 
 
@@ -3080,11 +3984,7 @@ DELIMITER ;
 
 
 
-# LOCKERS (VIEWS)
-
-
-
-##### GET RECENT LOCKER APPLICATION
+##### GET RECENT LOCKER APPLICATION (VIEW)
 
 
 

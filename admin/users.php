@@ -184,7 +184,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="offcanvas offcanvas-end" id="userAccountLogsOffcanvas">
                     <?php
                         // Get user account logs
-                        $limit = 18;
+                        $limit = 16;
                         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
                         if ($page < 1) $page = 1;
@@ -195,11 +195,19 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $stmtUserAccountLogs->bind_param("ii", $limit, $offset);
 
                         $stmtUserAccountLogs->execute();
+
                         $userAccountLogsResultSet = $stmtUserAccountLogs->get_result();
+
+                        $stmtUserAccountLogs->next_result();
+                        $totalUserLogsRow = $stmtUserAccountLogs->get_result()->fetch_assoc()['userLogsTotal'];
+
+                        $totalPages = ceil($totalUserLogsRow / $limit);
+
                         $stmtUserAccountLogs->close();
 
-                        $conn_local->next_result();
-                        $conn_local->store_result();
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
 
                     <div class="offcanvas-header">
@@ -253,7 +261,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 <span class="page-link"><?= $page ?></span>
                             </li>
 
-                            <li class="page-item <?= (mysqli_num_rows($userAccountLogsResultSet) < $limit) ? 'disabled' : '' ?>">
+                            <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
                                 <?php if (mysqli_num_rows($userAccountLogsResultSet) == $limit): ?>
                                     <a class="page-link" href="?page=<?= $page + 1 ?>#userAccountLogsOffcanvas">Next</a>
                                 <?php else: ?>
@@ -277,12 +285,12 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                         <div class="filter-group">
                             <i class="fa-solid fa-filter"></i>
-                            <select name="filter" onchange="this.form.submit()">
+                            <select name="filterUsers" onchange="this.form.submit()">
                                 <option value="">All</option>
-                                <option value="a-z" <?= (($_GET['filter'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
-                                <option value="z-a" <?= (($_GET['filter'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
-                                <option value="newest" <?= (($_GET['filter'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
-                                <option value="oldest" <?= (($_GET['filter'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
+                                <option value="a-z" <?= (($_GET['filterUsers'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
+                                <option value="z-a" <?= (($_GET['filterUsers'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
+                                <option value="newest" <?= (($_GET['filterUsers'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
+                                <option value="oldest" <?= (($_GET['filterUsers'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
                             </select>
                         </div>
 
@@ -294,26 +302,47 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="table-container">
                     <?php
                         // Get users
-                        $search = $_GET['searchUsers'] ?? '';
-                        $filter = $_GET['filter'] ?? '';
+                        $limit = 12;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                        if ($page < 1) $page = 1;
 
-                        if (!empty($search) || !empty($filter)) {
-                            // Use search and filter
-                            $stmt = $conn_local->prepare("CALL getSearchFilterUsers(?, ?)");
-                            $stmt->bind_param("ss", $search, $filter);
+                        $offset = ($page - 1) * $limit;
+
+                        $search = trim($_GET['searchUsers'] ?? '');
+                        $filter = strtolower($_GET['filterUsers'] ?? '');
+
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
+                            $stmtUsers = $conn_local->prepare("CALL getSearchFilterUsers(?, ?, ?, ?)");
+                            $stmtUsers->bind_param("ssii", $search, $filter, $limit, $offset);
                         } else {
-                            // Use raw
-                            $stmt = $conn_local->prepare("CALL getUsers()");
+                            $stmtUsers = $conn_local->prepare("CALL getUsers(?, ?)");
+                            $stmtUsers->bind_param("ii", $limit, $offset);
                         }
 
-                        $stmt->execute();
-                        $result = $stmt->get_result();
-                        $stmt->close();
+                        $stmtUsers->execute();
 
-                        $conn_local->next_result();
+                        $usersResultSet = $stmtUsers->get_result();
+
+                        $stmtUsers->next_result();
+                        $countResult = $stmtUsers->get_result();
+
+                        $rowCount = $countResult ? $countResult->fetch_assoc() : null;
+                        $totalUsersRow = $rowCount['usersTotal'] ?? 0;
+
+                        $totalPages = ceil($totalUsersRow / $limit);
+
+                        $stmtUsers->close();
+
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
 
-                    <?php if ($result->num_rows > 0): ?>
+                    <?php if ($usersResultSet->num_rows > 0): ?>
                         <table class="table table-borderless">
                             <thead>
                                 <th>ID</th>
@@ -324,12 +353,12 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             </thead>
                             
                             <tbody>
-                                <?php while ($row = $result->fetch_assoc()): ?>
+                                <?php while ($usersRow = $usersResultSet->fetch_assoc()): ?>
                                     <tr>
-                                    <td data-label="ID"><?= $row['id']; ?></td>
-                                    <td data-label="Username"><?= $row['username']; ?></td>
-                                    <td data-label="Full Name"><?= $row['fullname']; ?></td>
-                                    <td data-label="Email"><?= $row['email']; ?></td>
+                                    <td data-label="ID"><?= $usersRow['id']; ?></td>
+                                    <td data-label="Username"><?= $usersRow['username']; ?></td>
+                                    <td data-label="Full Name"><?= $usersRow['fullname']; ?></td>
+                                    <td data-label="Email"><?= $usersRow['email']; ?></td>
 
                                     <td data-label="Action">
                                         <div class="action-buttons">
@@ -337,15 +366,15 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#viewUserModal"
                                                 onclick="viewUserDetails(
-                                                    '<?= htmlspecialchars($row['id']) ?>',
-                                                    '<?= htmlspecialchars($row['fullname']) ?>',
-                                                    '<?= htmlspecialchars($row['sex'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($row['dob'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($row['institute'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($row['program'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($row['username']) ?>',
-                                                    '<?= htmlspecialchars($row['email']) ?>',
-                                                    '<?= htmlspecialchars($row['created_at']) ?>'
+                                                    '<?= htmlspecialchars($usersRow['id']) ?>',
+                                                    '<?= htmlspecialchars($usersRow['fullname']) ?>',
+                                                    '<?= htmlspecialchars($usersRow['sex'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($usersRow['dob'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($usersRow['institute'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($usersRow['program'] ?? '') ?>',
+                                                    '<?= htmlspecialchars($usersRow['username']) ?>',
+                                                    '<?= htmlspecialchars($usersRow['email']) ?>',
+                                                    '<?= htmlspecialchars($usersRow['created_at']) ?>'
                                                 )">
 
                                                 <i class="fa-solid fa-eye"></i>
@@ -357,6 +386,33 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
+                        <ul class="pagination">
+                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                <?php if ($page > 1): ?>
+                                    <a class="page-link"
+                                    href="?page=<?= $page - 1 ?>&searchUsers=<?= urlencode($_GET['searchUsers'] ?? '') ?>&filterUsers=<?= urlencode($_GET['filterUsers'] ?? '') ?>">
+                                        Previous
+                                    </a>
+                                <?php else: ?>
+                                    <span class="page-link">Previous</span>
+                                <?php endif; ?>
+                            </li>
+
+                            <li class="page-item active">
+                                <span class="page-link"><?= $page ?></span>
+                            </li>
+
+                            <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                                <?php if ($page < $totalPages): ?>
+                                    <a class="page-link"
+                                    href="?page=<?= $page + 1 ?>&searchUsers=<?= urlencode($_GET['searchUsers'] ?? '') ?>&filterUsers=<?= urlencode($_GET['filterUsers'] ?? '') ?>">
+                                        Next
+                                    </a>
+                                <?php else: ?>
+                                    <span class="page-link">Next</span>
+                                <?php endif; ?>
+                            </li>
+                        </ul>
                     <?php else: ?>
                         <div id="empty">
                             <i class="fa-solid fa-ban"></i>
