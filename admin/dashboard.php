@@ -276,12 +276,56 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                         $stmtRevokedLockerApplicationsCount->close();
                         $conn_local->next_result();
+
+                        // Get paid locker applications count
+                        $stmtPaidLockerApplicationsCount = $conn_local->prepare("CALL get_paid_ended_locker_applications_count()");
+                        $stmtPaidLockerApplicationsCount->execute();
+
+                        $paidLockerApplicationsCountResultSet = $stmtPaidLockerApplicationsCount->get_result();
+                        $paidLockerApplicationsCountRow = $paidLockerApplicationsCountResultSet->fetch_assoc();
+
+                        $stmtPaidLockerApplicationsCount->close();
+                        $conn_local->next_result();
+
+                        // Get paid locker applications amount
+                        $stmtPaidLockerApplicationsAmount = $conn_local->prepare("CALL get_paid_ended_locker_applications_amount()");
+                        $stmtPaidLockerApplicationsAmount->execute();
+
+                        $paidLockerApplicationsAmountResultSet = $stmtPaidLockerApplicationsAmount->get_result();
+                        $paidLockerApplicationsAmountRow = $paidLockerApplicationsAmountResultSet->fetch_assoc();
+
+                        $stmtPaidLockerApplicationsAmount->close();
+                        $conn_local->next_result();
+
+                        // Get unpaid locker applications count
+                        $stmtUnpaidLockerApplicationsCount = $conn_local->prepare("CALL get_unpaid_ended_locker_applications_count()");
+                        $stmtUnpaidLockerApplicationsCount->execute();
+
+                        $unpaidLockerApplicationsCountResultSet = $stmtUnpaidLockerApplicationsCount->get_result();
+                        $unpaidLockerApplicationsCountRow = $unpaidLockerApplicationsCountResultSet->fetch_assoc();
+
+                        $stmtUnpaidLockerApplicationsCount->close();
+                        $conn_local->next_result();
+
+                        // Get unpaid locker applications amount
+                        $stmtUnpaidLockerApplicationsAmount = $conn_local->prepare("CALL get_unpaid_ended_locker_applications_amount()");
+                        $stmtUnpaidLockerApplicationsAmount->execute();
+
+                        $unpaidLockerApplicationsAmountResultSet = $stmtUnpaidLockerApplicationsAmount->get_result();
+                        $unpaidLockerApplicationsAmountRow = $unpaidLockerApplicationsAmountResultSet->fetch_assoc();
+
+                        $stmtUnpaidLockerApplicationsAmount->close();
+                        $conn_local->next_result();
                     ?>
 
                     <!-- Activated users -->
                     <div class="data-count">
                         <div class="count">
-                            <small>Activated Users</small>
+                            <small> 
+                                <span>
+                                    Activated Users
+                                </span>
+                            </small>
 
                             <h1>
                                 <span><?php echo $usersCountRow['users_count']; ?></span>
@@ -297,7 +341,11 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     <!-- Lockers -->
                     <div class="data-count">
                         <div class="count">
-                            <small>Total Lockers</small>
+                            <small>
+                                <span>
+                                    Total Lockers
+                                </span>
+                            </small>
 
                             <h1>
                                 <span><?php echo $totalLockersCountRow['total_lockers_count']; ?></span>
@@ -306,14 +354,18 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         </div>
 
                         <small>
-                            Over <?php echo $availableLockersCountRow['available_lockers_count']; ?> available lockers and <?php echo $occupiedLockersCountRow['occupied_lockers_count']; ?> occupied lockers
+                            Over <?php echo $availableLockersCountRow['available_lockers_count']; ?> available and <?php echo $occupiedLockersCountRow['occupied_lockers_count']; ?> occupied lockers
                         </small>
                     </div>
 
                     <!-- Locker applications -->
                     <div class="data-count">
                         <div class="count">
-                            <small>Accepted Applications</small>
+                            <small>
+                                <span>
+                                    Accepted Applications
+                                </span>
+                            </small>
 
                             <h1>
                                 <span><?php echo $acceptedLockerApplicationsCountRow['accepted_locker_applications_count']; ?></span>
@@ -323,6 +375,34 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                         <small>
                             Over <?php echo $pendingLockerApplicationsCountRow['pending_locker_applications_count']; ?> pending locker applications
+                        </small>
+                    </div>
+
+                    <!-- Payment count and amount -->
+                    <div class="data-count">
+                        <div class="count">
+                            <small>
+                                <span>
+                                    <?php echo $paidLockerApplicationsCountRow['paid_total_transactions'] ?? 0; ?>
+                                    Ended Application Paid For
+                                </span>
+
+                                <span>
+                                    <a href="../app/pdf/locker_payment_report.php" target="_blank">
+                                        View
+                                    </a>
+                                </span>
+                            </small>
+
+                            <h1>
+                                <span>₱<?php echo number_format($paidLockerApplicationsAmountRow['paid_total_amount'], 2); ?></span>
+                                <span><i class="fa-brands fa-cash-app"></i></span>
+                            </h1>
+                        </div>
+
+                        <small>
+                            <?php echo $unpaidLockerApplicationsCountRow['unpaid_total_transactions']; ?> Ended Applications Unpaid For 
+                            ₱<?php echo number_format($unpaidLockerApplicationsAmountRow['unpaid_total_amount'], 2); ?>
                         </small>
                     </div>
                 </div>

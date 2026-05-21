@@ -608,6 +608,134 @@ DELIMITER ;
 
 
 
+##### GET PAID LOCKER APPLICATIONS COUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE get\_paid\_ended\_locker\_applications\_count()
+
+BEGIN
+
+&#x20;   SELECT 
+
+&#x20;       COUNT(\*) AS paid\_total\_transactions
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE payment = 'Paid'
+
+&#x20;   AND status = 'Ended';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET PAID LOCKER APPLICATIONS AMOUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE get\_paid\_ended\_locker\_applications\_amount()
+
+BEGIN
+
+&#x20;   SELECT 
+
+&#x20;       COALESCE(SUM(lsz.price), 0) AS paid\_total\_amount
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   WHERE la.payment = 'Paid'
+
+&#x20;   AND la.status = 'Ended';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET UNPAID LOCKER APPLICATIONS COUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE get\_unpaid\_ended\_locker\_applications\_count()
+
+BEGIN
+
+&#x20;   SELECT 
+
+&#x20;       COUNT(\*) AS unpaid\_total\_transactions
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE payment = 'Unpaid'
+
+&#x20;   AND status = 'Ended';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### GET UNPAID LOCKER APPLICATIONS AMOUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE get\_unpaid\_ended\_locker\_applications\_amount()
+
+BEGIN
+
+&#x20;   SELECT 
+
+&#x20;       COALESCE(SUM(lsz.price), 0) AS unpaid\_total\_amount
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   WHERE la.payment = 'Unpaid'
+
+&#x20;   AND la.status = 'Ended';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
 ##### AFTER USER ACTIVATION (TRIGGER)
 
 
@@ -2712,7 +2840,7 @@ BEGIN
 
 &#x20;   UPDATE locker\_applications la
 
-&#x20;   SET 
+&#x20;   SET
 
 &#x20;   	la.status = 'Cancelled',
 
