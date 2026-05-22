@@ -40,14 +40,14 @@ try {
     $email = $_SESSION['email'];
     $username = $_SESSION['username'];
 
-    sendLockerSlotCancellation(
-        $email,
-        $username,
-        $slot['location'],
-        $slot['slot_number'],
-        $slot['size'],
-        $slot['price']
-    );
+    // sendLockerSlotCancellation(
+    //     $email,
+    //     $username,
+    //     $slot['location'],
+    //     $slot['slot_number'],
+    //     $slot['size'],
+    //     $slot['price']
+    // );
 
     $_SESSION['alert_message'] = [
         'type' => 'warning',

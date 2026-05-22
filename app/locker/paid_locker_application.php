@@ -54,14 +54,14 @@ try {
     $stmt->close();
     $conn_local->next_result();
 
-    sendLockerSlotPaid(
-        $user['email'],
-        $user['username'],
-        $slot['location'],
-        $slot['slot_number'],
-        $slot['size'],
-        $slot['price']
-    );
+    // sendLockerSlotPaid(
+    //     $user['email'],
+    //     $user['username'],
+    //     $slot['location'],
+    //     $slot['slot_number'],
+    //     $slot['size'],
+    //     $slot['price']
+    // );
 
     $_SESSION['alert_message'] = [
         'type' => 'success',

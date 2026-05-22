@@ -58,14 +58,14 @@ try {
     $email = $user['email'];
     $username = $user['username'];
 
-    sendLockerSlotAccepted(
-        $email,
-        $username,
-        $slot['location'],
-        $slot['slot_number'],
-        $slot['size'],
-        $slot['price']
-    );
+    // sendLockerSlotAccepted(
+    //     $email,
+    //     $username,
+    //     $slot['location'],
+    //     $slot['slot_number'],
+    //     $slot['size'],
+    //     $slot['price']
+    // );
 
     $_SESSION['alert_message'] = [
         'type' => 'success',

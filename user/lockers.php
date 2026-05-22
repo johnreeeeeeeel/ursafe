@@ -572,12 +572,12 @@ $password = $_SESSION['password'] ?? '';
                                                                     <span class="badge rounded-pill revoked-badge">Revoked</span>
                                                                 <?php } elseif ($row['status'] == 'Cancelled') { ?>
                                                                     <span class="badge rounded-pill cancelled-badge">Cancelled</span>
+                                                                <?php } elseif ($row['status'] == 'Rejected') { ?>
+                                                                    <span class="badge rounded-pill rejected-badge">Rejected</span>
                                                                 <?php } elseif ($row['payment'] == 'Paid') { ?>
                                                                     <span class="badge rounded-pill ended-badge">Ended - Paid</span>
                                                                 <?php } elseif ($row['payment'] == 'Unpaid') { ?>
                                                                     <span class="badge rounded-pill ended-badge">Ended - Unpaid</span>
-                                                                <?php } else { ?>
-                                                                    <span class="badge rounded-pill rejected-badge">Rejected</span>
                                                                 <?php } ?>
                                                             </td>
 

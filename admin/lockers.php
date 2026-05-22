@@ -954,12 +954,12 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                         <span class="badge rounded-pill revoked-badge">Revoked</span>
                                                     <?php } elseif ($row['status'] == 'Cancelled') { ?>
                                                         <span class="badge rounded-pill cancelled-badge">Cancelled</span>
+                                                    <?php } elseif ($row['status'] == 'Rejected') { ?>
+                                                        <span class="badge rounded-pill rejected-badge">Rejected</span>
                                                     <?php } elseif ($row['payment'] == 'Paid') { ?>
                                                         <span class="badge rounded-pill ended-badge">Ended - Paid</span>
                                                     <?php } elseif ($row['payment'] == 'Unpaid') { ?>
                                                         <span class="badge rounded-pill ended-badge">Ended - Unpaid</span>
-                                                    <?php } else { ?>
-                                                        <span class="badge rounded-pill rejected-badge">Rejected</span>
                                                     <?php } ?>
                                                 </td>
                                                 
@@ -1736,7 +1736,13 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                     <td data-label="Price">&#8369;<?= $lockerRow['price'] ?></td>
                                                     <td data-label="Start Date"><?= $lockerRow['start_at'] ?></td>
                                                     <td data-label="End Date"><?= $lockerRow['end_at'] ?></td>
-                                                    <td data-label="Status"><?= $lockerRow['status'] ?></td>
+                                                    <td data-label="Status">
+                                                        <?= $lockerRow['status'] ?>
+
+                                                        <?php if ($lockerRow['status'] == 'Occupied') { ?>
+                                                            By <?= $lockerRow['user_id'] ?>
+                                                        <?php } ?>
+                                                    </td>
 
                                                     <td data-label="Action">
                                                         <div class="action-buttons">

@@ -114,9 +114,15 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE getUserById(IN p\_id VARCHAR(255))
+CREATE OR REPLACE PROCEDURE getUserById(
+
+&#x20;   IN p\_value VARCHAR(255)
+
+)
 
 BEGIN
+
+
 
 &#x20;   SELECT
 
@@ -160,9 +166,13 @@ BEGIN
 
 &#x20;   FROM users
 
-&#x20;   WHERE id = p\_id
+&#x20;   WHERE id = p\_value
+
+&#x20;      OR username = p\_value
 
 &#x20;   LIMIT 1;
+
+
 
 END //
 
@@ -880,7 +890,11 @@ CREATE OR REPLACE PROCEDURE getPendingLockerApplications(
 
 )
 
+
+
 BEGIN
+
+
 
 &#x20;   SELECT
 
@@ -892,7 +906,9 @@ BEGIN
 
 &#x20;       la.status,
 
-&#x09;la.payment,
+&#x09; 	la.payment,
+
+&#x20;       
 
 &#x20;       TRIM(CONCAT(
 
@@ -903,6 +919,8 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
+
+&#x20;       
 
 &#x20;       u.email,
 
@@ -924,6 +942,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -932,21 +952,17 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
+&#x20;   
+
 &#x20;   WHERE la.status = 'Pending'
 
-&#x20;   ORDER BY la.created\_at DESC
-
-&#x20;   LIMIT p\_limit OFFSET p\_offset;
+&#x20;   ORDER BY la.created\_at DESC LIMIT p\_limit OFFSET p\_offset;
 
 
 
-&#x20;   SELECT COUNT(\*) AS pendingTotal
+&#x20;   SELECT COUNT(\*) AS pendingTotal FROM locker\_applications WHERE status = 'Pending';
 
-&#x20;   FROM locker\_applications
-
-&#x20;   WHERE status = 'Pending';
-
-
+&#x20;   
 
 END//
 
@@ -976,7 +992,11 @@ CREATE OR REPLACE PROCEDURE getSearchFilterPendingLockerApplications(
 
 )
 
+
+
 BEGIN
+
+
 
 &#x20;   SELECT
 
@@ -988,7 +1008,9 @@ BEGIN
 
 &#x20;       la.status,
 
-&#x09;la.payment,
+&#x09;	la.payment,
+
+&#x20;       
 
 &#x20;       TRIM(CONCAT(
 
@@ -999,6 +1021,8 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
+
+&#x20;       
 
 &#x20;       u.email,
 
@@ -1018,6 +1042,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -1026,23 +1052,37 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
+&#x20;   
+
 &#x20;   WHERE la.status = 'Pending'
 
 &#x20;   AND (
 
-&#x20;       searchTerm IS NULL
-
-&#x20;       OR searchTerm = ''
+&#x20;       searchTerm IS NULL OR searchTerm = ''
 
 &#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR la.user\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR la.slot\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       
+
 &#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.middlename LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR u.username LIKE CONCAT('%', searchTerm, '%')
+
 &#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       
+
 &#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lsz.size LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
 
@@ -1064,29 +1104,47 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
 
 &#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   
+
 &#x20;   WHERE la.status = 'Pending'
 
 &#x20;   AND (
 
-&#x20;       searchTerm IS NULL
-
-&#x20;       OR searchTerm = ''
+&#x20;       searchTerm IS NULL OR searchTerm = ''
 
 &#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR la.user\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR la.slot\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       
+
 &#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.middlename LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR u.username LIKE CONCAT('%', searchTerm, '%')
+
 &#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       
+
 &#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lsz.size LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
 
@@ -1118,7 +1176,11 @@ CREATE OR REPLACE PROCEDURE getAcceptedLockerApplications(
 
 )
 
+
+
 BEGIN
+
+
 
 &#x20;   SELECT
 
@@ -1130,7 +1192,9 @@ BEGIN
 
 &#x20;       la.status,
 
-&#x09;la.payment,
+&#x09; 	la.payment,
+
+&#x20;       
 
 &#x20;       TRIM(CONCAT(
 
@@ -1141,6 +1205,8 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
+
+&#x20;       
 
 &#x20;       u.email,
 
@@ -1162,6 +1228,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -1170,19 +1238,15 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
+&#x20;   
+
 &#x20;   WHERE la.status = 'Accepted'
 
-&#x20;   ORDER BY la.updated\_at DESC
-
-&#x20;   LIMIT p\_limit OFFSET p\_offset;
+&#x20;   ORDER BY la.updated\_at DESC LIMIT p\_limit OFFSET p\_offset;
 
 
 
-&#x20;   SELECT COUNT(\*) AS acceptedTotal
-
-&#x20;   FROM locker\_applications
-
-&#x20;   WHERE status = 'Accepted';
+&#x20;   SELECT COUNT(\*) AS acceptedTotal FROM locker\_applications WHERE status = 'Accepted';
 
 
 
@@ -1214,7 +1278,11 @@ CREATE OR REPLACE PROCEDURE getSearchFilterAcceptedLockerApplications(
 
 )
 
+
+
 BEGIN
+
+
 
 &#x20;   SELECT
 
@@ -1226,7 +1294,9 @@ BEGIN
 
 &#x20;       la.status,
 
-&#x09;la.payment,
+&#x09;	la.payment,
+
+&#x20;       
 
 &#x20;       TRIM(CONCAT(
 
@@ -1237,6 +1307,8 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
+
+&#x20;       
 
 &#x20;       u.email,
 
@@ -1256,6 +1328,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -1264,21 +1338,37 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
+&#x20;   
+
 &#x20;   WHERE la.status = 'Accepted'
 
-&#x20;   AND (
+&#x20;  AND (
 
 &#x20;       searchTerm IS NULL OR searchTerm = ''
 
 &#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR la.user\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR la.slot\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       
+
 &#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.middlename LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR u.username LIKE CONCAT('%', searchTerm, '%')
+
 &#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       
+
 &#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lsz.size LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
 
@@ -1300,11 +1390,17 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
 
 &#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   
 
 &#x20;   WHERE la.status = 'Accepted'
 
@@ -1314,13 +1410,27 @@ BEGIN
 
 &#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR la.user\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR la.slot\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       
+
 &#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.middlename LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR u.username LIKE CONCAT('%', searchTerm, '%')
+
 &#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       
+
 &#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lsz.size LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
 
@@ -1352,7 +1462,11 @@ CREATE OR REPLACE PROCEDURE getEndedLockerApplications(
 
 )
 
+
+
 BEGIN
+
+
 
 &#x20;   SELECT
 
@@ -1364,7 +1478,9 @@ BEGIN
 
 &#x20;       la.status,
 
-&#x09;la.payment,
+&#x09; 	la.payment,
+
+&#x20;       
 
 &#x20;       TRIM(CONCAT(
 
@@ -1375,6 +1491,8 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
+
+&#x20;       
 
 &#x20;       u.email,
 
@@ -1396,6 +1514,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -1404,23 +1524,15 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status = 'Ended'
+&#x20;   
 
-&#x20;   AND la.payment = 'Unpaid'
+&#x20;   WHERE la.status = 'Ended' AND la.payment = 'Unpaid'
 
-&#x20;   ORDER BY la.updated\_at DESC
-
-&#x20;   LIMIT p\_limit OFFSET p\_offset;
+&#x20;   ORDER BY la.updated\_at DESC LIMIT p\_limit OFFSET p\_offset;
 
 
 
-&#x20;   SELECT COUNT(\*) AS acceptedTotal
-
-&#x20;   FROM locker\_applications
-
-&#x20;   WHERE status = 'Ended'
-
-&#x20;   AND payment = 'Unpaid';
+&#x20;   SELECT COUNT(\*) AS acceptedTotal FROM locker\_applications WHERE status = 'Ended' AND payment = 'Unpaid';
 
 
 
@@ -1452,7 +1564,11 @@ CREATE OR REPLACE PROCEDURE getSearchFilterEndedLockerApplications(
 
 )
 
+
+
 BEGIN
+
+
 
 &#x20;   SELECT
 
@@ -1464,7 +1580,9 @@ BEGIN
 
 &#x20;       la.status,
 
-&#x09;la.payment,
+&#x09;	la.payment,
+
+&#x20;       
 
 &#x20;       TRIM(CONCAT(
 
@@ -1475,6 +1593,8 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
+
+&#x20;       
 
 &#x20;       u.email,
 
@@ -1494,6 +1614,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -1502,9 +1624,9 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status = 'Ended'
+&#x20;   
 
-&#x20;   AND la.payment = 'Unpaid'
+&#x20;   WHERE la.status = 'Ended' AND la.payment = 'Unpaid'
 
 &#x20;   AND (
 
@@ -1512,13 +1634,27 @@ BEGIN
 
 &#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR la.user\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR la.slot\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       
+
 &#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.middlename LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR u.username LIKE CONCAT('%', searchTerm, '%')
+
 &#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       
+
 &#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lsz.size LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
 
@@ -1540,15 +1676,19 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
 
 &#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
-&#x20;   WHERE la.status = 'Ended'
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   AND payment = 'Unpaid'
+&#x20;   
+
+&#x20;   WHERE la.status = 'Ended' AND payment = 'Unpaid'
 
 &#x20;   AND (
 
@@ -1556,13 +1696,27 @@ BEGIN
 
 &#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR la.user\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR la.slot\_id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       
+
 &#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR u.middlename LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR u.username LIKE CONCAT('%', searchTerm, '%')
+
 &#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       
+
 &#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lsz.size LIKE CONCAT('%', searchTerm, '%')
 
 &#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
 
@@ -1594,7 +1748,11 @@ CREATE OR REPLACE PROCEDURE getLockerApplicationHistory(
 
 )
 
+
+
 BEGIN
+
+
 
 &#x20;   SELECT
 
@@ -1606,7 +1764,9 @@ BEGIN
 
 &#x20;       la.status,
 
-&#x20;       la.payment,
+&#x09; 	la.payment,
+
+&#x20;       
 
 &#x20;       TRIM(CONCAT(
 
@@ -1617,6 +1777,8 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
+
+&#x20;       
 
 &#x20;       u.email,
 
@@ -1638,6 +1800,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -1646,23 +1810,17 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
+&#x20;   
 
-&#x20;   AND la.payment IN ('Paid', 'Unpaid')
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid')
 
-&#x20;   ORDER BY la.updated\_at DESC
-
-&#x20;   LIMIT p\_limit OFFSET p\_offset;
+&#x20;   ORDER BY la.updated\_at DESC LIMIT p\_limit OFFSET p\_offset;
 
 
 
-&#x20;   SELECT COUNT(\*) AS historyTotal
+&#x20;   SELECT COUNT(\*) AS historyTotal FROM locker\_applications la
 
-&#x20;   FROM locker\_applications la
-
-&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
-
-&#x20;   AND la.payment IN ('Paid', 'Unpaid');
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid');
 
 
 
@@ -1694,11 +1852,13 @@ CREATE OR REPLACE PROCEDURE getSearchFilterLockerApplicationHistory(
 
 )
 
+
+
 BEGIN
 
 
 
-&#x20;   SELECT
+&#x20;  SELECT
 
 &#x20;       la.id AS application\_id,
 
@@ -1708,7 +1868,9 @@ BEGIN
 
 &#x20;       la.status,
 
-&#x20;       la.payment,
+&#x09;	la.payment,
+
+&#x20;       
 
 &#x20;       TRIM(CONCAT(
 
@@ -1719,6 +1881,8 @@ BEGIN
 &#x20;           u.lastname
 
 &#x20;       )) AS fullname,
+
+&#x20;       
 
 &#x20;       u.email,
 
@@ -1738,6 +1902,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -1746,29 +1912,41 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
+&#x20;   
 
-&#x20;     AND la.payment IN ('Paid', 'Unpaid')
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid')
 
 &#x20;     AND (
 
-&#x20;           searchTerm IS NULL OR searchTerm = ''
+&#x20;       searchTerm IS NULL OR searchTerm = ''
 
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR la.user\_id LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR CAST(la.id AS CHAR) LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR la.slot\_id LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR u.firstname LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       
 
-&#x20;           OR u.lastname LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR u.email LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR u.middlename LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR ll.location LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR ls.slot\_number LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR u.username LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;     )
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lsz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
 
 &#x20;   ORDER BY
 
@@ -1788,6 +1966,8 @@ BEGIN
 
 &#x20;   FROM locker\_applications la
 
+&#x20;   
+
 &#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
@@ -1796,29 +1976,41 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
+&#x20;   
 
-&#x20;     AND la.payment IN ('Paid', 'Unpaid')
+&#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid')
 
 &#x20;     AND (
 
-&#x20;           searchTerm IS NULL OR searchTerm = ''
+&#x20;       searchTerm IS NULL OR searchTerm = ''
 
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
 
+&#x20;       OR la.user\_id LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR CAST(la.id AS CHAR) LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR la.slot\_id LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR u.firstname LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       
 
-&#x20;           OR u.lastname LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR u.email LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR u.middlename LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR ll.location LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;           OR ls.slot\_number LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+&#x20;       OR u.username LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;     );
+&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR lsz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   );
 
 
 
@@ -2400,6 +2592,8 @@ CREATE OR REPLACE PROCEDURE getLockersByLocation (
 
 )
 
+
+
 BEGIN
 
 &#x20;   SELECT
@@ -2416,11 +2610,19 @@ BEGIN
 
 &#x20;       lsz.price,
 
-&#x20;       ls.status
+&#x20;       ls.status,
+
+&#x20;       la.user\_id
 
 &#x20;   FROM locker\_slots ls
 
+
+
 &#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   LEFT JOIN locker\_applications la ON ls.id = la.slot\_id AND la.status = 'Accepted'
+
+
 
 &#x20;   WHERE ls.location\_id = p\_location\_id
 
@@ -2932,15 +3134,15 @@ CREATE OR REPLACE PROCEDURE endLockerApplication()
 
 BEGIN
 
-&#x20;   UPDATE locker\_slots
-
-&#x20;   SET status = 'Available'
-
-&#x20;   WHERE status = 'Occupied';
 
 
+&#x20;   UPDATE locker\_slots SET status = 'Available'
 
-&#x20;   UPDATE locker\_applications la
+&#x20;   WHERE status = 'Occupied' AND end\_at <= CURRENT\_DATE;
+
+
+
+&#x20;   UPDATE locker\_applications la INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
 
 &#x20;   SET
 
@@ -2950,19 +3152,23 @@ BEGIN
 
 &#x20;       la.updated\_at = NOW()
 
-&#x20;   WHERE la.status = 'Accepted';
+&#x20;   WHERE la.status = 'Accepted' AND ls.end\_at <= CURRENT\_DATE;
 
 
 
-&#x20;   UPDATE locker\_applications la
+&#x20;   UPDATE locker\_applications la INNER JOIN locker\_slots ls
+
+&#x20;       ON la.slot\_id = ls.id
 
 &#x20;   SET
 
-&#x20;   	la.status = 'Cancelled',
+&#x20;       la.status = 'Cancelled',
 
 &#x20;       la.updated\_at = NOW()
 
-&#x20;   WHERE la.status = 'Pending';
+&#x20;   WHERE la.status = 'Pending' AND ls.end\_at <= CURRENT\_DATE;
+
+
 
 END //
 

@@ -445,7 +445,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                             <div class="profile-details">
                                 <small>
-                                    <span>Date: </span>
+                                    <span>Date Activated: </span>
                                     <?php echo htmlspecialchars($recentActivatedUserRow['created_at']); ?>
                                 </small>
                             </div>

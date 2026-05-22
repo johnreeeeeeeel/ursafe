@@ -17,8 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 0) {
         $_SESSION['alert_message'] = [
             'type' => 'danger',
-            'text' => 'Please use your campus email to activate your account'
+            'text' => 'Please use your campus email to activate your account.'
         ];
+
         header("Location: ../../index.php");
         exit;
     }
@@ -37,11 +38,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'type' => 'warning',
             'text' => 'Account already activated. Please log in instead.'
         ];
+
+        header("Location: ../../index.php");
+        exit;
+    }
+
+    $student = $result->fetch_assoc();
+    $stmt->close();
+
+    // Check if username already exists
+    $stmt = $conn_local->prepare("CALL getUserById(?)");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+
+    $checkUsername = $stmt->get_result();
+
+    if ($checkUsername->num_rows > 0) {
+        $_SESSION['alert_message'] = [
+            'type' => 'warning',
+            'text' => 'Username already exists.'
+        ];
+
         header("Location: ../../index.php");
         exit;
     }
 
     $stmt->close();
+    $conn_local->next_result();
 
     // Insert into ursafe database
     $password = password_hash($plainPassword, PASSWORD_DEFAULT);
