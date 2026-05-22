@@ -524,7 +524,7 @@ BEGIN
 
 &#x20;       description,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;       created\_at
 
 &#x20;   FROM user\_account\_logs
 
@@ -596,7 +596,7 @@ BEGIN
 
 &#x09;middlename,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y') AS created\_at
 
 &#x20;   FROM recent\_user\_account\_activation;
 
@@ -620,7 +620,7 @@ CREATE OR REPLACE PROCEDURE get\_paid\_ended\_locker\_applications\_count()
 
 BEGIN
 
-&#x20;   SELECT 
+&#x20;   SELECT
 
 &#x20;       COUNT(\*) AS paid\_total\_transactions
 
@@ -650,7 +650,7 @@ CREATE OR REPLACE PROCEDURE get\_paid\_ended\_locker\_applications\_amount()
 
 BEGIN
 
-&#x20;   SELECT 
+&#x20;   SELECT
 
 &#x20;       COALESCE(SUM(lsz.price), 0) AS paid\_total\_amount
 
@@ -684,7 +684,7 @@ CREATE OR REPLACE PROCEDURE get\_unpaid\_ended\_locker\_applications\_count()
 
 BEGIN
 
-&#x20;   SELECT 
+&#x20;   SELECT
 
 &#x20;       COUNT(\*) AS unpaid\_total\_transactions
 
@@ -714,7 +714,7 @@ CREATE OR REPLACE PROCEDURE get\_unpaid\_ended\_locker\_applications\_amount()
 
 BEGIN
 
-&#x20;   SELECT 
+&#x20;   SELECT
 
 &#x20;       COALESCE(SUM(lsz.price), 0) AS unpaid\_total\_amount
 
@@ -754,7 +754,7 @@ FOR EACH ROW
 
 BEGIN
 
-&#x09;DECLARE action VARCHAR(255) DEFAULT 'Activated';
+&#x09;DECLARE action VARCHAR(255) DEFAULT 'Activate';
 
 &#x20;   	DECLARE description VARCHAR(255);
 
@@ -804,7 +804,7 @@ FOR EACH ROW
 
 BEGIN
 
-&#x09;DECLARE action VARCHAR(255) DEFAULT 'Deleted';
+&#x09;DECLARE action VARCHAR(255) DEFAULT 'Delete';
 
 &#x20;  	DECLARE description VARCHAR(255);
 
@@ -1696,6 +1696,8 @@ CREATE OR REPLACE PROCEDURE getSearchFilterLockerApplicationHistory(
 
 BEGIN
 
+
+
 &#x20;   SELECT
 
 &#x20;       la.id AS application\_id,
@@ -1746,25 +1748,27 @@ BEGIN
 
 &#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
-&#x20;   AND la.payment IN ('Paid', 'Unpaid')
+&#x20;     AND la.payment IN ('Paid', 'Unpaid')
 
-&#x20;   AND (
+&#x20;     AND (
 
-&#x20;       searchTerm IS NULL OR searchTerm = ''
+&#x20;           searchTerm IS NULL OR searchTerm = ''
 
-&#x20;       OR CAST(la.id AS CHAR) LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+&#x20;           OR CAST(la.id AS CHAR) LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
 
-&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+&#x20;           OR u.firstname LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
 
-&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+&#x20;           OR u.lastname LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
 
-&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+&#x20;           OR u.email LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
 
-&#x20;   )
+&#x20;           OR ll.location LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+
+&#x20;           OR ls.slot\_number LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+
+&#x20;     )
 
 &#x20;   ORDER BY
 
@@ -1778,6 +1782,8 @@ BEGIN
 
 
 
+
+
 &#x20;   SELECT COUNT(\*) AS historyTotal
 
 &#x20;   FROM locker\_applications la
@@ -1788,27 +1794,31 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
 &#x20;   WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
 
-&#x20;   AND la.payment IN ('Paid', 'Unpaid')
+&#x20;     AND la.payment IN ('Paid', 'Unpaid')
 
-&#x20;   AND (
+&#x20;     AND (
 
-&#x20;       searchTerm IS NULL OR searchTerm = ''
+&#x20;           searchTerm IS NULL OR searchTerm = ''
 
-&#x20;       OR CAST(la.id AS CHAR) LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;       OR u.firstname LIKE CONCAT('%', searchTerm, '%')
 
-&#x20;       OR u.lastname LIKE CONCAT('%', searchTerm, '%')
+&#x20;           OR CAST(la.id AS CHAR) LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
 
-&#x20;       OR u.email LIKE CONCAT('%', searchTerm, '%')
+&#x20;           OR u.firstname LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
 
-&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+&#x20;           OR u.lastname LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
 
-&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+&#x20;           OR u.email LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
 
-&#x20;   );
+&#x20;           OR ll.location LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+
+&#x20;           OR ls.slot\_number LIKE CONCAT('%', searchTerm COLLATE utf8mb4\_unicode\_ci, '%')
+
+&#x20;     );
 
 
 
@@ -1836,7 +1846,9 @@ BEGIN
 
 &#x09;location,
 
-&#x09;DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x09;DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at,
+
+&#x09;DATE\_FORMAT(updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
 
 &#x09;FROM locker\_locations
 
@@ -1872,7 +1884,9 @@ BEGIN
 
 &#x20;   location,
 
-&#x20;   DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;   DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at,
+
+&#x20;   DATE\_FORMAT(updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
 
 &#x20;   FROM locker\_locations
 
@@ -1944,7 +1958,23 @@ CREATE OR REPLACE PROCEDURE addLockerLocation (
 
 )
 
+
+
 BEGIN
+
+&#x09;DECLARE EXIT HANDLER FOR 1062
+
+&#x20;
+
+&#x20;   BEGIN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Cannot add: Location already exist.';
+
+&#x20;   END;
+
+&#x09;
 
 &#x20;   INSERT INTO locker\_locations (location)
 
@@ -1978,7 +2008,11 @@ BEGIN
 
 &#x20;   UPDATE locker\_locations
 
-&#x20;   SET location = p\_location
+&#x20;   SET 
+
+&#x20;       location = p\_location,
+
+&#x20;       updated\_at = NOW()
 
 &#x20;   WHERE id = p\_id;
 
@@ -2005,6 +2039,20 @@ CREATE OR REPLACE PROCEDURE deleteLockerLocation (
 )
 
 BEGIN
+
+&#x20;   DECLARE EXIT HANDLER FOR 1451
+
+&#x20;   
+
+&#x20;   BEGIN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Cannot delete: Location still contains slots.';
+
+&#x20;   END;
+
+&#x20;   
 
 &#x20;   DELETE FROM locker\_locations
 
@@ -2044,7 +2092,7 @@ BEGIN
 
 &#x20;       description,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;       created\_at
 
 &#x20;   FROM locker\_logs
 
@@ -2086,7 +2134,9 @@ BEGIN
 
 &#x20;       price,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at,
+
+&#x09;DATE\_FORMAT(updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
 
 &#x20;       FROM locker\_sizes
 
@@ -2128,7 +2178,9 @@ BEGIN
 
 &#x20;       price,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at,
+
+&#x09;DATE\_FORMAT(updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
 
 &#x20;   FROM locker\_sizes
 
@@ -2222,7 +2274,23 @@ CREATE OR REPLACE PROCEDURE addLockerSize (
 
 )
 
+
+
 BEGIN
+
+&#x09;DECLARE EXIT HANDLER FOR 1062
+
+&#x20;
+
+&#x20;   BEGIN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Cannot add: Size already exist.';
+
+&#x20;   END;
+
+&#x20;   
 
 &#x20;   INSERT INTO locker\_sizes (size, price)
 
@@ -2260,7 +2328,9 @@ BEGIN
 
 &#x20;   SET size = p\_size,
 
-&#x20;       price = p\_price
+&#x20;       price = p\_price,
+
+&#x09;updated\_at = NOW()
 
 &#x20;   WHERE id = p\_id;
 
@@ -2286,7 +2356,23 @@ CREATE OR REPLACE PROCEDURE deleteLockerSize(
 
 )
 
+
+
 BEGIN
+
+&#x09;DECLARE EXIT HANDLER FOR 1451
+
+&#x20;
+
+&#x20;   BEGIN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Cannot delete: Size still assigned to slots.';
+
+&#x20;   END;
+
+&#x20;   
 
 &#x20;   DELETE FROM locker\_sizes
 
@@ -2452,6 +2538,20 @@ CREATE OR REPLACE PROCEDURE addLocker (
 
 BEGIN
 
+&#x09;DECLARE EXIT HANDLER FOR 1062
+
+&#x20;   
+
+&#x20;   BEGIN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Cannot add: Slot number already exist.';
+
+&#x20;   END;
+
+&#x20;   
+
 &#x20;   INSERT INTO locker\_slots (
 
 &#x20;       slot\_number,
@@ -2554,7 +2654,23 @@ CREATE OR REPLACE PROCEDURE deleteLocker (
 
 )
 
+
+
 BEGIN
+
+&#x09;DECLARE EXIT HANDLER FOR 1451
+
+&#x20;   
+
+&#x20;   BEGIN
+
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Cannot delete: Slot already has an application.';
+
+&#x20;   END;
+
+&#x20;   
 
 &#x20;   DELETE FROM locker\_slots
 
@@ -3670,21 +3786,19 @@ BEGIN
 
 &#x20;       user\_id,
 
-&#x20;       firstname,
-
-&#x20;       middlename,
-
-&#x20;       lastname,
+&#x20;       slot\_number,
 
 &#x20;       location,
-
-&#x20;       slot\_number,
 
 &#x20;       size,
 
 &#x20;       price,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+&#x20;       status,
+
+&#x20;       payment,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y') AS created\_at
 
 &#x20;   FROM recent\_locker\_application;
 
@@ -3714,7 +3828,7 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Addition';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Add';
 
 &#x20;   DECLARE description VARCHAR(255);
 
@@ -3764,7 +3878,7 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Addition';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Add';
 
 &#x20;   DECLARE description VARCHAR(255);
 
@@ -3814,13 +3928,65 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Addition';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Add';
+
+&#x20;   DECLARE v\_location VARCHAR(255);
+
+&#x20;   DECLARE v\_size VARCHAR(255);
 
 &#x20;   DECLARE description VARCHAR(255);
 
 
 
-&#x20;   SET description = CONCAT('Slot #', NEW.slot\_number, ' has been added (Location ID: ', NEW.location\_id, ', Size ID: ', NEW.size\_id, ').');
+&#x20;   SELECT location INTO v\_location 
+
+&#x20;   FROM locker\_locations 
+
+&#x20;   WHERE id = NEW.location\_id 
+
+&#x20;   LIMIT 1;
+
+
+
+&#x20;   SELECT size INTO v\_size 
+
+&#x20;   FROM locker\_sizes 
+
+&#x20;   WHERE id = NEW.size\_id 
+
+&#x20;   LIMIT 1;
+
+
+
+&#x20;   SET description = CONCAT(
+
+&#x20;       'Slot #',
+
+&#x20;       NEW.slot\_number,
+
+&#x20;       ' added (',
+
+&#x20;       v\_location,
+
+&#x20;       ', ',
+
+&#x20;       v\_size,
+
+&#x20;       ', ',
+
+&#x20;       DATE\_FORMAT(NEW.start\_at, '%M %d, %Y'),
+
+&#x20;       ' - ',
+
+&#x20;       DATE\_FORMAT(NEW.end\_at, '%M %d, %Y'),
+
+&#x20;       ', ',
+
+&#x20;       NEW.status,
+
+&#x20;       ').'
+
+&#x20;   );
 
 
 
@@ -3837,6 +4003,8 @@ BEGIN
 &#x20;       description
 
 &#x20;   );
+
+
 
 END //
 
@@ -3864,13 +4032,25 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Updation';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Update';
 
 &#x20;   DECLARE description VARCHAR(255);
 
 
 
-&#x20;   SET description = CONCAT('Location ', OLD.location, ' has been updated to ', NEW.location, '.');
+&#x20;   SET description = CONCAT(
+
+&#x20;       'Location ',
+
+&#x20;       OLD.location,
+
+&#x20;       ' has been updated to ',
+
+&#x20;       NEW.location,
+
+&#x20;       '.'
+
+&#x20;   );
 
 
 
@@ -3887,6 +4067,8 @@ BEGIN
 &#x20;       description
 
 &#x20;   );
+
+
 
 END //
 
@@ -3914,21 +4096,169 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Updation';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Update';
 
 &#x20;   DECLARE description VARCHAR(255);
 
 
 
-&#x09;IF OLD.size <> NEW.size THEN
+&#x20;   SET description = CONCAT(
 
-&#x09;	SET description = CONCAT('Size ', OLD.size, ' has been updated to ', NEW.size, '.');
+&#x20;       'Size ',
 
-&#x09;ELSEIF OLD.price <> NEW.price THEN
+&#x20;       OLD.size,
 
-&#x09;	SET description = CONCAT('Price ', OLD.price, ' has been updated to ', NEW.price, ' on ', NEW.size, '.');
+&#x20;       ' with price ₱',
 
-&#x09;END IF;
+&#x20;       OLD.price,
+
+&#x20;       ' has been updated to ',
+
+&#x20;       NEW.size,
+
+&#x20;       ' with price ₱',
+
+&#x20;       NEW.price,
+
+&#x20;       '.'
+
+&#x20;   );
+
+
+
+&#x20;   INSERT INTO locker\_logs (
+
+&#x20;       action,
+
+&#x20;       description
+
+&#x20;   ) VALUES (
+
+&#x20;       action,
+
+&#x20;       description
+
+&#x20;   );
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### AFTER LOCKER LOCATION UPDATION (TRIGGER)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE TRIGGER after\_locker\_location\_updation
+
+AFTER UPDATE ON locker\_locations
+
+FOR EACH ROW
+
+
+
+BEGIN
+
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Update';
+
+&#x20;   DECLARE description VARCHAR(255);
+
+
+
+&#x20;   SET description = CONCAT(
+
+&#x20;       'Location ',
+
+&#x20;       OLD.location,
+
+&#x20;       ' has been updated to ',
+
+&#x20;       NEW.location,
+
+&#x20;       '.'
+
+&#x20;   );
+
+
+
+&#x20;   INSERT INTO locker\_logs (
+
+&#x20;       action,
+
+&#x20;       description
+
+&#x20;   ) VALUES (
+
+&#x20;       action,
+
+&#x20;       description
+
+&#x20;   );
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### AFTER LOCKER SIZES UPDATION (TRIGGER)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE TRIGGER after\_locker\_sizes\_updation
+
+AFTER UPDATE ON locker\_sizes
+
+FOR EACH ROW
+
+
+
+BEGIN
+
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Update';
+
+&#x20;   DECLARE description VARCHAR(255);
+
+
+
+&#x20;   SET description = CONCAT(
+
+&#x20;       'Size ',
+
+&#x20;       OLD.size,
+
+&#x20;       ' with price ₱',
+
+&#x20;       OLD.price,
+
+&#x20;       ' has been updated to ',
+
+&#x20;       NEW.size,
+
+&#x20;       ' with price ₱',
+
+&#x20;       NEW.price,
+
+&#x20;       '.'
+
+&#x20;   );
 
 
 
@@ -3974,57 +4304,83 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Updation';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Update';
 
-&#x20;   DECLARE description VARCHAR(255) DEFAULT 'Locker updated.';
+&#x20;   DECLARE v\_old\_location VARCHAR(255);
 
+&#x20;   DECLARE v\_new\_location VARCHAR(255);
 
+&#x20;   DECLARE v\_old\_size VARCHAR(255);
 
-&#x20;   IF OLD.slot\_number <> NEW.slot\_number THEN
+&#x20;   DECLARE v\_new\_size VARCHAR(255);
 
-
-
-&#x20;       SET description = CONCAT(
-
-&#x20;           'Slot #',
-
-&#x20;           OLD.slot\_number,
-
-&#x20;           ' has been updated to Slot #',
-
-&#x20;           NEW.slot\_number,
-
-&#x20;           '.'
-
-&#x20;       );
+&#x20;   DECLARE description VARCHAR(255);
 
 
 
-&#x20;   ELSEIF OLD.status <> NEW.status THEN
+&#x20;   SELECT location INTO v\_old\_location FROM locker\_locations WHERE id = OLD.location\_id LIMIT 1;
+
+&#x20;   SELECT location INTO v\_new\_location FROM locker\_locations WHERE id = NEW.location\_id LIMIT 1;
+
+&#x20;   SELECT size INTO v\_old\_size FROM locker\_sizes WHERE id = OLD.size\_id LIMIT 1;
+
+&#x20;   SELECT size INTO v\_new\_size FROM locker\_sizes WHERE id = NEW.size\_id LIMIT 1;
 
 
 
-&#x20;       SET description = CONCAT(
+&#x20;   SET description = CONCAT(
 
-&#x20;           'Slot #',
+&#x20;       'Slot #',
 
-&#x20;           NEW.slot\_number,
+&#x20;       OLD.slot\_number,
 
-&#x20;           ' status of ',
+&#x20;       ' (',
 
-&#x20;           OLD.status,
+&#x20;       v\_old\_location,
 
-&#x20;           ' has been updated to ',
+&#x20;       ', ',
 
-&#x20;           NEW.status,
+&#x20;       v\_old\_size,
 
-&#x20;           '.'
+&#x20;       ', ',
 
-&#x20;       );
+&#x20;       DATE\_FORMAT(OLD.start\_at, '%M %d, %Y'),
 
+&#x20;       ' - ',
 
+&#x20;       DATE\_FORMAT(OLD.end\_at, '%M %d, %Y'),
 
-&#x20;   END IF;
+&#x20;       ', ',
+
+&#x20;       OLD.status,
+
+&#x20;       ') updated to Slot #',
+
+&#x20;       NEW.slot\_number,
+
+&#x20;       ' (',
+
+&#x20;       v\_new\_location,
+
+&#x20;       ', ',
+
+&#x20;       v\_new\_size,
+
+&#x20;       ', ',
+
+&#x20;       DATE\_FORMAT(NEW.start\_at, '%M %d, %Y'),
+
+&#x20;       ' - ',
+
+&#x20;       DATE\_FORMAT(NEW.end\_at, '%M %d, %Y'),
+
+&#x20;       ', ',
+
+&#x20;       NEW.status,
+
+&#x20;       ').'
+
+&#x20;   );
 
 
 
@@ -4045,8 +4401,6 @@ BEGIN
 
 
 END //
-
-
 
 
 
@@ -4072,13 +4426,21 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Deletion';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Delete';
 
 &#x20;   DECLARE description VARCHAR(255);
 
 
 
-&#x20;   SET description = CONCAT('Location ', OLD.location, ' has been deleted.');
+&#x20;   SET description = CONCAT(
+
+&#x20;       'Location ',
+
+&#x20;       OLD.location,
+
+&#x20;       ' has been deleted.'
+
+&#x20;   );
 
 
 
@@ -4122,13 +4484,25 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Deletion';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Delete';
 
 &#x20;   DECLARE description VARCHAR(255);
 
 
 
-&#x20;   SET description = CONCAT('Size ', OLD.size, ' with price ₱', OLD.price, ' has been deleted.');
+&#x20;   SET description = CONCAT(
+
+&#x20;       'Size ',
+
+&#x20;       OLD.size,
+
+&#x20;       ' (₱',
+
+&#x20;       OLD.price,
+
+&#x20;       ') has been deleted.'
+
+&#x20;   );
 
 
 
@@ -4172,13 +4546,65 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Deletion';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Delete';
+
+&#x20;   DECLARE v\_location VARCHAR(255);
+
+&#x20;   DECLARE v\_size VARCHAR(255);
 
 &#x20;   DECLARE description VARCHAR(255);
 
 
 
-&#x20;   SET description = CONCAT('Slot #', OLD.slot\_number, ' has been deleted (Location ID: ', OLD.location\_id, ', Size ID: ', OLD.size\_id, ').');
+&#x20;   SELECT location INTO v\_location 
+
+&#x20;   FROM locker\_locations 
+
+&#x20;   WHERE id = OLD.location\_id 
+
+&#x20;   LIMIT 1;
+
+
+
+&#x20;   SELECT size INTO v\_size 
+
+&#x20;   FROM locker\_sizes 
+
+&#x20;   WHERE id = OLD.size\_id 
+
+&#x20;   LIMIT 1;
+
+
+
+&#x20;   SET description = CONCAT(
+
+&#x20;       'Slot #',
+
+&#x20;       OLD.slot\_number,
+
+&#x20;       ' (',
+
+&#x20;       v\_location,
+
+&#x20;       ', ',
+
+&#x20;       v\_size,
+
+&#x20;       ', ',
+
+&#x20;       DATE\_FORMAT(OLD.start\_at, '%M %d, %Y'),
+
+&#x20;       ' - ',
+
+&#x20;       DATE\_FORMAT(OLD.end\_at, '%M %d, %Y'),
+
+&#x20;       ', ',
+
+&#x20;       OLD.status,
+
+&#x20;       ') deleted.'
+
+&#x20;   );
 
 
 
@@ -4195,6 +4621,8 @@ BEGIN
 &#x20;       description
 
 &#x20;   );
+
+
 
 END //
 
@@ -4222,7 +4650,7 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Application';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Apply';
 
 &#x20;   DECLARE v\_slot\_number INT;
 
@@ -4236,13 +4664,27 @@ BEGIN
 
 &#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
-&#x20;   WHERE ls.id = NEW.slot\_id
-
-&#x20;   LIMIT 1;
+&#x20;   WHERE ls.id = NEW.slot\_id LIMIT 1;
 
 
 
-&#x20;   SET description = CONCAT(NEW.user\_id, ' has applied on slot #', v\_slot\_number, ' at ', v\_location, '.');
+&#x20;   SET description = CONCAT(
+
+&#x09;'User ',
+
+&#x20;       NEW.user\_id,
+
+&#x20;       ' applied (Slot #',
+
+&#x20;       v\_slot\_number,
+
+&#x20;       ', ',
+
+&#x20;       v\_location,
+
+&#x20;       ').'
+
+&#x20;   );
 
 
 
@@ -4288,7 +4730,7 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Cancellation';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Cancel';
 
 &#x20;   DECLARE v\_slot\_number INT;
 
@@ -4298,19 +4740,35 @@ BEGIN
 
 
 
-&#x09;IF NEW.status = 'Cancelled' AND OLD.status <> 'Cancelled' THEN
+&#x20;   IF NEW.status = 'Cancelled' AND OLD.status <> 'Cancelled' THEN
+
+
 
 &#x20;       SELECT ls.slot\_number, ll.location INTO v\_slot\_number, v\_location FROM locker\_slots ls
 
 &#x20;       INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
-&#x20;       WHERE ls.id = NEW.slot\_id
-
-&#x20;       LIMIT 1;
+&#x20;       WHERE ls.id = NEW.slot\_id LIMIT 1;
 
 
 
-&#x20;       SET description = CONCAT(NEW.user\_id, ' has cancelled slot #', v\_slot\_number, ' at ', v\_location, '.');
+&#x20;       SET description = CONCAT(
+
+&#x20;           'User ',
+
+&#x20;           NEW.user\_id,
+
+&#x20;           ' cancelled (Slot #',
+
+&#x20;           v\_slot\_number,
+
+&#x20;           ', ',
+
+&#x20;           v\_location,
+
+&#x20;           ').'
+
+&#x20;       );
 
 
 
@@ -4328,7 +4786,9 @@ BEGIN
 
 &#x20;       );
 
-&#x09;END IF;
+
+
+&#x20;   END IF;
 
 
 
@@ -4358,7 +4818,7 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Acception';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Accept';
 
 &#x20;   DECLARE v\_slot\_number INT;
 
@@ -4368,9 +4828,15 @@ BEGIN
 
 
 
-&#x09;IF NEW.status = 'Accepted' AND OLD.status <> 'Accepted' THEN
+&#x20;   IF NEW.status = 'Accepted' AND OLD.status <> 'Accepted' THEN
 
-&#x20;       SELECT ls.slot\_number, ll.location INTO v\_slot\_number, v\_location FROM locker\_slots ls
+
+
+&#x20;       SELECT ls.slot\_number, ll.location 
+
+&#x20;       INTO v\_slot\_number, v\_location 
+
+&#x20;       FROM locker\_slots ls
 
 &#x20;       INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
@@ -4380,25 +4846,33 @@ BEGIN
 
 
 
-&#x20;       SET description = CONCAT(NEW.user\_id, ' application on slot #', v\_slot\_number, ' at ', v\_location, ' has been accepted.');
+&#x20;       SET description = CONCAT(
 
+&#x09;    'User ',
 
+&#x20;           NEW.user\_id,
 
-&#x20;       INSERT INTO locker\_logs (
+&#x20;           ' application on slot #',
 
-&#x20;           action,
+&#x20;           v\_slot\_number,
 
-&#x20;           description
+&#x20;           ' at ',
 
-&#x20;       ) VALUES (
+&#x20;           v\_location,
 
-&#x20;           action,
-
-&#x20;           description
+&#x20;           ' accepted.'
 
 &#x20;       );
 
-&#x09;END IF;
+
+
+&#x20;       INSERT INTO locker\_logs (action, description)
+
+&#x20;       VALUES (action, description);
+
+
+
+&#x20;   END IF;
 
 
 
@@ -4428,7 +4902,7 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Rejection';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Reject';
 
 &#x20;   DECLARE v\_slot\_number INT;
 
@@ -4438,9 +4912,15 @@ BEGIN
 
 
 
-&#x09;IF NEW.status = 'Rejected' AND OLD.status <> 'Rejected' THEN
+&#x20;   IF NEW.status = 'Rejected' AND OLD.status <> 'Rejected' THEN
 
-&#x20;       SELECT ls.slot\_number, ll.location INTO v\_slot\_number, v\_location FROM locker\_slots ls
+
+
+&#x20;       SELECT ls.slot\_number, ll.location 
+
+&#x20;       INTO v\_slot\_number, v\_location 
+
+&#x20;       FROM locker\_slots ls
 
 &#x20;       INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
@@ -4450,25 +4930,33 @@ BEGIN
 
 
 
-&#x20;       SET description = CONCAT(NEW.user\_id, ' application on slot #', v\_slot\_number, ' at ', v\_location, ' has been rejected.');
+&#x20;       SET description = CONCAT(
 
+&#x09;    'User ',
 
+&#x20;           NEW.user\_id,
 
-&#x20;       INSERT INTO locker\_logs (
+&#x20;           ' application on slot #',
 
-&#x20;           action,
+&#x20;           v\_slot\_number,
 
-&#x20;           description
+&#x20;           ' at ',
 
-&#x20;       ) VALUES (
+&#x20;           v\_location,
 
-&#x20;           action,
-
-&#x20;           description
+&#x20;           ' rejected.'
 
 &#x20;       );
 
-&#x09;END IF;
+
+
+&#x20;       INSERT INTO locker\_logs (action, description)
+
+&#x20;       VALUES (action, description);
+
+
+
+&#x20;   END IF;
 
 
 
@@ -4498,7 +4986,7 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Revoking';
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'Revoke';
 
 &#x20;   DECLARE v\_slot\_number INT;
 
@@ -4508,9 +4996,15 @@ BEGIN
 
 
 
-&#x09;IF NEW.status = 'Revoked' AND OLD.status <> 'Revoked' THEN
+&#x20;   IF NEW.status = 'Revoked' AND OLD.status <> 'Revoked' THEN
 
-&#x20;       SELECT ls.slot\_number, ll.location INTO v\_slot\_number, v\_location FROM locker\_slots ls
+
+
+&#x20;       SELECT ls.slot\_number, ll.location 
+
+&#x20;       INTO v\_slot\_number, v\_location 
+
+&#x20;       FROM locker\_slots ls
 
 &#x20;       INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
 
@@ -4520,25 +5014,117 @@ BEGIN
 
 
 
-&#x20;       SET description = CONCAT(NEW.user\_id, ' application on slot #', v\_slot\_number, ' at ', v\_location, ' has been revoked.');
+&#x20;       SET description = CONCAT(
 
+&#x09;    'User ',
 
+&#x20;           NEW.user\_id,
 
-&#x20;       INSERT INTO locker\_logs (
+&#x20;           ' application on slot #',
 
-&#x20;           action,
+&#x20;           v\_slot\_number,
 
-&#x20;           description
+&#x20;           ' at ',
 
-&#x20;       ) VALUES (
+&#x20;           v\_location,
 
-&#x20;           action,
-
-&#x20;           description
+&#x20;           ' revoked.'
 
 &#x20;       );
 
-&#x09;END IF;
+
+
+&#x20;       INSERT INTO locker\_logs (action, description)
+
+&#x20;       VALUES (action, description);
+
+
+
+&#x20;   END IF;
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### AFTER LOCKER ENDED (TRIGGER)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE TRIGGER after\_locker\_ending
+
+AFTER UPDATE ON locker\_applications
+
+FOR EACH ROW
+
+
+
+BEGIN
+
+&#x20;   DECLARE action VARCHAR(255) DEFAULT 'End';
+
+&#x20;   DECLARE v\_slot\_number INT;
+
+&#x20;   DECLARE v\_location VARCHAR(255);
+
+&#x20;   DECLARE description TEXT;
+
+
+
+&#x20;   IF NEW.status = 'Ended' AND OLD.status <> 'Ended' THEN
+
+
+
+&#x20;       SELECT ls.slot\_number, ll.location 
+
+&#x20;       INTO v\_slot\_number, v\_location 
+
+&#x20;       FROM locker\_slots ls
+
+&#x20;       INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;       WHERE ls.id = NEW.slot\_id
+
+&#x20;       LIMIT 1;
+
+
+
+&#x20;       SET description = CONCAT(
+
+&#x09;    'User ',
+
+&#x20;           NEW.user\_id,
+
+&#x20;           ' application on slot #',
+
+&#x20;           v\_slot\_number,
+
+&#x20;           ' at ',
+
+&#x20;           v\_location,
+
+&#x20;           ' ended.'
+
+&#x20;       );
+
+
+
+&#x20;       INSERT INTO locker\_logs (action, description)
+
+&#x20;       VALUES (action, description);
+
+
+
+&#x20;   END IF;
 
 
 
@@ -4592,27 +5178,23 @@ SELECT
 
 &#x20;   la.user\_id,
 
-&#x20;   u.firstname,
-
-&#x20;   u.middlename,
-
-&#x20;   u.lastname,
+&#x20;   ls.slot\_number,
 
 &#x20;   ll.location,
-
-&#x20;   ls.slot\_number,
 
 &#x20;   lsz.size,
 
 &#x20;   lsz.price,
+
+&#x20;   la.status,
+
+&#x20;   la.payment,
 
 &#x20;   la.created\_at
 
 FROM locker\_applications la
 
 
-
-INNER JOIN users u ON la.user\_id = u.id
 
 INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
 
