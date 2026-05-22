@@ -221,9 +221,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 <table class="table table-borderless">
                                     <thead>
                                         <tr>
-                                            <th>Log ID</th>
-                                            <th>Timestamp</th>
                                             <th>Action</th>
+                                            <th>Timestamp</th>
                                             <th>Description</th>
                                         </tr>
                                     </thead>
@@ -231,9 +230,19 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                     <tbody>
                                         <?php while ($userAccountLogsRow = $userAccountLogsResultSet->fetch_assoc()) { ?>
                                             <tr>
-                                                <td data-label="Log ID"><?= $userAccountLogsRow['id'] ?></td>
+                                                <td data-label="Action">
+                                                    <?php if ($userAccountLogsRow['action'] == 'Activate') { ?>
+                                                        <span class="badge rounded-pill primary-badge">
+                                                            <?= $userAccountLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } else { ?>
+                                                        <span class="badge rounded-pill danger-badge">
+                                                            <?= $userAccountLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } ?>
+                                                </td>
+
                                                 <td data-label="Timestamp"><?= $userAccountLogsRow['created_at'] ?></td>
-                                                <td data-label="Action"><?= $userAccountLogsRow['action'] ?></td>
                                                 <td data-label="Description"><?= $userAccountLogsRow['description'] ?></td>
                                             </tr>
                                         <?php } ?>

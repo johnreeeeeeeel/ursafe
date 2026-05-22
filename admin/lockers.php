@@ -1063,7 +1063,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 <button type="submit" hidden></button>
                             </form>
 
-                            <button type="button" class="btn primary-btn" data-bs-toggle="modal" data-bs-target="#addLockerLocationModal">
+                            <button type="button" class="sm-btn primary-btn" data-bs-toggle="modal" data-bs-target="#addLockerLocationModal">
                                 <i class="fa-solid fa-plus"></i>
                                 Add Locker Location
                             </button>
@@ -1075,7 +1075,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                     <thead>
                                         <tr>
                                             <th>Location</th>
-                                            <th>Date Created</th>
+                                            <th>Created At</th>
+                                            <th>Updated At</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -1084,7 +1085,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         <?php while ($lockerLocationRow = $lockerLocationResultSet->fetch_assoc()) { ?>
                                             <tr>
                                                 <td data-label="Location"><?= $lockerLocationRow['location'] ?></td>
-                                                <td data-label="Date Created"><?= $lockerLocationRow['created_at'] ?></td>
+                                                <td data-label="Created At"><?= $lockerLocationRow['created_at'] ?></td>
+                                                <td data-label="Updated At"><?= $lockerLocationRow['updated_at'] ?></td>
 
                                                 <td data-label="Action">
                                                     <div class="action-buttons">
@@ -1269,7 +1271,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                                 <button type="submit" hidden></button>
                             </form>
-                            <button type="button" class="btn primary-btn" data-bs-toggle="modal" data-bs-target="#addLockerSizeModal">
+                            <button type="button" class="sm-btn primary-btn" data-bs-toggle="modal" data-bs-target="#addLockerSizeModal">
                                 <i class="fa-solid fa-plus"></i>
                                 Add Locker Size 
                             </button>
@@ -1282,7 +1284,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         <tr>
                                             <th>Size</th>
                                             <th>Price</th>
-                                            <th>Date Created</th>
+                                            <th>Created At</th>
+                                            <th>Updated At</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -1292,7 +1295,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                             <tr>
                                                 <td data-label="Size"><?= $lockerSizesRow['size'] ?></td>
                                                 <td data-label="Price">&#8369;<?= $lockerSizesRow['price'] ?></td>
-                                                <td data-label="Date Created"><?= $lockerSizesRow['created_at'] ?></td>
+                                                <td data-label="Created At"><?= $lockerSizesRow['created_at'] ?></td>
+                                                <td data-label="Updated At"><?= $lockerSizesRow['updated_at'] ?></td>
 
                                                 <td data-label="Action">
                                                     <div class="action-buttons">
@@ -1476,9 +1480,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 <table class="table table-borderless">
                                     <thead>
                                         <tr>
-                                            <th>Log ID</th>
-                                            <th>Timestamp</th>
                                             <th>Action</th>
+                                            <th>Timestamp</th>
                                             <th>Description</th>
                                         </tr>
                                     </thead>
@@ -1486,9 +1489,47 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                     <tbody>
                                         <?php while ($lockerLogsRow = $userLockerLogsResultSet->fetch_assoc()) { ?>
                                             <tr>
-                                                <td data-label="Log ID"><?= $lockerLogsRow['id'] ?></td>
+                                                <td data-label="Action">
+                                                    <?php if ($lockerLogsRow['action'] == 'Add') { ?>
+                                                        <span class="badge rounded-pill primary-badge">
+                                                            <?= $lockerLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } elseif ($lockerLogsRow['action'] == 'Update') { ?>
+                                                        <span class="badge rounded-pill warning-badge">
+                                                            <?= $lockerLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } elseif ($lockerLogsRow['action'] == 'Delete') { ?>
+                                                        <span class="badge rounded-pill danger-badge">
+                                                            <?= $lockerLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } elseif ($lockerLogsRow['action'] == 'Apply') { ?>
+                                                        <span class="badge rounded-pill success-badge">
+                                                            <?= $lockerLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } elseif ($lockerLogsRow['action'] == 'Cancel') { ?>
+                                                        <span class="badge rounded-pill pending-badge">
+                                                            <?= $lockerLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } elseif ($lockerLogsRow['action'] == 'Accept') { ?>
+                                                        <span class="badge rounded-pill accepted-badge">
+                                                            <?= $lockerLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } elseif ($lockerLogsRow['action'] == 'Reject') { ?>
+                                                        <span class="badge rounded-pill rejected-badge">
+                                                            <?= $lockerLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } elseif ($lockerLogsRow['action'] == 'Revoke') { ?>
+                                                        <span class="badge rounded-pill revoked-badge">
+                                                            <?= $lockerLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } else { ?>
+                                                        <span class="badge rounded-pill ended-badge">
+                                                            <?= $lockerLogsRow['action'] ?>
+                                                        </span>
+                                                    <?php } ?>
+                                                </td>
+
                                                 <td data-label="Timestamp"><?= $lockerLogsRow['created_at'] ?></td>
-                                                <td data-label="Action"><?= $lockerLogsRow['action'] ?></td>
                                                 <td data-label="Description"><?= $lockerLogsRow['description'] ?></td>
                                             </tr>
                                         <?php } ?>

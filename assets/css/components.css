@@ -102,6 +102,9 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
     border-radius: 12px;
     font-weight: 400;
     z-index: 9999;
+    width: fit-content;
+    max-width: 600px;
+    display: inline-block;
 }
 
 #messageAlert .toast-body {
@@ -109,6 +112,10 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
     flex-direction: row;
     align-items: center;
     gap: 8px;
+
+    white-space: normal;
+    word-wrap: break-word;
+    font-weight: 400;
 }
 
 #messageAlert.danger {
@@ -318,6 +325,26 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
 }
 
 /* Badges */
+.primary-badge {
+    background-color: var(--color-primary-base);
+    color: var(--text-light-primary);
+}
+
+.warning-badge {
+    background-color: var(--warning-base);
+    color: var(--text-light-primary);
+}
+
+.success-badge {
+    background-color: var(--success-base);
+    color: var(--text-light-primary);
+}
+
+.danger-badge {
+    background-color: var(--danger-base);
+    color: var(--text-light-primary);
+}
+
 .pending-badge {
     background-color: var(--warning-base);
     color: var(--text-light-primary);
@@ -347,7 +374,7 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
     background-color: var(--success-base);
     color: var(--text-light-primary);
 }
-
+  
 /* Primary modal */
 .primary-modal .modal-dialog {
     max-width: 400px !important;

@@ -42,9 +42,8 @@ try {
     ];
 
 } catch (Exception $e) {
-
     $_SESSION['alert_message'] = [
-        'type' => 'warning',
+        'type' => 'danger',
         'text' => $e->getMessage()
     ];
 }

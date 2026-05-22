@@ -438,7 +438,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                     ?>
                                 </h6>
                                 <small>
-                                    <span>ID: </span>
+                                    <span>User ID: </span>
                                     <?php echo htmlspecialchars($recentActivatedUserRow['id']); ?>
                                 </small>
                             </div>
@@ -479,10 +479,12 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                     <tr>
                                         <th>Application ID</th>
                                         <th>User ID</th>
-                                        <th>Location</th>
                                         <th>Slot</th>
+                                        <th>Location</th>
                                         <th>Size</th>
                                         <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Payment</th>
                                         <th>Date</th>
                                     </tr>
                                 </thead>
@@ -492,10 +494,12 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                             <tr>
                                                 <td data-label="Application ID"><?= $recentLockerApplicationRow['id'] ?></td>
                                                 <td data-label="User ID"><?= $recentLockerApplicationRow['user_id'] ?></td>
-                                                <td data-label="Location"><?= $recentLockerApplicationRow['location'] ?></td>
                                                 <td data-label="Slot"><?= $recentLockerApplicationRow['slot_number'] ?></td>
+                                                <td data-label="Location"><?= $recentLockerApplicationRow['location'] ?></td>
                                                 <td data-label="Size"><?= $recentLockerApplicationRow['size'] ?></td>
                                                 <td data-label="Price">&#8369;<?= $recentLockerApplicationRow['price'] ?></td>
+                                                <td data-label="Price"><?= $recentLockerApplicationRow['status'] ?></td>
+                                                <td data-label="Price"><?= $recentLockerApplicationRow['payment'] ?></td>
                                                 <td data-label="Date"><?= $recentLockerApplicationRow['created_at'] ?></td>
                                             </tr>
                                         <?php endwhile; ?>

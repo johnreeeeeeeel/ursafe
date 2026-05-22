@@ -4,23 +4,26 @@ require '../db_connection.php';
 
 $id = $_POST['id'];
 
-$stmt = $conn_local->prepare("CALL deleteLockerSize(?)");
-$stmt->bind_param("i", $id);
+try {
+    $stmt = $conn_local->prepare("CALL deleteLockerSize(?)");
+    $stmt->bind_param("i", $id);
 
-if ($stmt->execute()) {
+    $stmt->execute();
+
     $_SESSION['alert_message'] = [
         'type' => 'warning',
         'text' => 'Locker size deleted successfully.'
     ];
-} else {
+
+    $stmt->close();
+    $conn_local->next_result();
+
+} catch (Exception $e) {
     $_SESSION['alert_message'] = [
         'type' => 'danger',
-        'text' => 'Failed to delete locker size.'
+        'text' => $e->getMessage()
     ];
 }
-
-$stmt->close();
-$conn_local->next_result();
 
 header("Location: ../../admin/lockers.php#lockerSizesOffcanvas");
 exit;
