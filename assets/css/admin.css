@@ -879,7 +879,6 @@ section .content {
 }
 
 @media (max-width: 768px) {
-
     #lockers #lockerPendingApplicationOffcanvas .offcanvas-body .table thead,
     #lockers #lockerAcceptedApplicationOffcanvas .offcanvas-body .table thead,
     #lockers #lockerApplicationHistoryOffcanvas .offcanvas-body .table thead {
@@ -952,9 +951,10 @@ section .content {
     }
 }
 
-/* Locker locations, sizes, logs applications offcanvas */
+/* Locker locations, sizes, academic calendar, logs applications offcanvas */
 section #lockers #lockerLocationsOffcanvas,
 section #lockers #lockerSizesOffcanvas,
+section #lockers #academicCalendarOffcanvas,
 section #lockers #lockerLogsOffcanvas {
     background-color: var(--bg-secondary);
     width: 100vw;
@@ -971,6 +971,9 @@ section #lockers #lockerLocationsOffcanvas .offcanvas-footer,
 section #lockers #lockerSizesOffcanvas .offcanvas-header,
 section #lockers #lockerSizesOffcanvas .offcanvas-body,
 section #lockers #lockerSizesOffcanvas .offcanvas-footer,
+section #lockers #academicCalendarOffcanvas .offcanvas-header,
+section #lockers #academicCalendarOffcanvas .offcanvas-body,
+section #lockers #academicCalendarOffcanvas .offcanvas-footer,
 section #lockers #lockerLogsOffcanvas .offcanvas-header,
 section #lockers #lockerLogsOffcanvas .offcanvas-body,
 section #lockers #lockerLogsOffcanvas .offcanvas-footer {
@@ -987,6 +990,10 @@ section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close,
 section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:focus,
 section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:active,
 section #lockers #lockerSizesOffcanvas .offcanvas-header .btn-close:hover,
+section #lockers #academicCalendarOffcanvas .offcanvas-header .btn-close,
+section #lockers #academicCalendarOffcanvas .offcanvas-header .btn-close:focus,
+section #lockers #academicCalendarOffcanvas .offcanvas-header .btn-close:active,
+section #lockers #academicCalendarOffcanvas .offcanvas-header .btn-close:hover,
 section #lockers #lockerLogsOffcanvas .offcanvas-header .btn-close,
 section #lockers #lockerLogsOffcanvas .offcanvas-header .btn-close:focus,
 section #lockers #lockerLogsOffcanvas .offcanvas-header .btn-close:active,
@@ -998,6 +1005,7 @@ section #lockers #lockerLogsOffcanvas .offcanvas-header .btn-close:hover {
 
 section #lockers #lockerLocationsOffcanvas .offcanvas-header div,
 section #lockers #lockerSizesOffcanvas .offcanvas-header div,
+section #lockers #academicCalendarOffcanvas .offcanvas-header div,
 section #lockers #lockerLogsOffcanvas .offcanvas-header div {
     display: flex;
     flex-direction: row;
@@ -1008,18 +1016,21 @@ section #lockers #lockerLogsOffcanvas .offcanvas-header div {
 
 section #lockers #lockerLocationsOffcanvas .offcanvas-header div h3,
 section #lockers #lockerSizesOffcanvas .offcanvas-header div h3,
+section #lockers #academicCalendarOffcanvas .offcanvas-header div h3,
 section #lockers #lockerLogsOffcanvas .offcanvas-header div h3 {
     color: var(--text-dark-secondary) !important;
 }
 
 section #lockers #lockerLocationsOffcanvas .offcanvas-body table,
 section #lockers #lockerSizesOffcanvas .offcanvas-body table,
+section #lockers #academicCalendarOffcanvas .offcanvas-body table,
 section #lockers #lockerLogsOffcanvas .offcanvas-body table {
     background-color: transparent !important;
 }
 
 section #lockers #lockerLocationsOffcanvas .offcanvas-body table thead tr th,
 section #lockers #lockerSizesOffcanvas .offcanvas-body table thead tr th,
+section #lockers #academicCalendarOffcanvas .offcanvas-body table thead tr th,
 section #lockers #lockerLogsOffcanvas .offcanvas-body table thead tr th {
     text-align: left;
     font-weight: 500;
@@ -1030,6 +1041,7 @@ section #lockers #lockerLogsOffcanvas .offcanvas-body table thead tr th {
 
 section #lockers #lockerLocationsOffcanvas .offcanvas-body table tbody tr td,
 section #lockers #lockerSizesOffcanvas .offcanvas-body table tbody tr td,
+section #lockers #academicCalendarOffcanvas .offcanvas-body table tbody tr td,
 section #lockers #lockerLogsOffcanvas .offcanvas-body table tbody tr td {
     text-align: left;
     font-weight: 400;
@@ -1038,13 +1050,13 @@ section #lockers #lockerLogsOffcanvas .offcanvas-body table tbody tr td {
     font-size: 14px;
 }
 
-section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body {
+section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container {
+section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container {
     background: #ffffff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     padding: 12px;
@@ -1054,7 +1066,7 @@ section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLo
     gap: 12px;
 }
 
-section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table .location-header {
+section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table .location-header {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1062,19 +1074,19 @@ section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLo
     gap: 12px;
 }
 
-section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table .location-header h3 {
+section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table .location-header h3 {
     font-weight: 500;
     color: var(--text-dark-secondary);
 }
 
-section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table table thead tr th {
+section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table table thead tr th {
     text-align: left;
     font-weight: 500;
     vertical-align: middle;
     color: var(--text-dark-secondary);
 }
 
-section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table table tbody tr td {
+section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table table tbody tr td {
     text-align: left;
     font-weight: 400;
     vertical-align: middle;
@@ -1082,30 +1094,30 @@ section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLo
 }
 
 @media (max-width: 768px) {
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table thead {
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table thead {
         display: none;
     }
 
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table,
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table tbody,
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table tr,
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table td {
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table,
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table tbody,
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table tr,
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table td {
         display: block;
     }
 
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table tbody {
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table tbody {
         display: flex;
         flex-direction: column;
         gap: 24px;
     }
 
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table tr {
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table tr {
         margin-bottom: 10px;
         padding: 12px;
         border-radius: 8px;
     }
 
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table td {
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table td {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -1118,14 +1130,14 @@ section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLo
         text-overflow: ellipsis;
     }
 
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table td::before {
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table td::before {
         content: attr(data-label);
         font-weight: 500;
         color: #555;
         flex-shrink: 0;
     }
 
-    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table td:last-child .action-buttons {
+    section #lockers :is(#lockerLocationsOffcanvas, #lockerSizesOffcanvas, #academicCalendarOffcanvas, #lockerLogsOffcanvas) .offcanvas-body .table-container table td:last-child .action-buttons {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;

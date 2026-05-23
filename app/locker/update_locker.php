@@ -4,13 +4,22 @@ require '../db_connection.php';
 
 $id = $_POST['id'];
 $slot_number = $_POST['slot_number'];
-$start_at = $_POST['start_at'];
-$end_at = $_POST['end_at'];
+$size_id = $_POST['size_id'];
+$academic_year_id = $_POST['academic_year_id']; 
 $status = $_POST['status'];
 
 try {
+
     $stmt = $conn_local->prepare("CALL updateLocker(?, ?, ?, ?, ?)");
-    $stmt->bind_param("iisss", $id, $slot_number, $start_at, $end_at, $status);
+
+    $stmt->bind_param(
+        "iiiis",
+        $id,
+        $slot_number,
+        $size_id,
+        $academic_year_id,
+        $status
+    );
 
     $stmt->execute();
 
@@ -21,7 +30,7 @@ try {
 
     $stmt->close();
     $conn_local->next_result();
-    
+
 } catch (Exception $e) {
     $_SESSION['alert_message'] = [
         'type' => 'danger',

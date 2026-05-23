@@ -257,6 +257,8 @@ $password = $_SESSION['password'] ?? '';
 
                                                         <p>Size: <?= $row['size'] ?></p>
                                                         <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                        <p>Academic Year: <?= $row['academic_year'] ?></p>
+                                                        <p>Semester: <?= $row['semester'] ?></p>
                                                         <p>Start on: <?= $row['start_at'] ?></p>
                                                         <p>End on: <?= $row['end_at'] ?></p>
                                                     </div>
@@ -354,6 +356,8 @@ $password = $_SESSION['password'] ?? '';
 
                                                         <p>Size: <?= $row['size'] ?></p>
                                                         <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                        <p>Academic Year: <?= $row['academic_year'] ?></p>
+                                                        <p>Semester: <?= $row['semester'] ?></p>
                                                         <p>Start on: <?= $row['start_at'] ?></p>
                                                         <p>End on: <?= $row['end_at'] ?></p>
                                                     </div>
@@ -462,6 +466,8 @@ $password = $_SESSION['password'] ?? '';
 
                                                         <p>Size: <?= $row['size'] ?></p>
                                                         <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                        <p>Academic Year: <?= $row['academic_year'] ?></p>
+                                                        <p>Semester: <?= $row['semester'] ?></p>
                                                         <p>Start on: <?= $row['start_at'] ?></p>
                                                         <p>End on: <?= $row['end_at'] ?></p>
                                                     </div>
@@ -549,8 +555,9 @@ $password = $_SESSION['password'] ?? '';
                                                         <th>Slot</th>
                                                         <th>Size</th>
                                                         <th>Price</th>
-                                                        <th>Start Date</th>
-                                                        <th>End Date</th>
+                                                        <th>Academic Year - Semester</th>
+                                                        <th>Start On</th>
+                                                        <th>End On</th>
                                                         <th>Status</th>
                                                         <th>Date</th>
                                                     </tr>
@@ -564,20 +571,25 @@ $password = $_SESSION['password'] ?? '';
                                                             <td data-label="Slot"><?= $row['slot_number'] ?></td>
                                                             <td data-label="Size"><?= $row['size'] ?></td>
                                                             <td data-label="Price">&#8369;<?= $row['price'] ?></td>
-                                                            <td data-label="Start Date"><?= $row['start_at'] ?></td>
-                                                            <td data-label="End Date"><?= $row['end_at'] ?></td>
+
+                                                            <td data-label="Academic Year - Semester">
+                                                                <?= $row['academic_year'] ?> - <?= $row['semester'] ?>
+                                                            </td>
+
+                                                            <td data-label="Start On"><?= $row['start_at'] ?></td>
+                                                            <td data-label="End On"><?= $row['end_at'] ?></td>
 
                                                             <td data-label="Status">
                                                                 <?php if ($row['status'] == 'Revoked') { ?>
                                                                     <span class="badge rounded-pill revoked-badge">Revoked</span>
                                                                 <?php } elseif ($row['status'] == 'Cancelled') { ?>
                                                                     <span class="badge rounded-pill cancelled-badge">Cancelled</span>
-                                                                <?php } elseif ($row['status'] == 'Rejected') { ?>
-                                                                    <span class="badge rounded-pill rejected-badge">Rejected</span>
                                                                 <?php } elseif ($row['payment'] == 'Paid') { ?>
                                                                     <span class="badge rounded-pill ended-badge">Ended - Paid</span>
                                                                 <?php } elseif ($row['payment'] == 'Unpaid') { ?>
                                                                     <span class="badge rounded-pill ended-badge">Ended - Unpaid</span>
+                                                                <?php } else { ?>
+                                                                    <span class="badge rounded-pill rejected-badge">Rejected</span>
                                                                 <?php } ?>
                                                             </td>
 
@@ -652,19 +664,19 @@ $password = $_SESSION['password'] ?? '';
                         <div class="search-group">
                             <i class="fa-solid fa-magnifying-glass"></i>
                             <input type="search"
-                                name="searchLocation"
+                                name="searchLockerSlotLocation"
                                 placeholder="Search locker locations..."
-                                value="<?= htmlspecialchars($_GET['searchLocation'] ?? '') ?>">
+                                value="<?= htmlspecialchars($_GET['searchLockerSlotLocation'] ?? '') ?>">
                         </div>
 
                         <div class="filter-group">
                             <i class="fa-solid fa-filter"></i>
-                            <select name="filterLocation" onchange="this.form.submit()">
+                            <select name="filterLockerSlotLocation" onchange="this.form.submit()">
                                 <option value="">All</option>
-                                <option value="a-z" <?= (($_GET['filterLocation'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
-                                <option value="z-a" <?= (($_GET['filterLocation'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
-                                <option value="newest" <?= (($_GET['filterLocation'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
-                                <option value="oldest" <?= (($_GET['filterLocation'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
+                                <option value="a-z" <?= (($_GET['filterLockerSlotLocation'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
+                                <option value="z-a" <?= (($_GET['filterLockerSlotLocation'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
+                                <option value="newest" <?= (($_GET['filterLockerSlotLocation'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
+                                <option value="oldest" <?= (($_GET['filterLockerSlotLocation'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
                             </select>
                         </div>
 
@@ -674,72 +686,105 @@ $password = $_SESSION['password'] ?? '';
                 
                 <!-- Lockers -->
                 <div class="table-container">
-                     <?php
+                    <?php
                         // Get locker locations
-                        $search = trim($_GET['searchLocation'] ?? '');
-                        $filter = strtolower($_GET['filterLocation'] ?? '');
+                        $limit = 6;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
-                        if (!empty($search) || !empty($filter)) {
+                        if ($page < 1) $page = 1;
+
+                        $offset = ($page - 1) * $limit;
+
+                        $search = trim($_GET['searchLockerSlotLocation'] ?? '');
+                        $filter = strtolower($_GET['filterLockerSlotLocation'] ?? '');
+
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
                             // Use search and filter
-                            $stmtLockerLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?)");
-                            $stmtLockerLocation->bind_param("ss", $search, $filter);
+                            $stmtLockerSlotLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?, ?, ?)");
+                            $stmtLockerSlotLocation->bind_param("ssii", $search, $filter, $limit, $offset);
                         } else {
                             // Use raw
-                            $stmtLockerLocation = $conn_local->prepare("CALL getLockerLocations()");
+                            $stmtLockerSlotLocation = $conn_local->prepare("CALL getLockerLocations(?, ?)");
+                            $stmtLockerSlotLocation->bind_param("ii", $limit, $offset);
                         }
 
-                        $stmtLockerLocation->execute();
-                        $lockerLocationResultSet = $stmtLockerLocation->get_result();
-                        $stmtLockerLocation->close();
+                        $stmtLockerSlotLocation->execute();
+                        $lockerSlotLocationResultSet = $stmtLockerSlotLocation->get_result();
+
+                        $stmtLockerSlotLocation->next_result();
+                        $totalLockerSlotLocationRow = $stmtLockerSlotLocation->get_result()->fetch_assoc()['lockerLocationsTotal'];
+
+                        $totalLockerSlotLocationPages = ceil($totalLockerSlotLocationRow / $limit);
+
+                        $stmtLockerSlotLocation->close();
 
                         while ($conn_local->next_result()) {
                             $conn_local->store_result();
                         }
                     ?>
 
-                    <?php if ($lockerLocationResultSet->num_rows > 0): ?>
-                        <?php while($lockerLocationRow = $lockerLocationResultSet->fetch_assoc()) { ?>
+                    <?php if ($lockerSlotLocationResultSet->num_rows > 0): ?>
+                        <?php while($lockerSlotLocationRow = $lockerSlotLocationResultSet->fetch_assoc()) { ?>
                             <div class="location-slot-section">
                                 <div class="location-header">
-                                    <h3><?= $lockerLocationRow['location'] ?></h3>
+                                    <h3><?= $lockerSlotLocationRow['location'] ?></h3>
                                 </div>
 
                                 <?php
-                                    // Get lockers by location
-                                    $stmtLocker = $conn_local->prepare("CALL getLockersByLocation(?)");
-                                    $stmtLocker->bind_param("i", $lockerLocationRow['id']);
-                                    $stmtLocker->execute();
-                                    $lockerResultSet = $stmtLocker->get_result();
-                                    $stmtLocker->close();
+                                    // Get locker slots by location
+                                    $stmtLockerSlots = $conn_local->prepare("CALL getLockersByLocation(?)");
+                                    $stmtLockerSlots->bind_param("i", $lockerSlotLocationRow['id']);
+                                    $stmtLockerSlots->execute();
+
+                                    $lockerSlotResultSet = $stmtLockerSlots->get_result();
+
+                                    $stmtLockerSlots->free_result();
+                                    $stmtLockerSlots->close();
 
                                     while ($conn_local->next_result()) {
                                         $conn_local->store_result();
                                     }
                                 ?>
 
-                                <?php if ($lockerResultSet->num_rows > 0): ?>
+                                <?php if ($lockerSlotResultSet->num_rows > 0): ?>
                                     <table class="table table-borderless">
                                         <thead>
                                             <tr>
                                                 <th>Slot Number</th>
                                                 <th>Size</th>
                                                 <th>Price</th>
-                                                <th>Start Date</th>
-                                                <th>End Date</th>
+                                                <th>Academic Year</th>
+                                                <th>Start On</th>
+                                                <th>End On</th>
                                                 <th>Status</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
 
                                         <tbody>
-                                            <?php while($lockerRow = $lockerResultSet->fetch_assoc()) { ?>
+                                            <?php while($lockerSlotsRow = $lockerSlotResultSet->fetch_assoc()) { ?>
                                                 <tr>
-                                                <td data-label="Slot Number"><?= $lockerRow['slot_number'] ?></td>
-                                                <td data-label="Size"><?= $lockerRow['size'] ?></td>
-                                                <td data-label="Price">&#8369;<?= $lockerRow['price'] ?></td>
-                                                <td data-label="Status"><?= $lockerRow['start_at'] ?></td>
-                                                <td data-label="Status"><?= $lockerRow['end_at'] ?></td>
-                                                <td data-label="Status"><?= $lockerRow['status'] ?></td>
+                                                <td data-label="Slot Number"><?= $lockerSlotsRow['slot_number'] ?></td>
+                                                <td data-label="Size"><?= $lockerSlotsRow['size'] ?></td>
+                                                <td data-label="Price">&#8369;<?= $lockerSlotsRow['price'] ?></td>
+                                                
+                                                <td data-label="Academic Year">
+                                                    <?= $lockerSlotsRow['academic_year'] ?> - <?= $lockerSlotsRow['semester'] ?>
+                                                </td>
+
+                                                <td data-label="Start On">
+                                                    <?= $lockerSlotsRow['start_at'] ?>
+                                                </td>
+
+                                                <td data-label="End On">
+                                                    <?= $lockerSlotsRow['end_at'] ?>
+                                                </td>
+
+                                                <td data-label="Status"><?= $lockerSlotsRow['status'] ?></td>
 
                                                 <td data-label="Action">
                                                     <div class="action-buttons">
@@ -747,7 +792,7 @@ $password = $_SESSION['password'] ?? '';
                                                             type="button" 
                                                             class="sm-btn secondary-btn"
                                                             data-bs-toggle="modal" 
-                                                            data-bs-target="#applyLockerSlotModal<?= $lockerRow['id'] ?>">
+                                                            data-bs-target="#applyLockerSlotModal<?= $lockerSlotsRow['id'] ?>">
 
                                                             <i class="fa-brands fa-jxl"></i>
                                                             Apply
@@ -758,7 +803,7 @@ $password = $_SESSION['password'] ?? '';
 
                                                 <!-- Apply locker slot modal -->
                                                 <div class="modal fade success-modal"
-                                                    id="applyLockerSlotModal<?= $lockerRow['id'] ?>"
+                                                    id="applyLockerSlotModal<?= $lockerSlotsRow['id'] ?>"
                                                     tabindex="-1">
 
                                                     <div class="modal-dialog modal-dialog-centered">
@@ -769,7 +814,7 @@ $password = $_SESSION['password'] ?? '';
                                                                     <i class="fa-brands fa-jxl"></i>
                                                                     <h5>Apply</h5>
                                                                     <p>
-                                                                        Are you sure you want to apply <span>slot <?= $lockerRow['slot_number'] ?></span>?
+                                                                        Are you sure you want to apply <span>slot <?= $lockerSlotsRow['slot_number'] ?></span>?
                                                                     </p>
                                                                 </div>
 
@@ -779,7 +824,7 @@ $password = $_SESSION['password'] ?? '';
                                                                     </button>
 
                                                                     <form method="POST" action="../app/locker/apply_locker_slot.php">
-                                                                        <input type="hidden" name="slot_id" value="<?= $lockerRow['id'] ?>">
+                                                                        <input type="hidden" name="slot_id" value="<?= $lockerSlotsRow['id'] ?>">
 
                                                                         <button type="submit" class="btn primary-btn">
                                                                             Yes, Apply
@@ -802,6 +847,32 @@ $password = $_SESSION['password'] ?? '';
                                 <?php endif; ?>
                             </div>
                         <?php } ?>
+
+                        <ul class="pagination">
+                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                <?php if ($page > 1): ?>
+                                    <a class="page-link" href="?page=<?= $page - 1 ?>&searchLockerSlotLocation=<?= urlencode($_GET['searchLockerSlotLocation'] ?? '') ?>&filterLockerSlotLocation=<?= urlencode($_GET['filterLockerSlotLocation'] ?? '') ?>">
+                                        Previous
+                                    </a>
+                                <?php else: ?>
+                                    <span class="page-link">Previous</span>
+                                <?php endif; ?>
+                            </li>
+
+                            <li class="page-item active">
+                                <span class="page-link"><?= $page ?></span>
+                            </li>
+
+                            <li class="page-item <?= ($page >= $totalLockerSlotLocationPages) ? 'disabled' : '' ?>">
+                                <?php if ($page < $totalLockerSlotLocationPages): ?>
+                                    <a class="page-link" href="?page=<?= $page + 1 ?>&searchLockerSlotLocation=<?= urlencode($_GET['searchLockerSlotLocation'] ?? '') ?>&filterLockerSlotLocation=<?= urlencode($_GET['filterLockerSlotLocation'] ?? '') ?>">
+                                        Next
+                                    </a>
+                                <?php else: ?>
+                                    <span class="page-link">Next</span>
+                                <?php endif; ?>
+                            </li>
+                        </ul>
                     <?php else: ?>
                         <div id="empty">
                             <i class="fa-solid fa-ban"></i>

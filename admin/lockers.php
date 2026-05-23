@@ -199,6 +199,11 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 Locker Sizes
                             </button> 
                         </li>
+                        <li>
+                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#academicCalendarOffcanvas" onclick="window.location.hash='academicCalendarOffcanvas';">
+                                Academic Calendar
+                            </button> 
+                        </li>
                         <li><hr class="dropdown-divider"></hr></li>
                         <li>
                             <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#lockerLogsOffcanvas" onclick="window.location.hash='lockerLogsOffcanvas';">
@@ -302,6 +307,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                     </p>
                                                     <p>Size: <?= $row['size'] ?></p>
                                                     <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                    <p>Academic Year: <?= $row['academic_year'] ?></p>
+                                                    <p>Semester: <?= $row['semester'] ?></p>
                                                     <p>Start on: <?= $row['start_at'] ?></p>
                                                     <p>End on: <?= $row['end_at'] ?></p>
                                                 </div>
@@ -348,6 +355,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         </div>
                                     <?php } ?>
                                 </div>
+
                                 <ul class="pagination">
                                     <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
                                         <?php if ($page > 1): ?>
@@ -538,6 +546,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                                                     <p>Size: <?= $row['size'] ?></p>
                                                     <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                    <p>Academic Year: <?= $row['academic_year'] ?></p>
+                                                    <p>Semester: <?= $row['semester'] ?></p>
                                                     <p>Start on: <?= $row['start_at'] ?></p>
                                                     <p>End on: <?= $row['end_at'] ?></p>
                                                 </div>
@@ -673,11 +683,10 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         }
 
                         $stmtEnded->execute();
-
                         $endedResultSet = $stmtEnded->get_result();
 
                         $stmtEnded->next_result();
-                        $totalEndedRow = $stmtEnded->get_result()->fetch_assoc()['acceptedTotal'];
+                        $totalEndedRow = $stmtEnded->get_result()->fetch_assoc()['endedTotal'];
 
                         $totalPages = ceil($totalEndedRow / $limit);
 
@@ -738,6 +747,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                                                     <p>Size: <?= $row['size'] ?></p>
                                                     <p>Price: &#8369;<?= $row['price'] ?></p>
+                                                    <p>Academic Year: <?= $row['academic_year'] ?></p>
+                                                    <p>Semester: <?= $row['semester'] ?></p>
                                                     <p>Start on: <?= $row['start_at'] ?></p>
                                                     <p>End on: <?= $row['end_at'] ?></p>
                                                 </div>
@@ -929,8 +940,9 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                             <th>Slot</th>
                                             <th>Size</th>
                                             <th>Price</th>
-                                            <th>Start Date</th>
-                                            <th>End Date</th>
+                                            <th>Academic Year - Semester</th>
+                                            <th>Start On</th>
+                                            <th>End On</th>
                                             <th>Status</th>
                                             <th>Date</th>
                                         </tr>
@@ -946,8 +958,13 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                 <td data-label="Slot"><?= $row['slot_number'] ?></td>
                                                 <td data-label="Size"><?= $row['size'] ?></td>
                                                 <td data-label="Price">&#8369;<?= $row['price'] ?></td>
-                                                <td data-label="Start Date"><?= $row['start_at'] ?></td>
-                                                <td data-label="End Date"><?= $row['end_at'] ?></td>
+                                                
+                                                <td data-label="Academic Year - Semester">
+                                                    <?= $row['academic_year'] ?> - <?= $row['semester'] ?>
+                                                </td>
+
+                                                <td data-label="Start On"><?= $row['start_at'] ?></td>
+                                                <td data-label="End On"><?= $row['end_at'] ?></td>
 
                                                 <td data-label="Status">
                                                     <?php if ($row['status'] == 'Revoked') { ?>
@@ -1011,24 +1028,43 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="offcanvas offcanvas-end" id="lockerLocationsOffcanvas">
                     <?php
                         // Get locker locations
+                        $limit = 6;
+                        $lockerLocationsPage = isset($_GET['lockerLocationsPage']) ? (int)$_GET['lockerLocationsPage'] : 1;
+
+                        if ($lockerLocationsPage < 1) $lockerLocationsPage = 1;
+
+                        $offset = ($lockerLocationsPage - 1) * $limit;
+
                         $search = trim($_GET['searchLockerLocations'] ?? '');
                         $filter = strtolower($_GET['filterLockerLocations'] ?? '');
 
-                        if (!empty($search) || !empty($filter)) {
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
                             // Use search and filter
-                            $stmtLockerLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?)");
-                            $stmtLockerLocation->bind_param("ss", $search, $filter);
+                            $stmtLockerLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?, ?, ?)");
+                            $stmtLockerLocation->bind_param("ssii", $search, $filter, $limit, $offset);
                         } else {
                             // Use raw
-                            $stmtLockerLocation = $conn_local->prepare("CALL getLockerLocations()");
+                            $stmtLockerLocation = $conn_local->prepare("CALL getLockerLocations(?, ?)");
+                            $stmtLockerLocation->bind_param("ii", $limit, $offset);
                         }
 
                         $stmtLockerLocation->execute();
                         $lockerLocationResultSet = $stmtLockerLocation->get_result();
+
+                        $stmtLockerLocation->next_result();
+                        $totalLockerLocationRow = $stmtLockerLocation->get_result()->fetch_assoc()['lockerLocationsTotal'];
+
+                        $totalLockerLocationPages = ceil($totalLockerLocationRow / $limit);
+
                         $stmtLockerLocation->close();
 
-                        $conn_local->next_result();
-                        $conn_local->store_result();
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
 
                     <div class="offcanvas-header">
@@ -1109,6 +1145,32 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         <?php } ?>
                                     </tbody>
                                 </table>
+
+                                <ul class="pagination">
+                                    <li class="page-item <?= ($lockerLocationsPage <= 1) ? 'disabled' : '' ?>">
+                                        <?php if ($lockerLocationsPage > 1): ?>
+                                            <a class="page-link" href="?lockerLocationsPage=<?= $lockerLocationsPage - 1 ?>&searchLockerLocations=<?= urlencode($_GET['searchLockerLocations'] ?? '') ?>&filterLockerLocations=<?= urlencode($_GET['filterLockerLocations'] ?? '') ?>#lockerLocationsOffcanvas">
+                                                Previous
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Previous</span>
+                                        <?php endif; ?>
+                                    </li>
+
+                                    <li class="page-item active">
+                                        <span class="page-link"><?= $lockerLocationsPage ?></span>
+                                    </li>
+
+                                    <li class="page-item <?= ($lockerLocationsPage >= $totalLockerLocationPages) ? 'disabled' : '' ?>">
+                                        <?php if ($lockerLocationsPage < $totalLockerLocationPages): ?>
+                                            <a class="page-link" href="?lockerLocationsPage=<?= $lockerLocationsPage + 1 ?>&searchLockerLocations=<?= urlencode($_GET['searchLockerLocations'] ?? '') ?>&filterLockerLocations=<?= urlencode($_GET['filterLockerLocations'] ?? '') ?>#lockerLocationsOffcanvas">
+                                                Next
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Next</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
                             <?php else: ?>
                                 <div id="empty">
                                     <i class="fa-solid fa-ban"></i>
@@ -1152,8 +1214,17 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 </div>
 
                 <?php
-                    $lockerLocationResultSet = $conn_local->query("CALL getLockerLocations()");
-                    $conn_local->next_result();
+                    $stmtLockerLocation = $conn_local->prepare("CALL getLockerLocations(?, ?)");
+                    $stmtLockerLocation->bind_param("ii", $limit, $offset);
+
+                    $stmtLockerLocation->execute();
+                    $lockerLocationResultSet = $stmtLockerLocation->get_result();
+
+                    $stmtLockerLocation->close();
+
+                    while ($conn_local->next_result()) {
+                        $conn_local->store_result();
+                    }
 
                     while ($lockerLocationRow = $lockerLocationResultSet->fetch_assoc()) {
                 ?>
@@ -1220,24 +1291,43 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="offcanvas offcanvas-end" id="lockerSizesOffcanvas">
                     <?php
                         // Get locker sizes
+                        $limit = 6;
+                        $lockerSizesPage = isset($_GET['lockerSizesPage']) ? (int)$_GET['lockerSizesPage'] : 1;
+
+                        if ($lockerSizesPage < 1) $lockerSizesPage = 1;
+
+                        $offset = ($lockerSizesPage - 1) * $limit;
+
                         $search = trim($_GET['searchLockerSizes'] ?? '');
                         $filter = strtolower($_GET['filterLockerSizes'] ?? '');
 
-                        if (!empty($search) || !empty($filter)) {
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
                             // Use search and filter
-                            $stmtLockerSizes = $conn_local->prepare("CALL getSearchFilterLockerSizes(?, ?)");
-                            $stmtLockerSizes->bind_param("ss", $search, $filter);
+                            $stmtLockerSizes = $conn_local->prepare("CALL getSearchFilterLockerSizes(?, ?, ?, ?)");
+                            $stmtLockerSizes->bind_param("ssii", $search, $filter, $limit, $offset);
                         } else {
                             // Use raw
-                            $stmtLockerSizes = $conn_local->prepare("CALL getLockerSizes()");
+                            $stmtLockerSizes = $conn_local->prepare("CALL getLockerSizes(?, ?)");
+                            $stmtLockerSizes->bind_param("ii", $limit, $offset);
                         }
 
                         $stmtLockerSizes->execute();
                         $lockerSizesResultSet = $stmtLockerSizes->get_result();
+
+                        $stmtLockerSizes->next_result();
+                        $totalLockerSizesRow = $stmtLockerSizes->get_result()->fetch_assoc()['lockerSizesTotal'];
+
+                        $totalLockerSizesPages = ceil($totalLockerSizesRow / $limit);
+
                         $stmtLockerSizes->close();
 
-                        $conn_local->next_result();
-                        $conn_local->store_result();
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
 
                     <div class="offcanvas-header">
@@ -1319,6 +1409,32 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                         <?php } ?>
                                     </tbody>
                                 </table>
+
+                                <ul class="pagination">
+                                    <li class="page-item <?= ($lockerSizesPage <= 1) ? 'disabled' : '' ?>">
+                                        <?php if ($lockerSizesPage > 1): ?>
+                                            <a class="page-link" href="?lockerSizesPage=<?= $lockerSizesPage - 1 ?>&searchLockerSizes=<?= urlencode($_GET['searchLockerSizes'] ?? '') ?>&filterLockerSizes=<?= urlencode($_GET['filterLockerSizes'] ?? '') ?>#lockerSizesOffcanvas">
+                                                Previous
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Previous</span>
+                                        <?php endif; ?>
+                                    </li>
+
+                                    <li class="page-item active">
+                                        <span class="page-link"><?= $lockerSizesPage ?></span>
+                                    </li>
+
+                                    <li class="page-item <?= ($lockerSizesPage >= $totalLockerSizesPages) ? 'disabled' : '' ?>">
+                                        <?php if ($lockerSizesPage < $totalLockerSizesPages): ?>
+                                            <a class="page-link" href="?lockerSizesPage=<?= $lockerSizesPage + 1 ?>&searchLockerSizes=<?= urlencode($_GET['searchLockerSizes'] ?? '') ?>&filterLockerSizes=<?= urlencode($_GET['filterLockerSizes'] ?? '') ?>#lockerSizesOffcanvas">
+                                                Next
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Next</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
                             <?php else: ?>
                                 <div id="empty">
                                     <i class="fa-solid fa-ban"></i>
@@ -1369,11 +1485,21 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 </div>
 
                 <?php
-                    $lockerSizesResultSet = $conn_local->query("CALL getLockerSizes()");
-                    $conn_local->next_result();
+                    $stmtLockerSizes = $conn_local->prepare("CALL getLockerSizes(?, ?)");
+                    $stmtLockerSizes->bind_param("ii", $limit, $offset);
+
+                    $stmtLockerSizes->execute();
+                    $lockerSizesResultSet = $stmtLockerSizes->get_result();
+
+                    $stmtLockerSizes->close();
+
+                    while ($conn_local->next_result()) {
+                        $conn_local->store_result();
+                    }
 
                     while ($lockerSizesRow = $lockerSizesResultSet->fetch_assoc()) {
                 ?>
+
                     <!-- Update locker size modal -->
                     <div class="modal fade primary-modal" id="updateLockerSizeModal<?= $lockerSizesRow['id'] ?>" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
@@ -1439,6 +1565,342 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         </div>
                     </div>
                 <?php } ?>
+
+                <!-- Offcanvas for locker sizes -->
+                <div class="offcanvas offcanvas-end" id="academicCalendarOffcanvas">
+                    <?php
+                        // Get academic calendar
+                        $limit = 6;
+                        $academicCalendarPage = isset($_GET['academicCalendarPage']) ? (int)$_GET['academicCalendarPage'] : 1;
+
+                        if ($academicCalendarPage < 1) $academicCalendarPage = 1;
+
+                        $offset = ($academicCalendarPage - 1) * $limit;
+
+                        $search = trim($_GET['searchAcademicCalendar'] ?? '');
+                        $filter = strtolower($_GET['filterAcademicCalendar'] ?? '');
+
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
+                            // Use search and filter
+                            $stmtAcademicCalendar = $conn_local->prepare("CALL getSearchFilterAcademicCalendar(?, ?, ?, ?)");
+                            $stmtAcademicCalendar->bind_param("ssii", $search, $filter, $limit, $offset);
+                        } else {
+                            // Use raw
+                            $stmtAcademicCalendar = $conn_local->prepare("CALL getAcademicCalendar(?, ?)");
+                            $stmtAcademicCalendar->bind_param("ii", $limit, $offset);
+                        }
+
+                        $stmtAcademicCalendar->execute();
+                        $academicCalendarResultSet = $stmtAcademicCalendar->get_result();
+
+                        $stmtAcademicCalendar->next_result();
+                        $totalAcademicCalendarRow = $stmtAcademicCalendar->get_result()->fetch_assoc()['academicCalendarTotal'];
+
+                        $totalAcademicCalendarPages = ceil($totalAcademicCalendarRow / $limit);
+
+                        $stmtAcademicCalendar->close();
+
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
+                    ?>
+
+                    <div class="offcanvas-header">
+                        <h3 class="offcanvas-title">Academic Calendar</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                    </div>
+
+                    <div class="offcanvas-body">
+                        <header>
+                            <form method="GET">
+                                <div class="search-group">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="search"
+                                        name="searchAcademicCalendar"
+                                        placeholder="Search..."
+                                        value="<?= htmlspecialchars($_GET['searchAcademicCalendar'] ?? '') ?>">
+                                </div>
+
+                                <div class="filter-group">
+                                    <i class="fa-solid fa-filter"></i>
+                                    <select name="filterAcademicCalendar" onchange="this.form.submit()">
+                                        <option value="">All</option>
+                                        <option value="a-z" <?= (($_GET['filterAcademicCalendar'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
+                                        <option value="z-a" <?= (($_GET['filterAcademicCalendar'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
+                                        <option value="newest" <?= (($_GET['filterAcademicCalendar'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
+                                        <option value="oldest" <?= (($_GET['filterAcademicCalendar'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" hidden></button>
+                            </form>
+                            <button type="button" class="sm-btn primary-btn" data-bs-toggle="modal" data-bs-target="#addAcademicYearModal">
+                                <i class="fa-solid fa-plus"></i>
+                                Add Academic Year
+                            </button>
+                        </header>
+
+                        <div class="table-container">
+                            <?php if ($academicCalendarResultSet->num_rows > 0): ?>
+                                <table class="table table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th>Academic Year - Semester</th>
+                                            <th>Start On</th>
+                                            <th>End On</th>
+                                            <th>Created At</th>
+                                            <th>Updated At</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <?php while ($academicCalendarRow = $academicCalendarResultSet->fetch_assoc()) { ?>
+                                            <tr>
+                                                <td data-label="Academic Year - Semester"><?= $academicCalendarRow['academic_year'] ?> - <?= $academicCalendarRow['semester'] ?></td>
+                                                <td data-label="Start On"><?= $academicCalendarRow['start_at'] ?></td>
+                                                <td data-label="End On"><?= $academicCalendarRow['end_at'] ?></td>
+                                                <td data-label="Created At"><?= $academicCalendarRow['created_at'] ?></td>
+                                                <td data-label="Updated At"><?= $academicCalendarRow['updated_at'] ?></td>
+
+                                                <td data-label="Action">
+                                                    <div class="action-buttons">
+                                                        <button class="sm-btn primary-btn"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#updateAcademicYearModal<?= $academicCalendarRow['id'] ?>">
+                                                            <i class="fa-solid fa-pen-to-square"></i>
+                                                            Edit
+                                                        </button>
+
+                                                        <button class="sm-btn danger-btn"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#deleteAcademicYearModal<?= $academicCalendarRow['id'] ?>">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+
+                                <ul class="pagination">
+                                    <li class="page-item <?= ($academicCalendarPage <= 1) ? 'disabled' : '' ?>">
+                                        <?php if ($academicCalendarPage > 1): ?>
+                                            <a class="page-link" href="?academicCalendarPage=<?= $academicCalendarPage - 1 ?>&searchAcademicCalendar=<?= urlencode($_GET['searchAcademicCalendar'] ?? '') ?>&filterAcademicCalendar=<?= urlencode($_GET['filterAcademicCalendar'] ?? '') ?>#academicCalendarOffcanvas">
+                                                Previous
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Previous</span>
+                                        <?php endif; ?>
+                                    </li>
+
+                                    <li class="page-item active">
+                                        <span class="page-link"><?= $academicCalendarPage ?></span>
+                                    </li>
+
+                                    <li class="page-item <?= ($academicCalendarPage >= $totalAcdemicCalendarPages) ? 'disabled' : '' ?>">
+                                        <?php if ($academicCalendarPage < $totalAcademicCalendarPages): ?>
+                                            <a class="page-link" href="?academicCalendarPage=<?= $academicCalendarPage + 1 ?>&searchAcademicCalendar=<?= urlencode($_GET['searchAcademicCalendar'] ?? '') ?>&filterAcademicCalendar=<?= urlencode($_GET['filterAcademicCalendar'] ?? '') ?>#academicCalendarOffcanvas">
+                                                Next
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Next</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
+                            <?php else: ?>
+                                <div id="empty">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <small>No academic calendar added yet</small>
+                                    <small>Try to reload page</small>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add academic year modal -->
+                <div class="modal fade primary-modal" id="addAcademicYearModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fa-solid fa-plus"></i>
+                                    Add Academic Year
+                                </h5>
+                            </div>
+
+                            <div class="modal-body">
+                                <form method="POST" action="../app/locker/add_academic_year.php">
+                                    <div class="form-group">
+                                        <label class="input-label">Academic Year (ex. 2026-2027)</label>
+                                        <div class="input-box">
+                                            <input type="text" name="academic_year" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="input-label">Semester</label>
+                                        <div class="input-box">
+                                            <select name="semester" id="semester" required>
+                                                <option value="">Select Semester</option>
+                                                <option value="1st Semester">1st Semester</option>
+                                                <option value="2nd Semester">2nd Semester</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="input-label">Start On</label>
+                                        <div class="input-box">
+                                            <input type="date" name="start_at" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="input-label">End On</label>
+                                        <div class="input-box">
+                                            <input type="date" name="end_at" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="action-buttons">
+                                        <button type="submit" class="btn primary-btn">Add Academic Year</button>
+                                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <?php
+                    $stmtAcademicCalendar = $conn_local->prepare("CALL getAcademicCalendar(?, ?)");
+                    $stmtAcademicCalendar->bind_param("ii", $limit, $offset);
+
+                    $stmtAcademicCalendar->execute();
+                    $academicCalendarResultSet = $stmtAcademicCalendar->get_result();
+
+                    $stmtAcademicCalendar->close();
+
+                    while ($conn_local->next_result()) {
+                        $conn_local->store_result();
+                    }
+
+                    while ($academicCalendarRow = $academicCalendarResultSet->fetch_assoc()) {
+                ?>
+
+                    <!-- Update academic calendar modal -->
+                    <div class="modal fade primary-modal" id="updateAcademicYearModal<?= $academicCalendarRow['id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        Update Academic Year
+                                    </h5>
+                                </div>
+
+                                <div class="modal-body">
+                                    <form method="POST" action="../app/locker/update_academic_year.php">
+                                        <input type="hidden" name="id" value="<?= $academicCalendarRow['id'] ?>">
+
+                                        <div class="form-group">
+                                            <label class="input-label">Academic Year (ex. 2026-2027)</label>
+                                            <div class="input-box">
+                                                <input type="text" name="academic_year" value="<?= $academicCalendarRow['academic_year'] ?>" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="input-label">Semester</label>
+                                            <div class="input-box">
+                                                <select name="semester" required>
+                                                    <option value="1st Semester"
+                                                        <?= $academicCalendarRow['semester'] == '1st Semester' ? 'selected' : '' ?>>
+                                                        1st Semester
+                                                    </option>
+
+                                                    <option value="2nd Semester"
+                                                        <?= $academicCalendarRow['semester'] == '2nd Semester' ? 'selected' : '' ?>>
+                                                        2nd Semester
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="input-label">Start On</label>
+                                            <div class="input-box">
+                                                <input type="date" name="start_at" value="<?= date('Y-m-d', strtotime($academicCalendarRow['start_at'])) ?>" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="input-label">End On</label>
+                                            <div class="input-box">
+                                                <input type="date" name="end_at" value="<?= date('Y-m-d', strtotime($academicCalendarRow['end_at'])) ?>" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="action-buttons">
+                                            <button type="submit" class="btn primary-btn">Save</button>
+                                            <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete academic calendar modal -->
+                    <div class="modal fade danger-modal" id="deleteAcademicYearModal<?= $academicCalendarRow['id'] ?>" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="message">
+                                        <p><i class="fa-solid fa-circle-exclamation"></i></p>
+                                        <h5>Delete</h5>
+                                        <p>Are you sure you want to delete <span><?= $academicCalendarRow['academic_year'] ?> - <?= $academicCalendarRow['semester'] ?></span>?</p>
+                                    </div>
+
+                                    <div class="action-buttons">
+                                        <button class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+
+                                        <form method="POST" action="../app/locker/delete_academic_year.php">
+                                            <input type="hidden" name="id" value="<?= $academicCalendarRow['id'] ?>">
+
+                                            <button type="submit" class="btn danger-btn">Yes, Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 <!-- Offcanvas for locker logs -->
                 <div class="offcanvas offcanvas-end" id="lockerLogsOffcanvas">
@@ -1574,19 +2036,19 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         <div class="search-group">
                             <i class="fa-solid fa-magnifying-glass"></i>
                             <input type="search"
-                                name="searchLocation"
+                                name="searchLockerSlotLocation"
                                 placeholder="Search locker locations..."
-                                value="<?= htmlspecialchars($_GET['searchLocation'] ?? '') ?>">
+                                value="<?= htmlspecialchars($_GET['searchLockerSlotLocation'] ?? '') ?>">
                         </div>
 
                         <div class="filter-group">
                             <i class="fa-solid fa-filter"></i>
-                            <select name="filterLocation" onchange="this.form.submit()">
+                            <select name="filterLockerSlotLocation" onchange="this.form.submit()">
                                 <option value="">All</option>
-                                <option value="a-z" <?= (($_GET['filterLocation'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
-                                <option value="z-a" <?= (($_GET['filterLocation'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
-                                <option value="newest" <?= (($_GET['filterLocation'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
-                                <option value="oldest" <?= (($_GET['filterLocation'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
+                                <option value="a-z" <?= (($_GET['filterLockerSlotLocation'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
+                                <option value="z-a" <?= (($_GET['filterLockerSlotLocation'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
+                                <option value="newest" <?= (($_GET['filterLockerSlotLocation'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
+                                <option value="oldest" <?= (($_GET['filterLockerSlotLocation'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
                             </select>
                         </div>
 
@@ -1598,37 +2060,56 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="table-container">
                     <?php
                         // Get locker locations
-                        $search = trim($_GET['searchLocation'] ?? '');
-                        $filter = strtolower($_GET['filterLocation'] ?? '');
+                        $limit = 6;
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
-                        if (!empty($search) || !empty($filter)) {
+                        if ($page < 1) $page = 1;
+
+                        $offset = ($page - 1) * $limit;
+
+                        $search = trim($_GET['searchLockerSlotLocation'] ?? '');
+                        $filter = strtolower($_GET['filterLockerSlotLocation'] ?? '');
+
+                        $isSearching = !empty($search);
+                        $isFiltering = ($filter !== '');
+                        $isSearchFilterMode = $isSearching || $isFiltering;
+
+                        if ($isSearchFilterMode) {
                             // Use search and filter
-                            $stmtLockerLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?)");
-                            $stmtLockerLocation->bind_param("ss", $search, $filter);
+                            $stmtLockerSlotLocation = $conn_local->prepare("CALL getSearchFilterLockerLocation(?, ?, ?, ?)");
+                            $stmtLockerSlotLocation->bind_param("ssii", $search, $filter, $limit, $offset);
                         } else {
                             // Use raw
-                            $stmtLockerLocation = $conn_local->prepare("CALL getLockerLocations()");
+                            $stmtLockerSlotLocation = $conn_local->prepare("CALL getLockerLocations(?, ?)");
+                            $stmtLockerSlotLocation->bind_param("ii", $limit, $offset);
                         }
 
-                        $stmtLockerLocation->execute();
-                        $lockerLocationResultSet = $stmtLockerLocation->get_result();
-                        $stmtLockerLocation->close();
+                        $stmtLockerSlotLocation->execute();
+                        $lockerSlotLocationResultSet = $stmtLockerSlotLocation->get_result();
 
-                        $conn_local->next_result();
-                        $conn_local->store_result();
+                        $stmtLockerSlotLocation->next_result();
+                        $totalLockerSlotLocationRow = $stmtLockerSlotLocation->get_result()->fetch_assoc()['lockerLocationsTotal'];
+
+                        $totalLockerSlotLocationPages = ceil($totalLockerSlotLocationRow / $limit);
+
+                        $stmtLockerSlotLocation->close();
+
+                        while ($conn_local->next_result()) {
+                            $conn_local->store_result();
+                        }
                     ?>
 
-                    <?php if ($lockerLocationResultSet->num_rows > 0): ?>
-                        <?php while ($lockerLocationRow = $lockerLocationResultSet->fetch_assoc()) { ?>
+                    <?php if ($lockerSlotLocationResultSet->num_rows > 0): ?>
+                        <?php while ($lockerSlotLocationRow = $lockerSlotLocationResultSet->fetch_assoc()) { ?>
                             <div class="location-slot-section">
                                 <div class="location-header">
-                                    <h3><?= $lockerLocationRow['location'] ?></h3>
+                                    <h3><?= $lockerSlotLocationRow['location'] ?></h3>
 
                                     <div class="action-buttons">
                                         <button type="button"
                                             class="sm-btn primary-btn"
                                             data-bs-toggle="modal"
-                                            data-bs-target="#addLockerModal<?= $lockerLocationRow['id'] ?>">
+                                            data-bs-target="#addLockerModal<?= $lockerSlotLocationRow['id'] ?>">
                                             <i class="fa-solid fa-plus"></i>
                                             Add locker
                                         </button>
@@ -1636,59 +2117,59 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 </div>
 
                                 <!-- Add locker modal (per location) -->
-                                <div class="modal fade primary-modal" id="addLockerModal<?= $lockerLocationRow['id'] ?>" tabindex="-1">
+                                <div class="modal fade primary-modal" id="addLockerModal<?= $lockerSlotLocationRow['id'] ?>" tabindex="-1">
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content">
 
                                             <div class="modal-header">
                                                 <h5 class="modal-title">
                                                     <i class="fa-solid fa-plus"></i>
-                                                    Add Locker - <?= $lockerLocationRow['location'] ?>
+                                                    Add Locker - <?= $lockerSlotLocationRow['location'] ?>
                                                 </h5>
                                             </div>
 
                                             <div class="modal-body">
-                                                <?php
-                                                    // get sizes only
-                                                    $stmtLockerSizes = $conn_local->query("CALL getLockerSizes()");
-                                                    $conn_local->next_result();
-                                                ?>
-
                                                 <form method="POST" action="../app/locker/add_locker.php">
-                                                    <input type="hidden" name="location_id" value="<?= $lockerLocationRow['id'] ?>">
+                                                    <input type="hidden" name="location_id" value="<?= $lockerSlotLocationRow['id'] ?>">
+
+                                                    <div class="form-group">
+                                                        <label class="input-label">Slot Number</label>
+                                                        <div class="input-box">
+                                                            <input type="number" min="1" max="99" name="slot_number" required>
+                                                        </div>
+                                                    </div>
 
                                                     <div class="form-group">
                                                         <label class="input-label">Size</label>
                                                         <div class="input-box">
                                                             <select name="size_id" required>
-                                                                <option value="">Select Size</option>
-                                                                <?php while($size = $stmtLockerSizes->fetch_assoc()) { ?>
-                                                                    <option value="<?= $size['id'] ?>">
-                                                                        <?= $size['size'] ?>
-                                                                    </option>
-                                                                <?php } ?>
+                                                                <?php
+                                                                    $sizesResult = $conn_local->query("SELECT * FROM locker_sizes");
+                                                                ?>
+                                                                    <option value="">Select Size</option>
+                                                                    <?php foreach ($sizesResult as $sizesList) { ?>
+                                                                        <option value="<?= $sizesList['id'] ?>">
+                                                                            <?= $sizesList['size'] ?>
+                                                                        </option>
+                                                                    <?php } ?>
                                                             </select>
                                                         </div>
                                                     </div>
 
                                                     <div class="form-group">
-                                                        <label class="input-label">Slot Number</label>
+                                                        <label class="input-label">Academic Year</label>
                                                         <div class="input-box">
-                                                            <input type="number" name="slot_number" required>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="form-group">
-                                                        <label class="input-label">Start Date</label>
-                                                        <div class="input-box">
-                                                            <input type="date" name="start_at" required>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="form-group">
-                                                        <label class="input-label">End Date</label>
-                                                        <div class="input-box">
-                                                            <input type="date" name="end_at" required>
+                                                            <select name="academic_year_id" required>
+                                                                <?php
+                                                                    $academicYearResult = $conn_local->query("SELECT * FROM academic_calendar");
+                                                                ?>
+                                                                    <option value="">Select Academic Year</option>
+                                                                    <?php foreach ($academicYearResult as $academicYearList) { ?>
+                                                                        <option value="<?= $academicYearList['id'] ?>">
+                                                                            <?= $academicYearList['academic_year'] ?> - <?= $academicYearList['semester'] ?>
+                                                                        </option>
+                                                                    <?php } ?>
+                                                            </select>
                                                         </div>
                                                     </div>
 
@@ -1703,44 +2184,60 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 </div>
 
                                 <?php
-                                    // Get lockers by location
-                                    $stmtLocker = $conn_local->prepare("CALL getLockersByLocation(?)");
-                                    $stmtLocker->bind_param("i", $lockerLocationRow['id']);
-                                    $stmtLocker->execute();
-                                    $lockerResultSet = $stmtLocker->get_result();
-                                    $stmtLocker->close();
+                                    // Get locker slots by location
+                                    $stmtLockerSlots = $conn_local->prepare("CALL getLockersByLocation(?)");
+                                    $stmtLockerSlots->bind_param("i", $lockerSlotLocationRow['id']);
+                                    $stmtLockerSlots->execute();
 
-                                    $conn_local->next_result();
-                                    $conn_local->store_result();
+                                    $lockerSlotResultSet = $stmtLockerSlots->get_result();
+
+                                    $stmtLockerSlots->free_result();
+                                    $stmtLockerSlots->close();
+
+                                    while ($conn_local->next_result()) {
+                                        $conn_local->store_result();
+                                    }
                                 ?>
 
-                                <?php if ($lockerResultSet->num_rows > 0): ?>
+                                <?php if ($lockerSlotResultSet->num_rows > 0): ?>
                                     <table class="table table-borderless">
                                         <thead>
                                             <tr>
                                                 <th>Slot Number</th>
                                                 <th>Size</th>
                                                 <th>Price</th>
-                                                <th>Start Date</th>
-                                                <th>End Date</th>
+                                                <th>Academic Year - Semester</th>
+                                                <th>Start On</th>
+                                                <th>End On</th>
                                                 <th>Status</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
 
                                         <tbody>
-                                            <?php while ($lockerRow = $lockerResultSet->fetch_assoc()) { ?>
+                                            <?php while ($lockerSlotsRow = $lockerSlotResultSet->fetch_assoc()) { ?>
                                                 <tr>
-                                                    <td data-label="Slot Number"><?= $lockerRow['slot_number'] ?></td>
-                                                    <td data-label="Size"><?= $lockerRow['size'] ?></td>
-                                                    <td data-label="Price">&#8369;<?= $lockerRow['price'] ?></td>
-                                                    <td data-label="Start Date"><?= $lockerRow['start_at'] ?></td>
-                                                    <td data-label="End Date"><?= $lockerRow['end_at'] ?></td>
-                                                    <td data-label="Status">
-                                                        <?= $lockerRow['status'] ?>
+                                                    <td data-label="Slot Number"><?= $lockerSlotsRow['slot_number'] ?></td>
+                                                    <td data-label="Size"><?= $lockerSlotsRow['size'] ?></td>
+                                                    <td data-label="Price">&#8369;<?= $lockerSlotsRow['price'] ?></td>
 
-                                                        <?php if ($lockerRow['status'] == 'Occupied') { ?>
-                                                            By <?= $lockerRow['user_id'] ?>
+                                                    <td data-label="Academic Year - Semester">
+                                                        <?= $lockerSlotsRow['academic_year'] ?> - <?= $lockerSlotsRow['semester'] ?>
+                                                    </td>
+
+                                                    <td data-label="Start On">
+                                                        <?= $lockerSlotsRow['start_at'] ?>
+                                                    </td>
+
+                                                    <td data-label="End On">
+                                                        <?= $lockerSlotsRow['end_at'] ?>
+                                                    </td>
+
+                                                    <td data-label="Status">
+                                                        <?= $lockerSlotsRow['status'] ?>
+
+                                                        <?php if (!empty($lockerSlotsRow['user_id'])) { ?>
+                                                            <br>By <?= $lockerSlotsRow['user_id'] ?>
                                                         <?php } ?>
                                                     </td>
 
@@ -1749,7 +2246,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                             <button type="button"
                                                                 class="sm-btn primary-btn"
                                                                 data-bs-toggle="modal"
-                                                                data-bs-target="#updateLockerSlotModal<?= $lockerRow['id'] ?>">
+                                                                data-bs-target="#updateLockerSlotModal<?= $lockerSlotsRow['id'] ?>">
                                                                 <i class="fa-solid fa-pen"></i>
                                                                 Edit
                                                             </button>
@@ -1757,7 +2254,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                             <button type="button"
                                                                 class="sm-btn danger-btn"
                                                                 data-bs-toggle="modal"
-                                                                data-bs-target="#deleteLockerSlotConfirmationModal<?= $lockerRow['id'] ?>">
+                                                                data-bs-target="#deleteLockerSlotConfirmationModal<?= $lockerSlotsRow['id'] ?>">
                                                                 <i class="fa-solid fa-trash"></i>
                                                                 Delete
                                                             </button>
@@ -1766,7 +2263,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                 </tr>
 
                                                 <!-- Update locker modal -->
-                                                <div class="modal fade primary-modal" id="updateLockerSlotModal<?= $lockerRow['id'] ?>" tabindex="-1" aria-hidden="true">
+                                                <div class="modal fade primary-modal" id="updateLockerSlotModal<?= $lockerSlotsRow['id'] ?>" tabindex="-1">
                                                     <div class="modal-dialog modal-dialog-centered">
                                                         <div class="modal-content">
 
@@ -1779,26 +2276,46 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                                                             <div class="modal-body">
                                                                 <form method="POST" action="../app/locker/update_locker.php">
-                                                                    <input type="hidden" name="id" value="<?= $lockerRow['id'] ?>">
-
+                                                                    <input type="hidden" name="id" value="<?= $lockerSlotsRow['id'] ?>">
+                                                                    
                                                                     <div class="form-group">
                                                                         <label class="input-label">Slot Number</label>
                                                                         <div class="input-box">
-                                                                            <input type="number" name="slot_number" value="<?= $lockerRow['slot_number'] ?>" required>
+                                                                            <input type="number" min="1" max="99" name="slot_number" value="<?= $lockerSlotsRow['slot_number'] ?>" required>
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="form-group">
-                                                                        <label class="input-label">Start Date</label>
+                                                                        <label class="input-label">Size</label>
                                                                         <div class="input-box">
-                                                                            <input type="date" name="start_at" value="<?= date('Y-m-d', strtotime($lockerRow['start_at'])) ?>" required>
+                                                                            <select name="size_id" required>
+                                                                                <?php
+                                                                                    $sizesResult = $conn_local->query("SELECT * FROM locker_sizes");
+                                                                                ?>
+                                                                                    <?php while ($sizesList = $sizesResult->fetch_assoc()) { ?>
+                                                                                        <option value="<?= $sizesList['id'] ?>"
+                                                                                            <?= ($lockerSlotsRow['size_id'] == $sizesList['id']) ? 'selected' : '' ?>>
+                                                                                            <?= $sizesList['size'] ?>
+                                                                                        </option>
+                                                                                    <?php } ?>
+                                                                            </select>
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="form-group">
-                                                                        <label class="input-label">End Date</label>
+                                                                        <label class="input-label">Academic Year</label>
                                                                         <div class="input-box">
-                                                                            <input type="date" name="end_at" value="<?= date('Y-m-d', strtotime($lockerRow['end_at'])) ?>" required>
+                                                                            <select name="academic_year_id" required>
+                                                                                <?php
+                                                                                    $academicYearResult = $conn_local->query("SELECT * FROM academic_calendar");
+                                                                                ?>
+                                                                                    <?php while ($academicYearList = $academicYearResult->fetch_assoc()) { ?>
+                                                                                        <option value="<?= $academicYearList['id'] ?>"
+                                                                                            <?= ($lockerSlotsRow['academic_year_id'] == $academicYearList['id']) ? 'selected' : '' ?>>
+                                                                                            <?= $academicYearList['academic_year'] ?> - <?= $academicYearList['semester'] ?>
+                                                                                        </option>
+                                                                                    <?php } ?>
+                                                                            </select>
                                                                         </div>
                                                                     </div>
 
@@ -1806,15 +2323,24 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                                         <label class="input-label">Status</label>
                                                                         <div class="input-box">
                                                                             <select name="status">
-                                                                                <option value="Available" <?= $lockerRow['status'] == 'Available' ? 'selected' : '' ?>>Available</option>
-                                                                                <option value="Occupied" <?= $lockerRow['status'] == 'Occupied' ? 'selected' : '' ?>>Occupied</option>
+                                                                                <option value="Available"
+                                                                                    <?= $lockerSlotsRow['status'] == 'Available' ? 'selected' : '' ?>>
+                                                                                    Available
+                                                                                </option>
+
+                                                                                <option value="Occupied"
+                                                                                    <?= $lockerSlotsRow['status'] == 'Occupied' ? 'selected' : '' ?>>
+                                                                                    Occupied
+                                                                                </option>
                                                                             </select>
                                                                         </div>
                                                                     </div>
 
                                                                     <div class="action-buttons">
                                                                         <button type="submit" class="btn primary-btn">Save Changes</button>
-                                                                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
+                                                                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">
+                                                                            Cancel
+                                                                        </button>
                                                                     </div>
                                                                 </form>
                                                             </div>
@@ -1823,14 +2349,14 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                 </div>
 
                                                 <!-- Delete locker confirmation modal -->
-                                                <div class="modal fade danger-modal" id="deleteLockerSlotConfirmationModal<?= $lockerRow['id'] ?>" tabindex="-1" aria-hidden="true">
+                                                <div class="modal fade danger-modal" id="deleteLockerSlotConfirmationModal<?= $lockerSlotsRow['id'] ?>" tabindex="-1" aria-hidden="true">
                                                     <div class="modal-dialog modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-body">
                                                                 <div class="message">
                                                                     <p><i class="fa-solid fa-circle-exclamation"></i></p>
                                                                     <h5>Delete</h5>
-                                                                    <p>Are you sure you want to delete <span>slot <?= $lockerRow['slot_number'] ?></span>?</p>
+                                                                    <p>Are you sure you want to delete <span>slot <?= $lockerSlotsRow['slot_number'] ?></span>?</p>
                                                                 </div>
 
                                                                 <div class="action-buttons">
@@ -1839,7 +2365,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                                     </button>
 
                                                                     <form method="POST" action="../app/locker/delete_locker.php">
-                                                                        <input type="hidden" name="id" value="<?= $lockerRow['id'] ?>">
+                                                                        <input type="hidden" name="id" value="<?= $lockerSlotsRow['id'] ?>">
 
                                                                         <button type="submit" class="btn primary-btn">
                                                                             Yes, Delete
@@ -1862,6 +2388,32 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 <?php endif; ?>
                             </div>                        
                         <?php } ?>
+
+                        <ul class="pagination">
+                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                                <?php if ($page > 1): ?>
+                                    <a class="page-link" href="?page=<?= $page - 1 ?>&searchLockerSlotLocation=<?= urlencode($_GET['searchLockerSlotLocation'] ?? '') ?>&filterLockerSlotLocation=<?= urlencode($_GET['filterLockerSlotLocation'] ?? '') ?>">
+                                        Previous
+                                    </a>
+                                <?php else: ?>
+                                    <span class="page-link">Previous</span>
+                                <?php endif; ?>
+                            </li>
+
+                            <li class="page-item active">
+                                <span class="page-link"><?= $page ?></span>
+                            </li>
+
+                            <li class="page-item <?= ($page >= $totalLockerSlotLocationPages) ? 'disabled' : '' ?>">
+                                <?php if ($page < $totalLockerSlotLocationPages): ?>
+                                    <a class="page-link" href="?page=<?= $page + 1 ?>&searchLockerSlotLocation=<?= urlencode($_GET['searchLockerSlotLocation'] ?? '') ?>&filterLockerSlotLocation=<?= urlencode($_GET['filterLockerSlotLocation'] ?? '') ?>">
+                                        Next
+                                    </a>
+                                <?php else: ?>
+                                    <span class="page-link">Next</span>
+                                <?php endif; ?>
+                            </li>
+                        </ul>
                     <?php else: ?>
                         <div id="empty">
                             <i class="fa-solid fa-ban"></i>

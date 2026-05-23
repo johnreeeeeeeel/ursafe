@@ -5,12 +5,17 @@ require '../db_connection.php';
 $slot_number = $_POST['slot_number'];
 $location_id = $_POST['location_id'];
 $size_id = $_POST['size_id'];
-$start_at = $_POST['start_at'];
-$end_at = $_POST['end_at'];
+$academic_year_id = $_POST['academic_year_id'];
 
 try {
-    $stmt = $conn_local->prepare("CALL addLocker(?, ?, ?, ?, ?)");
-    $stmt->bind_param("iiiss", $slot_number, $location_id, $size_id, $start_at, $end_at);
+    $stmt = $conn_local->prepare("CALL addLocker(?, ?, ?, ?)");
+    $stmt->bind_param(
+        "iiii",
+        $slot_number,
+        $location_id,
+        $size_id,
+        $academic_year_id
+    );
 
     $stmt->execute();
 
@@ -20,9 +25,10 @@ try {
     ];
 
     $stmt->close();
-    $conn_local->next_result(); 
+    $conn_local->next_result();
 
 } catch (Exception $e) {
+
     $_SESSION['alert_message'] = [
         'type' => 'danger',
         'text' => $e->getMessage()

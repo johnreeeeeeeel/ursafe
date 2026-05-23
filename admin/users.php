@@ -311,7 +311,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                 <div class="table-container">
                     <?php
                         // Get users
-                        $limit = 12;
+                        $limit = 16;
                         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
                         if ($page < 1) $page = 1;
 
@@ -333,7 +333,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         }
 
                         $stmtUsers->execute();
-
                         $usersResultSet = $stmtUsers->get_result();
 
                         $stmtUsers->next_result();
@@ -395,6 +394,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 <?php endwhile; ?>
                             </tbody>
                         </table>
+
                         <ul class="pagination">
                             <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
                                 <?php if ($page > 1): ?>
