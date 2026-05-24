@@ -1,99 +1,75 @@
 <?php
-session_start();
 require '../db_connection.php';
+session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $email = trim($_POST['loginEmail']);
     $password = trim($_POST['loginPassword']);
 
-    $user = null;
-    
-    $isAdmin = false;
-    $isUser = false;
+    try {
 
-    // Check admin
-    if (!$user) {
-        $stmt = $conn_local->prepare("CALL getAdminByEmail(?)");
+        $stmt = $conn_local->prepare("CALL validateLogin(?)");
         $stmt->bind_param("s", $email);
         $stmt->execute();
 
         $result = $stmt->get_result();
-
-        if ($result && $result->num_rows === 1) {
-            $user = $result->fetch_assoc();
-            $isAdmin = true;
-        }
+        $user = $result->fetch_assoc();
 
         $stmt->close();
-        $conn_local->next_result();
-    }
 
-    // Check user 
-    if (!$user) {
-        $stmt = $conn_local->prepare("CALL getUserByEmail(?)");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
+        // Check password
+        if (password_verify($password, $user['password'])) {
 
-        $result = $stmt->get_result();
+            $_SESSION['id']         = $user['id'];
 
-        if ($result && $result->num_rows === 1) {
-            $user = $result->fetch_assoc();
-            $isUser = true;
-        }
+            $_SESSION['lastname']   = $user['lastname'] ?? '';
+            $_SESSION['firstname']  = $user['firstname'] ?? '';
+            $_SESSION['middlename'] = $user['middlename'] ?? '';
 
-        $stmt->close();
-        $conn_local->next_result();
-    }
+            $_SESSION['sex']        = $user['sex'] ?? '';
+            $_SESSION['dob']        = $user['dob'] ?? '';
 
-    // If still no user found
-    if (!$user) {
-        $_SESSION['alert_message'] = [
-            'type' => 'danger',
-            'text' => 'Account not found'
-        ];
-        header("Location: ../../index.php");
-        exit;
-    }
+            $_SESSION['institute']  = $user['institute'] ?? '';
+            $_SESSION['program']    = $user['program'] ?? '';
 
-    // Check password
-    if (password_verify($password, $user['password'])) {
-        $_SESSION['id']         = $user['id'];
+            $_SESSION['username']   = $user['username'];
+            $_SESSION['email']      = $user['email'];
 
-        $_SESSION['lastname']   = $user['lastname'] ?? '';
-        $_SESSION['firstname']  = $user['firstname'] ?? '';
-        $_SESSION['middlename'] = $user['middlename'] ?? '';
+            $_SESSION['role'] = $user['role'];
 
-        $_SESSION['sex']        = $user['sex'] ?? '';
-        $_SESSION['dob']        = $user['dob'] ?? '';
+            if ($user['role'] === 'admin') {
+                header("Location: ../../admin/dashboard.php");
 
-        $_SESSION['institute']  = $user['institute'] ?? '';
-        $_SESSION['program']    = $user['program'] ?? '';
+            } elseif ($user['role'] === 'user') {
+                header("Location: ../../user/home.php");
 
-        $_SESSION['username']   = $user['username'];
-        $_SESSION['email']      = $user['email'];
+            } else {
+                $_SESSION['alert_message'] = [
+                    'type' => 'danger',
+                    'text' => 'Something went wrong. Please try again.'
+                ];
 
-        if ($isAdmin) {
-            $_SESSION['role'] = 'admin';
-            header("Location: ../../admin/dashboard.php");
-
-        } elseif ($isUser) {
-            $_SESSION['role'] = 'user';
-            header("Location: ../../user/home.php");
+                header("Location: ../../index.php");
+            }
+            exit;
 
         } else {
             $_SESSION['alert_message'] = [
-            'type' => 'danger',
-            'text' => 'Something went wrong. Please try again.'
+                'type' => 'danger',
+                'text' => 'Invalid email or password'
             ];
-            header("Location: ../../index.php");
-        }
-        exit;
 
-    } else {
+            header("Location: ../../index.php");
+            exit;
+        }
+
+    } catch (mysqli_sql_exception $e) {
         $_SESSION['alert_message'] = [
             'type' => 'danger',
-            'text' => 'Invalid email or password'
+            'text' => $e->getMessage()
         ];
+
         header("Location: ../../index.php");
         exit;
     }

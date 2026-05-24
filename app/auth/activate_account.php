@@ -7,100 +7,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
     $username = $_POST['username'];
     $plainPassword = $_POST['password'];
-
-    // Checkly check if email exists in campus database
-    $stmt = $conn_remote->prepare("CALL getCampusStudentByEmail(?)");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 0) {
-        $_SESSION['alert_message'] = [
-            'type' => 'danger',
-            'text' => 'Please use your campus email to activate your account.'
-        ];
-
-        header("Location: ../../index.php");
-        exit;
-    }
-
-    $student = $result->fetch_assoc();
-    $stmt->close();
-
-    // Check if account already exists in ursafe database 
-    $stmt = $conn_local->prepare("CALL getUserByEmail(?)");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $check = $stmt->get_result();
-
-    if ($check->num_rows > 0) {
-        $_SESSION['alert_message'] = [
-            'type' => 'warning',
-            'text' => 'Account already activated. Please log in instead.'
-        ];
-
-        header("Location: ../../index.php");
-        exit;
-    }
-
-    $student = $result->fetch_assoc();
-    $stmt->close();
-
-    // Check if username already exists
-    $stmt = $conn_local->prepare("CALL getUserById(?)");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-
-    $checkUsername = $stmt->get_result();
-
-    if ($checkUsername->num_rows > 0) {
-        $_SESSION['alert_message'] = [
-            'type' => 'warning',
-            'text' => 'Username already exists.'
-        ];
-
-        header("Location: ../../index.php");
-        exit;
-    }
-
-    $stmt->close();
-    $conn_local->next_result();
-
-    // Insert into ursafe database
     $password = password_hash($plainPassword, PASSWORD_DEFAULT);
 
-    $insert = $conn_local->prepare(" CALL activateUserAccount(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+    try {
+        // Check and validate user account
+        $stmt = $conn_local->prepare("CALL validateAndActivateUserAccount(?, ?, ?)");
+        $stmt->bind_param("sss", $email, $username, $password);
+        $stmt->execute();
 
-    $insert->bind_param(
-        "sssssssssss",
-        $student['id'],
-        $student['lastname'],
-        $student['firstname'],
-        $student['middlename'],
-        $student['sex'],
-        $student['dob'],
-        $student['institute'],
-        $student['program'],
-        $username,
-        $student['email'],
-        $password
-    );
+        $result = $stmt->get_result();
+        $student = $result->fetch_assoc();
 
-    if ($insert->execute()) {
+        $stmt->close();
 
         require '../emails/success_account_activation_email.php';
-        sendUserEmail($student['email'], $username, $plainPassword);
+
+        sendUserEmail(
+            $student['email'],
+            $username,
+            $plainPassword
+        );
 
         $_SESSION['alert_message'] = [
             'type' => 'success',
             'text' => 'Account created and activated successfully'
         ];
 
-    } else {
+    } catch (mysqli_sql_exception $e) {
+
         $_SESSION['alert_message'] = [
             'type' => 'danger',
-            'text' => 'Failed to create account'
+            'text' => $e->getMessage()
         ];
+
+        header("Location: ../../index.php");
+        exit;
     }
 
     header("Location: ../../index.php");

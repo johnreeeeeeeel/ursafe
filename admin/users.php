@@ -235,8 +235,29 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                         <span class="badge rounded-pill primary-badge">
                                                             <?= $userAccountLogsRow['action'] ?>
                                                         </span>
-                                                    <?php } else { ?>
+
+                                                    <?php } elseif ($userAccountLogsRow['action'] == 'Deactivate') { ?>
                                                         <span class="badge rounded-pill danger-badge">
+                                                            <?= $userAccountLogsRow['action'] ?>
+                                                        </span>
+                                                    
+                                                    <?php } elseif ($userAccountLogsRow['action'] == 'Add') { ?>
+                                                        <span class="badge rounded-pill primary-badge">
+                                                            <?= $userAccountLogsRow['action'] ?>
+                                                        </span>
+
+                                                    <?php } elseif ($userAccountLogsRow['action'] == 'Update') { ?>
+                                                        <span class="badge rounded-pill warning-badge">
+                                                            <?= $userAccountLogsRow['action'] ?>
+                                                        </span>
+
+                                                    <?php } elseif ($userAccountLogsRow['action'] == 'Delete') { ?>
+                                                        <span class="badge rounded-pill danger-badge">
+                                                            <?= $userAccountLogsRow['action'] ?>
+                                                        </span>
+
+                                                    <?php } else { ?>
+                                                        <span class="badge rounded-pill secondary-badge">
                                                             <?= $userAccountLogsRow['action'] ?>
                                                         </span>
                                                     <?php } ?>
@@ -281,160 +302,335 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </div>
                 </div>
 
-                <!-- Users header -->
-                <header>
-                    <form method="GET">
-                        <div class="search-group">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="search"
-                                name="searchUsers"
-                                placeholder="Search users..."
-                                value="<?= htmlspecialchars($_GET['searchUsers'] ?? '') ?>">
-                        </div>
-
-                        <div class="filter-group">
-                            <i class="fa-solid fa-filter"></i>
-                            <select name="filterUsers" onchange="this.form.submit()">
-                                <option value="">All</option>
-                                <option value="a-z" <?= (($_GET['filterUsers'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
-                                <option value="z-a" <?= (($_GET['filterUsers'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
-                                <option value="newest" <?= (($_GET['filterUsers'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
-                                <option value="oldest" <?= (($_GET['filterUsers'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" hidden></button>
-                    </form>
-                </header>
-
                 <!-- Users -->
                 <div class="table-container">
-                    <?php
-                        // Get users
-                        $limit = 16;
-                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-                        if ($page < 1) $page = 1;
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($_GET['tab'] ?? 'activeUsersTab') === 'activeUsersTab' ? 'active' : '' ?>" href="?tab=activeUsersTab">
+                                Active Users
+                            </a>
+                        </li>
 
-                        $offset = ($page - 1) * $limit;
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($_GET['tab'] ?? '') === 'inactiveUsersTab' ? 'active' : '' ?>" href="?tab=inactiveUsersTab">
+                                Inactive Users
+                            </a>
+                        </li>
+                    </ul>
 
-                        $search = trim($_GET['searchUsers'] ?? '');
-                        $filter = strtolower($_GET['filterUsers'] ?? '');
+                    <div class="tab-content">
+                        <!-- Active users -->
+                        <div class="tab-pane fade <?= ($_GET['tab'] ?? 'activeUsersTab') === 'activeUsersTab' ? 'show active' : '' ?>" id="activeUsersTab">
+                            <?php
+                                // Get users
+                                $limit = 8;
+                                $activeUsersPage = isset($_GET['activeUsersPage']) ? (int)$_GET['activeUsersPage'] : 1;
+                                if ($activeUsersPage < 1) $activeUsersPage = 1;
 
-                        $isSearching = !empty($search);
-                        $isFiltering = ($filter !== '');
-                        $isSearchFilterMode = $isSearching || $isFiltering;
+                                $offset = ($activeUsersPage - 1) * $limit;
 
-                        if ($isSearchFilterMode) {
-                            $stmtUsers = $conn_local->prepare("CALL getSearchFilterUsers(?, ?, ?, ?)");
-                            $stmtUsers->bind_param("ssii", $search, $filter, $limit, $offset);
-                        } else {
-                            $stmtUsers = $conn_local->prepare("CALL getUsers(?, ?)");
-                            $stmtUsers->bind_param("ii", $limit, $offset);
-                        }
+                                $search = trim($_GET['searchActiveUsers'] ?? '');
+                                $filter = strtolower($_GET['filterActiveUsers'] ?? '');
 
-                        $stmtUsers->execute();
-                        $usersResultSet = $stmtUsers->get_result();
+                                $isSearching = !empty($search);
+                                $isFiltering = ($filter !== '');
+                                $isSearchFilterMode = $isSearching || $isFiltering;
 
-                        $stmtUsers->next_result();
-                        $countResult = $stmtUsers->get_result();
+                                if ($isSearchFilterMode) {
+                                    $stmtActiveUsers = $conn_local->prepare("CALL getSearchFilterActiveUsers(?, ?, ?, ?)");
+                                    $stmtActiveUsers->bind_param("ssii", $search, $filter, $limit, $offset);
+                                } else {
+                                    $stmtActiveUsers = $conn_local->prepare("CALL getActiveUsers(?, ?)");
+                                    $stmtActiveUsers->bind_param("ii", $limit, $offset);
+                                }
 
-                        $rowCount = $countResult ? $countResult->fetch_assoc() : null;
-                        $totalUsersRow = $rowCount['usersTotal'] ?? 0;
+                                $stmtActiveUsers->execute();
+                                $activeUsersResultSet = $stmtActiveUsers->get_result();
 
-                        $totalPages = ceil($totalUsersRow / $limit);
+                                $stmtActiveUsers->next_result();
+                                $activeUsersCountResult = $stmtActiveUsers->get_result();
 
-                        $stmtUsers->close();
+                                $activeUsersRowCount = $activeUsersCountResult ? $activeUsersCountResult->fetch_assoc() : null;
+                                $totalActiveUsersRow = $activeUsersRowCount['activeUsersTotal'] ?? 0;
 
-                        while ($conn_local->next_result()) {
-                            $conn_local->store_result();
-                        }
-                    ?>
+                                $totalActiveUsersPages = ceil($totalActiveUsersRow / $limit);
 
-                    <?php if ($usersResultSet->num_rows > 0): ?>
-                        <table class="table table-borderless">
-                            <thead>
-                                <th>ID</th>
-                                <th>Username</th>
-                                <th>Fullname</th>
-                                <th>Email</th>
-                                <th>Action</th>
-                            </thead>
-                            
-                            <tbody>
-                                <?php while ($usersRow = $usersResultSet->fetch_assoc()): ?>
-                                    <tr>
-                                    <td data-label="ID"><?= $usersRow['id']; ?></td>
-                                    <td data-label="Username"><?= $usersRow['username']; ?></td>
-                                    <td data-label="Full Name"><?= $usersRow['fullname']; ?></td>
-                                    <td data-label="Email"><?= $usersRow['email']; ?></td>
+                                $stmtActiveUsers->close();
 
-                                    <td data-label="Action">
-                                        <div class="action-buttons">
-                                            <button class="sm-btn primary-btn"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#viewUserModal"
-                                                onclick="viewUserDetails(
-                                                    '<?= htmlspecialchars($usersRow['id']) ?>',
-                                                    '<?= htmlspecialchars($usersRow['fullname']) ?>',
-                                                    '<?= htmlspecialchars($usersRow['sex'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($usersRow['dob'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($usersRow['institute'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($usersRow['program'] ?? '') ?>',
-                                                    '<?= htmlspecialchars($usersRow['username']) ?>',
-                                                    '<?= htmlspecialchars($usersRow['email']) ?>',
-                                                    '<?= htmlspecialchars($usersRow['created_at']) ?>'
-                                                )">
+                                while ($conn_local->next_result()) {
+                                    $conn_local->store_result();
+                                }
+                            ?>
 
-                                                <i class="fa-solid fa-eye"></i>
-                                                View
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
+                            <header>
+                                <form method="GET">
+                                    <input type="hidden" name="tab" value="activeUsersTab">
 
-                        <ul class="pagination">
-                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                                <?php if ($page > 1): ?>
-                                    <a class="page-link"
-                                    href="?page=<?= $page - 1 ?>&searchUsers=<?= urlencode($_GET['searchUsers'] ?? '') ?>&filterUsers=<?= urlencode($_GET['filterUsers'] ?? '') ?>">
-                                        Previous
-                                    </a>
-                                <?php else: ?>
-                                    <span class="page-link">Previous</span>
-                                <?php endif; ?>
-                            </li>
+                                    <div class="search-group">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="search"
+                                            name="searchActiveUsers"
+                                            placeholder="Search users..."
+                                            value="<?= htmlspecialchars($_GET['searchActiveUsers'] ?? '') ?>">
+                                    </div>
 
-                            <li class="page-item active">
-                                <span class="page-link"><?= $page ?></span>
-                            </li>
+                                    <div class="filter-group">
+                                        <i class="fa-solid fa-filter"></i>
+                                        <select name="filterActiveUsers" onchange="this.form.submit()">
+                                            <option value="">All</option>
+                                            <option value="a-z" <?= (($_GET['filterActiveUsers'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
+                                            <option value="z-a" <?= (($_GET['filterActiveUsers'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
+                                            <option value="newest" <?= (($_GET['filterActiveUsers'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
+                                            <option value="oldest" <?= (($_GET['filterActiveUsers'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
+                                        </select>
+                                    </div>
 
-                            <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                                <?php if ($page < $totalPages): ?>
-                                    <a class="page-link"
-                                    href="?page=<?= $page + 1 ?>&searchUsers=<?= urlencode($_GET['searchUsers'] ?? '') ?>&filterUsers=<?= urlencode($_GET['filterUsers'] ?? '') ?>">
-                                        Next
-                                    </a>
-                                <?php else: ?>
-                                    <span class="page-link">Next</span>
-                                <?php endif; ?>
-                            </li>
-                        </ul>
-                    <?php else: ?>
-                        <div id="empty">
-                            <i class="fa-solid fa-ban"></i>
-                            <small>No activated user yet</small>
-                            <small>Try to reload page</small>
+                                    <button type="submit" hidden></button>
+                                </form>
+                            </header>
+
+                            <?php if ($activeUsersResultSet->num_rows > 0): ?>
+                                <table class="table table-borderless">
+                                    <thead>
+                                        <th>ID</th>
+                                        <th>Status</th>
+                                        <th>Username</th>
+                                        <th>Fullname</th>
+                                        <th>Email</th>
+                                        <th>Action</th>
+                                    </thead>
+                                    
+                                    <tbody>
+                                        <?php while ($activeUsersRow = $activeUsersResultSet->fetch_assoc()): ?>
+                                            <tr>
+                                            <td data-label="ID"><?= $activeUsersRow['id']; ?></td>
+                                            <td data-label="Status"><?= $activeUsersRow['status']; ?></td>
+                                            <td data-label="Username"><?= $activeUsersRow['username']; ?></td>
+                                            <td data-label="Full Name"><?= $activeUsersRow['fullname']; ?></td>
+                                            <td data-label="Email"><?= $activeUsersRow['email']; ?></td>
+
+                                            <td data-label="Action">
+                                                <div class="action-buttons">
+                                                    <button class="sm-btn primary-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#viewActiveUserModal"
+                                                        onclick="viewActiveUserDetails(
+                                                            '<?= htmlspecialchars($activeUsersRow['id']) ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['fullname']) ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['sex'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['dob'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['institute'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['program'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['status'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['username']) ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['email']) ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['updated_at']) ?>',
+                                                            '<?= htmlspecialchars($activeUsersRow['created_at']) ?>'
+                                                        )">
+
+                                                        <i class="fa-solid fa-eye"></i>
+                                                        View
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php endwhile; ?>
+                                    </tbody>
+                                </table>
+
+                                <ul class="pagination">
+                                    <li class="page-item <?= ($activeUsersPage <= 1) ? 'disabled' : '' ?>">
+                                        <?php if ($activeUsersPage > 1): ?>
+                                            <a class="page-link"
+                                                href="?tab=activeUsersTab&activeUsersPage=<?= $activeUsersPage - 1 ?>&searchActiveUsers=<?= urlencode($_GET['searchActiveUsers'] ?? '') ?>&filterActiveUsers=<?= urlencode($_GET['filterActiveUsers'] ?? '') ?>"
+                                                Previous
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Previous</span>
+                                        <?php endif; ?>
+                                    </li>
+
+                                    <li class="page-item active">
+                                        <span class="page-link"><?= $activeUsersPage ?></span>
+                                    </li>
+
+                                    <li class="page-item <?= ($activeUsersPage >= $totalActiveUsersPages) ? 'disabled' : '' ?>">
+                                        <?php if ($activeUsersPage < $totalActiveUsersPages): ?>
+                                            <a class="page-link"
+                                                href="?tab=activeUsersTab&activeUsersPage=<?= $activeUsersPage - 1 ?>&searchActiveUsers=<?= urlencode($_GET['searchActiveUsers'] ?? '') ?>&filterActiveUsers=<?= urlencode($_GET['filterActiveUsers'] ?? '') ?>"
+                                                Next
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Next</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
+                            <?php else: ?>
+                                <div id="empty">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <small>No activated user yet</small>
+                                    <small>Try to reload page</small>
+                                </div>
+                            <?php endif; ?>
                         </div>
-                    <?php endif; ?>
+
+                        <!-- Inactive users -->
+                        <div class="tab-pane fade <?= ($_GET['tab'] ?? '') === 'inactiveUsersTab' ? 'show active' : '' ?>" id="inactiveUsersTab">
+                            <?php
+                                // Get users
+                                $limit = 8;
+                                $inactiveUsersPage = isset($_GET['inactiveUsersPage']) ? (int)$_GET['inactiveUsersPage'] : 1;
+                                if ($inactiveUsersPage < 1) $inactiveUsersPage = 1;
+
+                                $offset = ($inactiveUsersPage - 1) * $limit;
+
+                                $search = trim($_GET['searchInactiveUsers'] ?? '');
+                                $filter = strtolower($_GET['searchInactiveUsers'] ?? '');
+
+                                $isSearching = !empty($search);
+                                $isFiltering = ($filter !== '');
+                                $isSearchFilterMode = $isSearching || $isFiltering;
+
+                                if ($isSearchFilterMode) {
+                                    $stmtInctiveUsers = $conn_local->prepare("CALL getSearchFilterInactiveUsers(?, ?, ?, ?)");
+                                    $stmtInctiveUsers->bind_param("ssii", $search, $filter, $limit, $offset);
+                                } else {
+                                    $stmtInctiveUsers = $conn_local->prepare("CALL getInactiveUsers(?, ?)");
+                                    $stmtInctiveUsers->bind_param("ii", $limit, $offset);
+                                }
+
+                                $stmtInctiveUsers->execute();
+                                $inactiveUsersResultSet = $stmtInctiveUsers->get_result();
+
+                                $stmtInctiveUsers->next_result();
+                                $inactiveUsersCountResult = $stmtInctiveUsers->get_result();
+
+                                $inactiveUsersRowCount = $inactiveUsersCountResult ? $activeUsersCountResult->fetch_assoc() : null;
+                                $totalInactiveUsersRow = $inactiveUsersRowCount['inactiveUsersTotal'] ?? 0;
+
+                                $totalInactiveUsersPages = ceil($totalInactiveUsersRow / $limit);
+
+                                $stmtInctiveUsers->close();
+
+                                while ($conn_local->next_result()) {
+                                    $conn_local->store_result();
+                                }
+                            ?>
+
+                            <header>
+                                <form method="GET">
+                                    <input type="hidden" name="tab" value="inactiveUsersTab">
+
+                                    <div class="search-group">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="search"
+                                            name="searchInactiveUsers"
+                                            placeholder="Search users..."
+                                            value="<?= htmlspecialchars($_GET['searchInactiveUsers'] ?? '') ?>">
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <i class="fa-solid fa-filter"></i>
+                                        <select name="filterInactiveUsers" onchange="this.form.submit()">
+                                            <option value="">All</option>
+                                            <option value="a-z" <?= (($_GET['filterInactiveUsers'] ?? '') === 'a-z') ? 'selected' : '' ?>>A - Z</option>
+                                            <option value="z-a" <?= (($_GET['filterInactiveUsers'] ?? '') === 'z-a') ? 'selected' : '' ?>>Z - A</option>
+                                            <option value="newest" <?= (($_GET['filterInactiveUsers'] ?? '') === 'newest') ? 'selected' : '' ?>>Newest</option>
+                                            <option value="oldest" <?= (($_GET['filterInactiveUsers'] ?? '') === 'oldest') ? 'selected' : '' ?>>Oldest</option>
+                                        </select>
+                                    </div>
+
+                                    <button type="submit" hidden></button>
+                                </form>
+                            </header>
+
+                            <?php if ($inactiveUsersResultSet->num_rows > 0): ?>
+                                <table class="table table-borderless">
+                                    <thead>
+                                        <th>ID</th>
+                                        <th>Status</th>
+                                        <th>Fullname</th>
+                                        <th>Email</th>
+                                        <th>Action</th>
+                                    </thead>
+                                    
+                                    <tbody>
+                                        <?php while ($inactiveUsersRow = $inactiveUsersResultSet->fetch_assoc()): ?>
+                                            <tr>
+                                            <td data-label="ID"><?= $inactiveUsersRow['id']; ?></td>
+                                            <td data-label="Status"><?= $inactiveUsersRow['status']; ?></td>
+                                            <td data-label="Full Name"><?= $inactiveUsersRow['fullname']; ?></td>
+                                            <td data-label="Email"><?= $inactiveUsersRow['email']; ?></td>
+
+                                            <td data-label="Action">
+                                                <div class="action-buttons">
+                                                    <button class="sm-btn primary-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#viewInactiveUserModal"
+                                                        onclick="viewInactiveUserDetails(
+                                                            '<?= htmlspecialchars($inactiveUsersRow['id']) ?>',
+                                                            '<?= htmlspecialchars($inactiveUsersRow['fullname']) ?>',
+                                                            '<?= htmlspecialchars($inactiveUsersRow['sex'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($inactiveUsersRow['dob'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($inactiveUsersRow['institute'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($inactiveUsersRow['program'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($inactiveUsersRow['status'] ?? '') ?>',
+                                                            '<?= htmlspecialchars($inactiveUsersRow['email']) ?>',
+                                                            '<?= htmlspecialchars($inactiveUsersRow['created_at']) ?>'
+                                                        )">
+
+                                                        <i class="fa-solid fa-eye"></i>
+                                                        View
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php endwhile; ?>
+                                    </tbody>
+                                </table>
+
+                                <ul class="pagination">
+                                    <li class="page-item <?= ($inactiveUsersPage <= 1) ? 'disabled' : '' ?>">
+                                        <?php if ($inactiveUsersPage > 1): ?>
+                                            <a class="page-link"
+                                                href="?tab=inactiveUsersTab&inactiveUsersPage=<?= $inactiveUsersPage - 1 ?>&searchInactiveUsers=<?= urlencode($_GET['searchInactiveUsers'] ?? '') ?>&filterInactiveUsers=<?= urlencode($_GET['filterInactiveUsers'] ?? '') ?>"
+                                                Previous
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Previous</span>
+                                        <?php endif; ?>
+                                    </li>
+
+                                    <li class="page-item active">
+                                        <span class="page-link"><?= $inactiveUsersPage ?></span>
+                                    </li>
+
+                                    <li class="page-item <?= ($inactiveUsersPage >= $totalInactiveUsersPages) ? 'disabled' : '' ?>">
+                                        <?php if ($inactiveUsersPage < $totalInactiveUsersPages): ?>
+                                            <a class="page-link"
+                                                href="?tab=inactiveUsersTab&inactiveUsersPage=<?= $inactiveUsersPage - 1 ?>&searchInactiveUsers=<?= urlencode($_GET['searchInactiveUsers'] ?? '') ?>&filterInactiveUsers=<?= urlencode($_GET['filterInactiveUsers'] ?? '') ?>"
+                                                Next
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="page-link">Next</span>
+                                        <?php endif; ?>
+                                    </li>
+                                </ul>
+                            <?php else: ?>
+                                <div id="empty">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <small>No activated user yet</small>
+                                    <small>Try to reload page</small>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- View user details modal -->
-        <div class="modal fade" id="viewUserModal" tabindex="-1">
+        <!-- View active user details modal -->
+        <div class="modal fade" id="viewActiveUserModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -444,39 +640,98 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     <div class="modal-body">
                         <div class="profile">
                             <i class="fa-solid fa-circle-user"></i>
-                            <h4><span id="vu_fullname"></span></h4>
+                            <h4><span id="a_fullname"></span></h4>
                         </div>
                         
                         
                         <div class="profile-section">
                             <h6>Personal Information</h6>
                             <p>
-                                <small><b>ID: </b><span id="vu_id"></span></small>
-                                <small><b>Username: </b><span id="vu_username"></span></small>
+                                <small><b>ID: </b><span id="a_id"></span></small>
+                                <small><b>Username: </b><span id="a_username"></span></small>
                             </p>
                             <p>
-                                <small><b>Sex: </b><span id="vu_sex"></span></small>
-                                <small><b>Date of Birth: </b><span id="vu_dob"></span></small>
+                                <small><b>Sex: </b><span id="a_sex"></span></small>
+                                <small><b>Date of Birth: </b><span id="a_dob"></span></small>
                             </p>
                         </div>
 
                         <div class="profile-section">
                             <h6>Academic Information</h6>
                             <p>
-                                <small><b>Institute: </b><span id="vu_institute"></span></small>
+                                <small><b>Institute: </b><span id="a_institute"></span></small>
                             </p>
                             <p>
-                                <small><b>Program: </b><span id="vu_program"></span></small>
+                                <small><b>Program: </b><span id="a_program"></span></small>
                             </p>
                         </div>
 
                         <div class="profile-section">
                             <h6>Account Information</h6>
                             <p>
-                                <small><b>Email: </b><span id="vu_email"></span></small>
+                                <small><b>Email: </b><span id="a_email"></span></small>
                             </p>
                             <p>
-                                <small><b>Date Activated: </b><span id="vu_created_at"></span></small>
+                                <small><b>Status: </b><span id="a_status"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Date Activated: </b><span id="a_updated_at"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Date Created: </b><span id="a_created_at"></span></small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View inactive user details modal -->
+        <div class="modal fade" id="viewInactiveUserModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="profile">
+                            <i class="fa-solid fa-circle-user"></i>
+                            <h4><span id="i_fullname"></span></h4>
+                        </div>
+                        
+                        
+                        <div class="profile-section">
+                            <h6>Personal Information</h6>
+                            <p>
+                                <small><b>ID: </b><span id="i_id"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Sex: </b><span id="i_sex"></span></small>
+                                <small><b>Date of Birth: </b><span id="i_dob"></span></small>
+                            </p>
+                        </div>
+
+                        <div class="profile-section">
+                            <h6>Academic Information</h6>
+                            <p>
+                                <small><b>Institute: </b><span id="i_institute"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Program: </b><span id="i_program"></span></small>
+                            </p>
+                        </div>
+
+                        <div class="profile-section">
+                            <h6>Account Information</h6>
+                            <p>
+                                <small><b>Email: </b><span id="i_email"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Status: </b><span id="i_status"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Date Created: </b><span id="i_created_at"></span></small>
                             </p>
                         </div>
                     </div>

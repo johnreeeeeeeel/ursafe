@@ -167,24 +167,24 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
             <div id="dashboard">
                 <div class="data-count-container">
                     <?php
-                        // Get users count
-                        $stmtUsersCount = $conn_local->prepare("CALL get_users_count()");
-                        $stmtUsersCount->execute();
+                        // Get active user count
+                        $stmtActiveUsersCount = $conn_local->prepare("CALL getActiveUserCount()");
+                        $stmtActiveUsersCount->execute();
 
-                        $usersCountResultSet = $stmtUsersCount->get_result();
-                        $usersCountRow = $usersCountResultSet->fetch_assoc();
+                        $activeUsersCountResultSet = $stmtActiveUsersCount->get_result();
+                        $activeUsersCountRow = $activeUsersCountResultSet->fetch_assoc();
 
-                        $stmtUsersCount->close();
+                        $stmtActiveUsersCount->close();
                         $conn_local->next_result();
 
-                        // Get students count
-                        $stmtStudentsCount = $conn_remote->prepare("CALL get_students_count()");
-                        $stmtStudentsCount->execute();
+                        // Get inactive user count
+                        $stmtInactiveUsersCount = $conn_local->prepare("CALL getInactiveUserCount()");
+                        $stmtInactiveUsersCount->execute();
 
-                        $studentsCountResultSet = $stmtStudentsCount->get_result();
-                        $studentsCountRow = $studentsCountResultSet->fetch_assoc();
+                        $studentsCountResultSet = $stmtInactiveUsersCount->get_result();
+                        $inactiveUsersCountRow = $studentsCountResultSet->fetch_assoc();
 
-                        $stmtStudentsCount->close();
+                        $stmtInactiveUsersCount->close();
                         $conn_local->next_result();
 
                         // Get total lockers
@@ -328,13 +328,13 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             </small>
 
                             <h1>
-                                <span><?php echo $usersCountRow['users_count']; ?></span>
+                                <span><?php echo $activeUsersCountRow['active_user_count']; ?></span>
                                 <span><i class="fa-solid fa-users"></i></span>
                             </h1>
                         </div>
 
                         <small>
-                            Over <?php echo $studentsCountRow['students_count']; ?> students enrolled
+                            Over <?php echo $inactiveUsersCountRow['inactive_user_count']; ?> inactive users
                         </small>
                     </div>
                     

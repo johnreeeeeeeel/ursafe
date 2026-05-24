@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 22, 2026 at 03:19 PM
+-- Generation Time: May 24, 2026 at 10:22 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,41 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `campus_db`
 --
-
-DELIMITER $$
---
--- Procedures
---
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getCampusStudentByEmail` (IN `p_email` VARCHAR(255))   BEGIN
-    SELECT
-        id,
-
-        TRIM(CONCAT(
-            firstname, ' ',
-            IFNULL(CONCAT(middlename, ' '), ''),
-            lastname
-        )) AS fullname,
-
-        lastname,
-        firstname,
-        middlename,
-        sex,
-        dob,
-        institute,
-        program,
-        email
-
-    FROM students
-    WHERE email = p_email
-    LIMIT 1;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_students_count` ()   BEGIN
-    SELECT COUNT(*) AS students_count
-    FROM students;
-END$$
-
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -79,26 +44,138 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`id`, `lastname`, `firstname`, `middlename`, `sex`, `dob`, `institute`, `program`, `email`) VALUES
+('2024-11231', 'Bulay-og', 'Jason', 'Dy', 'Male', '2004-11-21', 'Institute of Computing', 'Bachelor of Science in Information System', 'bulay-og.jason@dnscedu.onmicrosoft.com'),
 ('2024-11468', 'Getalla', 'Joviet', 'Batang', 'Male', '2003-02-19', 'Institute of Computing', 'Bachelor of Science in Information System', 'getalla.joviet@dnscedu.onmicrosoft.com'),
-('2024-31214', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com'),
-('2024-98026', 'Bulay-og', 'Jason', 'Dy', 'Male', '2004-11-23', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'bulay-og.jason@dnscedu.onmicrosoft.com');
+('2024-98798', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com');
 
 --
 -- Triggers `students`
 --
 DELIMITER $$
-CREATE TRIGGER `syncStudentsUpdateToUrSafe` AFTER UPDATE ON `students` FOR EACH ROW BEGIN
-    UPDATE ursafe_db.users
-    SET
-        lastname = NEW.lastname,
-        firstname = NEW.firstname,
-        middlename = NEW.middlename,
-        sex = NEW.sex,
-        dob = NEW.dob,
-        institute = NEW.institute,
-        program = NEW.program,
-        email = NEW.email
-    WHERE id = NEW.id;
+CREATE TRIGGER `after_student_delete` AFTER DELETE ON `students` FOR EACH ROW BEGIN
+    IF EXISTS (
+        SELECT 1 FROM ursafe_db.users WHERE id = OLD.id
+    ) THEN
+
+        DELETE FROM ursafe_db.users
+        WHERE id = OLD.id;
+
+    END IF;
+
+    INSERT INTO ursafe_db.user_account_logs (
+        action,
+        description
+    )
+    VALUES (
+        'Delete',
+        CONCAT(
+            'Deleted user: ',
+            OLD.lastname, ', ', OLD.firstname, ' ', IFNULL(OLD.middlename, ''),
+
+            ' | ', OLD.id,
+            ' | ', OLD.sex,
+            ' | ', OLD.dob,
+            ' | ', OLD.institute,
+            ' | ', OLD.program,
+            ' | ', OLD.email
+        )
+    );
+
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_student_insert` AFTER INSERT ON `students` FOR EACH ROW BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM ursafe_db.users WHERE id = NEW.id
+    ) THEN
+
+        INSERT INTO ursafe_db.users (
+            id, 
+            lastname, 
+            firstname, 
+            middlename,
+            sex, 
+            dob, 
+            institute, 
+            program, 
+            email
+        )
+        VALUES (
+            NEW.id, 
+            NEW.lastname, 
+            NEW.firstname, 
+            NEW.middlename,
+            NEW.sex, 
+            NEW.dob, 
+            NEW.institute, 
+            NEW.program, 
+            NEW.email
+        );
+
+    END IF;
+
+    INSERT INTO ursafe_db.user_account_logs (
+        action,
+        description
+    )
+    VALUES (
+        'Add',
+        CONCAT(
+            'Added user: ',
+            NEW.lastname, ', ', NEW.firstname, ' ', IFNULL(NEW.middlename, ''),
+
+            ' | ', NEW.id,
+            ' | ', NEW.sex,
+            ' | ', NEW.dob,
+            ' | ', NEW.institute,
+            ' | ', NEW.program,
+            ' | ', NEW.email
+        )
+    );
+
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_student_update` AFTER UPDATE ON `students` FOR EACH ROW BEGIN
+    IF EXISTS (
+        SELECT 1 FROM ursafe_db.users WHERE id = NEW.id
+    ) THEN
+
+        UPDATE ursafe_db.users
+        SET
+            lastname = NEW.lastname,
+            firstname = NEW.firstname,
+            middlename = NEW.middlename,
+            sex = NEW.sex,
+            dob = NEW.dob,
+            institute = NEW.institute,
+            program = NEW.program,
+            email = NEW.email
+        WHERE id = NEW.id;
+
+    END IF;
+
+    INSERT INTO ursafe_db.user_account_logs (
+        action,
+        description
+    )
+    VALUES (
+        'Update',
+        CONCAT(
+            'Updated user: ',
+            NEW.lastname, ', ', NEW.firstname, ' ', IFNULL(NEW.middlename, ''),
+
+            ' | ', NEW.id,
+            ' | ', NEW.sex,
+            ' | ', NEW.dob,
+            ' | ', NEW.institute,
+            ' | ', NEW.program,
+            ' | ', NEW.email
+        )
+    );
+
 END
 $$
 DELIMITER ;

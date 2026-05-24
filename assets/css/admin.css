@@ -1485,6 +1485,27 @@ section #users .table-container {
     gap: 12px;
 }
 
+section #users .table-container .nav-tabs {
+    border-bottom: 1px solid var(--color-primary-base);
+}
+
+section #users .table-container .nav-tabs li a {
+    color: var(--text-dark-secondary);
+    font-weight: 400;
+}
+
+section #users .table-container .nav-tabs li a:hover {
+    background-color: var(--color-primary-base);
+    color: var(--text-light-primary);
+    font-weight: 400;
+}
+
+section #users .table-container .nav-tabs li a.active {
+    background-color: var(--color-primary-base);
+    color: var(--text-light-primary);
+    font-weight: 400;
+}
+
 section #users .table-container table thead tr th {
     text-align: left;
     font-weight: 500;
@@ -1555,11 +1576,13 @@ section #users .table-container table tbody tr td {
 }
 
 /* View user details */
-#viewUserModal .modal-dialog {
+#viewActiveUserModal .modal-dialog,
+#viewInactiveUserModal .modal-dialog {
     max-width: 400px !important;
 }
 
-#viewUserModal .modal-content {
+#viewActiveUserModal .modal-content,
+#viewInactiveUserModal .modal-content {
     background-color: var(--bg-secondary) !important;
     color: var(--text-primary) !important;
     border: none !important;
@@ -1570,30 +1593,39 @@ section #users .table-container table tbody tr td {
     gap: 18px !important;
 }
 
-#viewUserModal .modal-content .modal-header,
-#viewUserModal .modal-content .modal-body,
-#viewUserModal .modal-content .modal-footer {
+#viewActiveUserModal .modal-content .modal-header,
+#viewActiveUserModal .modal-content .modal-body,
+#viewActiveUserModal .modal-content .modal-footer,
+#viewInactiveUserModal .modal-content .modal-header,
+#viewInactiveUserModal .modal-content .modal-body,
+#viewInactiveUserModal .modal-content .modal-footer {
     border: none !important;
     background-color: transparent !important;
     padding: 0 !important;
 }
 
-#viewUserModal .modal-content .modal-header .btn-close,
-#viewUserModal .modal-content .modal-header .btn-close:focus,
-#viewUserModal .modal-content .modal-header .btn-close:active,
-#viewUserModal .modal-content .modal-header .btn-close:hover {
+#viewActiveUserModal .modal-content .modal-header .btn-close,
+#viewActiveUserModal .modal-content .modal-header .btn-close:focus,
+#viewActiveUserModal .modal-content .modal-header .btn-close:active,
+#viewActiveUserModal .modal-content .modal-header .btn-close:hover,
+#viewInactiveUserModal .modal-content .modal-header .btn-close,
+#viewInactiveUserModal .modal-content .modal-header .btn-close:focus,
+#viewInactiveUserModal .modal-content .modal-header .btn-close:active,
+#viewInactiveUserModal .modal-content .modal-header .btn-close:hover {
     outline: none !important;
     border: none !important;
     box-shadow: none !important;
 }
 
-#viewUserModal .modal-content .modal-body {
+#viewActiveUserModal .modal-content .modal-body,
+#viewInactiveUserModal .modal-content .modal-body {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-#viewUserModal .modal-content .modal-body .profile {
+#viewActiveUserModal .modal-content .modal-body .profile,
+#viewInactiveUserModal .modal-content .modal-body .profile {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1601,17 +1633,20 @@ section #users .table-container table tbody tr td {
     gap: 12px;
 }
 
-#viewUserModal .modal-content .modal-body .profile i {
+#viewActiveUserModal .modal-content .modal-body .profile i,
+#viewInactiveUserModal .modal-content .modal-body .profile i {
     color: var(--text-dark-tertiary);
     font-size: 128px;
 }
 
-#viewUserModal .modal-content .modal-body .profile h4 {
+#viewActiveUserModal .modal-content .modal-body .profile h4,
+#viewInactiveUserModal .modal-content .modal-body .profile h4 {
     color: var(--text-dark-secondary);
     text-align: center;
 }
 
-#viewUserModal .modal-content .modal-body .profile-section {
+#viewActiveUserModal .modal-content .modal-body .profile-section,
+#viewInactiveUserModal .modal-content .modal-body .profile-section {
     background-color: #ffffff;
     padding: 8px;
     border-radius: 8px;
@@ -1620,11 +1655,13 @@ section #users .table-container table tbody tr td {
     gap: 4px;
 }
 
-#viewUserModal .modal-content .modal-body .profile-section h6 {
+#viewActiveUserModal .modal-content .modal-body .profile-section h6,
+#viewInactiveUserModal .modal-content .modal-body .profile-section h6 {
     color: var(--text-dark-secondary);
 }
 
-#viewUserModal .modal-content .modal-body .profile-section p {
+#viewActiveUserModal .modal-content .modal-body .profile-section p,
+#viewInactiveUserModal .modal-content .modal-body .profile-section p {
     color: var(--text-dark-tertiary);
     display: flex;
     flex-direction: row;
@@ -1632,6 +1669,7 @@ section #users .table-container table tbody tr td {
     justify-content: space-between;
 }
 
-#viewUserModal .modal-content .modal-body .profile-section p small {
+#viewActiveUserModal .modal-content .modal-body .profile-section p small,
+#viewInactiveUserModal .modal-content .modal-body .profile-section p small {
     font-size: 13px;
 }

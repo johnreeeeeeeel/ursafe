@@ -74,25 +74,52 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// View user details
-function viewUserDetails(
+// View active user details
+function viewActiveUserDetails(
     id,
     fullname,
     sex,
     dob,
     institute,
     program,
+    status,
     username,
+    email,
+    updated_at,
+    created_at
+) {
+    document.getElementById('a_id').innerText = id;
+    document.getElementById('a_username').innerText = username;
+    document.getElementById('a_fullname').innerText = fullname;
+    document.getElementById('a_sex').innerText = sex;
+    document.getElementById('a_dob').innerText = dob;
+    document.getElementById('a_institute').innerText = institute;
+    document.getElementById('a_program').innerText = program;
+    document.getElementById('a_status').innerText = status;
+    document.getElementById('a_email').innerText = email;
+    document.getElementById('a_updated_at').innerText = updated_at;
+    document.getElementById('a_created_at').innerText = created_at;
+}
+
+// View inactive user details
+function viewInactiveUserDetails(
+    id,
+    fullname,
+    sex,
+    dob,
+    institute,
+    program,
+    status,
     email,
     created_at
 ) {
-    document.getElementById('vu_id').innerText = id;
-    document.getElementById('vu_username').innerText = username;
-    document.getElementById('vu_fullname').innerText = fullname;
-    document.getElementById('vu_sex').innerText = sex;
-    document.getElementById('vu_dob').innerText = dob;
-    document.getElementById('vu_institute').innerText = institute;
-    document.getElementById('vu_program').innerText = program;
-    document.getElementById('vu_email').innerText = email;
-    document.getElementById('vu_created_at').innerText = created_at;
+    document.getElementById('i_id').innerText = id;
+    document.getElementById('i_fullname').innerText = fullname;
+    document.getElementById('i_sex').innerText = sex;
+    document.getElementById('i_dob').innerText = dob;
+    document.getElementById('i_institute').innerText = institute;
+    document.getElementById('i_program').innerText = program;
+    document.getElementById('i_status').innerText = status;
+    document.getElementById('i_email').innerText = email;
+    document.getElementById('i_created_at').innerText = created_at;
 }

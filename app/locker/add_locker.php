@@ -28,7 +28,6 @@ try {
     $conn_local->next_result();
 
 } catch (Exception $e) {
-
     $_SESSION['alert_message'] = [
         'type' => 'danger',
         'text' => $e->getMessage()
