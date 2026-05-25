@@ -11,11 +11,11 @@ if ($conn_local->connect_error) {
     die("Local connection failed: " . $conn_local->connect_error);
 }
 
-// Remote Database Connection (Campus Database)
+// Remote Database Connection (School Database)
 $r_host = "localhost";
 $r_user = "root";
 $r_pass = "";
-$r_db   = "campus_db";
+$r_db   = "school_db";
 
 $conn_remote = new mysqli($r_host, $r_user, $r_pass, $r_db);
 

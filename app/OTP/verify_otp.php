@@ -68,23 +68,33 @@ session_start();
     <div class="verify-otp-container">
         <form method="POST" action="check_otp.php">
             <h2>
-                <a onclick="history.back()">
-                    <i class="fa-solid fa-angle-left"></i>
-                </a>
-                Verify OTP
+                Verify
+            </h2>
+            <h2>
+                One Time Pin
             </h2>
 
-            <small>Please enter the OTP sent to your email.</small>
+            <small>We have sent a one time pin to your email.</small>
             
-            <div class="form-group">
-                <div class="input-box">
-                    <input type="text" name="otp" placeholder="Enter OTP" required class="form-control">
-                </div>
+            <div class="inputs">
+                <input type="text" name="otp[]" class="input1" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" name="otp[]" class="input2" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" name="otp[]" class="input3" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" name="otp[]" class="input4" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" name="otp[]" class="input5" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" name="otp[]" class="input6" maxlength="1" inputmode="numeric" pattern="[0-9]*">
             </div>
 
-            <button type="submit" class="btn primary-btn">
-                Verify OTP
-            </button>
+            <div class="action-buttons">
+                <a href="../../index.php" class="btn secondary-btn">
+                    <i class="fa-solid fa-angle-left"></i>
+                    Back to Login
+                </a>
+
+                <button type="submit" class="btn primary-btn">
+                    Verify OTP
+                </button>
+            </div>
         </form> 
     </div>
 </body>

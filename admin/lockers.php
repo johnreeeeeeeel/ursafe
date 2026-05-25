@@ -1638,10 +1638,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
 
                                 <button type="submit" hidden></button>
                             </form>
-                            <button type="button" class="sm-btn primary-btn" data-bs-toggle="modal" data-bs-target="#addAcademicYearModal">
-                                <i class="fa-solid fa-plus"></i>
-                                Add Academic Year
-                            </button>
                         </header>
 
                         <div class="table-container">
@@ -1653,8 +1649,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                             <th>Start On</th>
                                             <th>End On</th>
                                             <th>Created At</th>
-                                            <th>Updated At</th>
-                                            <th>Action</th>
                                         </tr>
                                     </thead>
 
@@ -1665,25 +1659,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                 <td data-label="Start On"><?= $academicCalendarRow['start_at'] ?></td>
                                                 <td data-label="End On"><?= $academicCalendarRow['end_at'] ?></td>
                                                 <td data-label="Created At"><?= $academicCalendarRow['created_at'] ?></td>
-                                                <td data-label="Updated At"><?= $academicCalendarRow['updated_at'] ?></td>
-
-                                                <td data-label="Action">
-                                                    <div class="action-buttons">
-                                                        <button class="sm-btn primary-btn"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#updateAcademicYearModal<?= $academicCalendarRow['id'] ?>">
-                                                            <i class="fa-solid fa-pen-to-square"></i>
-                                                            Edit
-                                                        </button>
-
-                                                        <button class="sm-btn danger-btn"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#deleteAcademicYearModal<?= $academicCalendarRow['id'] ?>">
-                                                            <i class="fa-solid fa-trash"></i>
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                </td>
                                             </tr>
                                         <?php } ?>
                                     </tbody>
@@ -1724,183 +1699,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         </div>
                     </div>
                 </div>
-
-                <!-- Add academic year modal -->
-                <div class="modal fade primary-modal" id="addAcademicYearModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-
-                            <div class="modal-header">
-                                <h5 class="modal-title">
-                                    <i class="fa-solid fa-plus"></i>
-                                    Add Academic Year
-                                </h5>
-                            </div>
-
-                            <div class="modal-body">
-                                <form method="POST" action="../app/locker/add_academic_year.php">
-                                    <div class="form-group">
-                                        <label class="input-label">Academic Year (ex. 2026-2027)</label>
-                                        <div class="input-box">
-                                            <input type="text" name="academic_year" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="input-label">Semester</label>
-                                        <div class="input-box">
-                                            <select name="semester" id="semester" required>
-                                                <option value="">Select Semester</option>
-                                                <option value="1st Semester">1st Semester</option>
-                                                <option value="2nd Semester">2nd Semester</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="input-label">Start On</label>
-                                        <div class="input-box">
-                                            <input type="date" name="start_at" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="input-label">End On</label>
-                                        <div class="input-box">
-                                            <input type="date" name="end_at" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="action-buttons">
-                                        <button type="submit" class="btn primary-btn">Add Academic Year</button>
-                                        <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <?php
-                    $stmtAcademicCalendar = $conn_local->prepare("CALL getAcademicCalendar(?, ?)");
-                    $stmtAcademicCalendar->bind_param("ii", $limit, $offset);
-
-                    $stmtAcademicCalendar->execute();
-                    $academicCalendarResultSet = $stmtAcademicCalendar->get_result();
-
-                    $stmtAcademicCalendar->close();
-
-                    while ($conn_local->next_result()) {
-                        $conn_local->store_result();
-                    }
-
-                    while ($academicCalendarRow = $academicCalendarResultSet->fetch_assoc()) {
-                ?>
-
-                    <!-- Update academic calendar modal -->
-                    <div class="modal fade primary-modal" id="updateAcademicYearModal<?= $academicCalendarRow['id'] ?>" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-
-                                <div class="modal-header">
-                                    <h5 class="modal-title">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                        Update Academic Year
-                                    </h5>
-                                </div>
-
-                                <div class="modal-body">
-                                    <form method="POST" action="../app/locker/update_academic_year.php">
-                                        <input type="hidden" name="id" value="<?= $academicCalendarRow['id'] ?>">
-
-                                        <div class="form-group">
-                                            <label class="input-label">Academic Year (ex. 2026-2027)</label>
-                                            <div class="input-box">
-                                                <input type="text" name="academic_year" value="<?= $academicCalendarRow['academic_year'] ?>" required>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="input-label">Semester</label>
-                                            <div class="input-box">
-                                                <select name="semester" required>
-                                                    <option value="1st Semester"
-                                                        <?= $academicCalendarRow['semester'] == '1st Semester' ? 'selected' : '' ?>>
-                                                        1st Semester
-                                                    </option>
-
-                                                    <option value="2nd Semester"
-                                                        <?= $academicCalendarRow['semester'] == '2nd Semester' ? 'selected' : '' ?>>
-                                                        2nd Semester
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="input-label">Start On</label>
-                                            <div class="input-box">
-                                                <input type="date" name="start_at" value="<?= date('Y-m-d', strtotime($academicCalendarRow['start_at'])) ?>" required>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="input-label">End On</label>
-                                            <div class="input-box">
-                                                <input type="date" name="end_at" value="<?= date('Y-m-d', strtotime($academicCalendarRow['end_at'])) ?>" required>
-                                            </div>
-                                        </div>
-
-                                        <div class="action-buttons">
-                                            <button type="submit" class="btn primary-btn">Save</button>
-                                            <button type="button" class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Delete academic calendar modal -->
-                    <div class="modal fade danger-modal" id="deleteAcademicYearModal<?= $academicCalendarRow['id'] ?>" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-body">
-                                    <div class="message">
-                                        <p><i class="fa-solid fa-circle-exclamation"></i></p>
-                                        <h5>Delete</h5>
-                                        <p>Are you sure you want to delete <span><?= $academicCalendarRow['academic_year'] ?> - <?= $academicCalendarRow['semester'] ?></span>?</p>
-                                    </div>
-
-                                    <div class="action-buttons">
-                                        <button class="btn secondary-btn" data-bs-dismiss="modal">Cancel</button>
-
-                                        <form method="POST" action="../app/locker/delete_academic_year.php">
-                                            <input type="hidden" name="id" value="<?= $academicCalendarRow['id'] ?>">
-
-                                            <button type="submit" class="btn danger-btn">Yes, Delete</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php } ?>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                 <!-- Offcanvas for locker logs -->
                 <div class="offcanvas offcanvas-end" id="lockerLogsOffcanvas">
@@ -2323,6 +2121,16 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                                         <label class="input-label">Status</label>
                                                                         <div class="input-box">
                                                                             <select name="status">
+                                                                                <option value="Not yet started"
+                                                                                    <?= $lockerSlotsRow['status'] == 'Not yet started' ? 'selected' : '' ?>>
+                                                                                    Not yet started
+                                                                                </option>
+
+                                                                                <option value="Already closed"
+                                                                                    <?= $lockerSlotsRow['status'] == 'Already closed' ? 'selected' : '' ?>>
+                                                                                    Already closed
+                                                                                </option>
+
                                                                                 <option value="Available"
                                                                                     <?= $lockerSlotsRow['status'] == 'Available' ? 'selected' : '' ?>>
                                                                                     Available

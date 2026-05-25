@@ -1,5 +1,8 @@
 <?php
 session_start();
+
+$fieldErrors = $_SESSION['field_error'] ?? [];
+unset($_SESSION['field_error']);
 ?>
 
 <!DOCTYPE html>
@@ -62,107 +65,176 @@ session_start();
     <?php endif; ?>
 
     <div class="auth-container">
-        <img src="assets/images/ursafe_logo_2.png" alt="reload">
+        <!-- Login form -->
+        <div class="auth-form" id="loginForm">
+            <img src="assets/images/ursafe_logo_2.png" alt="reload">
 
-        <!-- Login Form -->
-        <div class="auth-form">
             <form method="POST" action="app/auth/login.php">
-                <div class="input-box">
-                    <input type="email" id="loginEmail" class="input" placeholder="Email" name="loginEmail" required>
+                <div class="form-group">
+                    <div class="input-box">
+                        <input type="email" id="loginEmail" class="input" placeholder="Email" name="loginEmail" value="<?= $_SESSION['login_email'] ?? '' ?>" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="input-box">
+                        <input type="password" id="loginPassword" class="input" placeholder="Password" name="loginPassword" required>
+                        <i class="fa-solid fa-eye-slash toggle-password"></i>
+                    </div>
+                    <span class="field-error">
+                        <?= $fieldErrors['email_or_password'] ?? '' ?>
+                    </span>
                 </div>
 
-                <div class="input-box">
-                    <input type="password" id="loginPassword" class="input" placeholder="Password" name="loginPassword" required>
-                    <i class="fa-solid fa-eye-slash toggle-password"></i>
-                </div>
-
-                <a class="forgot-password" data-bs-toggle="modal" data-bs-target="#lostPasswordModal">Forgot Password?</a>
+                <a class="forgot-password" onclick="window.location.hash='reset_password'; showAuthForms();">Forgot Password?</a>
 
                 <button type="submit" class="btn primary-btn">
                     Login
                 </button>
             </form>
 
-            <button type="submit" class="btn secondary-btn" data-bs-toggle="modal" data-bs-target="#activateAccountModal">
+            <button type="button" class="btn secondary-btn" onclick="window.location.hash='activate_account'; showAuthForms();">
                 Activate Account
             </button>
         </div>
-    </div>
-    
-    <!-- Activate account modal -->
-    <div class="modal fade success-modal" id="activateAccountModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-user-plus"></i>
-                        Activate Account
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+        <!-- Account activation form -->
+        <div class="auth-form" style="display: none;" id="accountActivationForm">
+            <form method="POST" action="app/auth/activate_account.php">
+                <h2>Activate account</h2>
+
+                <div class="form-group">
+                    <label class="input-label">Email</label>
+                    <div class="input-box">
+                        <input type="email" name="accountActivationEmail" placeholder="doe.john@example.com" value="<?= $_SESSION['account_activation_email'] ?? '' ?>" required>
+                    </div>
+                    <span class="field-error">
+                        <?= $fieldErrors['email'] ?? '' ?>
+                    </span>
                 </div>
 
+                <div class="form-group">
+                    <label class="input-label">Username</label>
+                    <div class="input-box">
+                        <input type="text" name="accountActivationUsername" placeholder="john_doe" value="<?= $_SESSION['account_activation_username'] ?? '' ?>" required>
+                    </div>
+                    <span class="field-error">
+                        <?= $fieldErrors['username'] ?? '' ?>
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label">Password</label>
+                    <div class="input-box">
+                        <input type="password" id="password" name="accountActivationPassword" placeholder="12345678" value="<?= $_SESSION['account_activation_password'] ?? '' ?>" required>
+                        <i class="fa-solid fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label">Confirm Password</label>
+                    <div class="input-box">
+                        <input type="password" name="accountActivationConfirmPassword" placeholder="12345678" value="<?= $_SESSION['account_activation_confirm_password'] ?? '' ?>" required>
+                        <i class="fa-solid fa-eye-slash toggle-password"></i>
+                    </div>
+                    <span class="field-error">
+                        <?= $fieldErrors['confirm_password'] ?? '' ?>
+                    </span>
+                </div>
+
+                <button type="submit" class="btn primary-btn">
+                    Activate Account
+                </button>
+            </form>
+
+            <button type="button" class="btn secondary-btn" onclick="window.location.hash='login'; showAuthForms();">
+                Already have an account
+            </button>
+        </div>
+
+        <!-- Reset password form -->
+        <div class="auth-form" style="display: none;" id="resetPasswordForm">
+            <form method="POST" action="app/otp/send_otp.php">
+                <h2>Reset password</h2>
+
+                <div class="form-group">
+                    <label class="input-label">Email</label>
+                    <div class="input-box">
+                        <input type="email" name="resetPasswordEmail" placeholder="doe.john@example.com" value="<?= $_SESSION['reset_password_email'] ?? '' ?>" required>
+                    </div>
+                    <span class="field-error">
+                        <?= $fieldErrors['email'] ?? '' ?>
+                    </span>
+                </div>
+
+                <button type="submit" class="btn primary-btn">
+                    Send OTP
+                </button>
+            </form>
+
+            <button type="button" class="btn secondary-btn" onclick="window.location.hash='login'; showAuthForms();">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- Success account activation -->
+    <?php if (isset($_SESSION['show_success_account_activation_modal'])): ?>
+        <script>
+            window.addEventListener('DOMContentLoaded', function () {
+                var modal = new bootstrap.Modal(document.getElementById('successAccountActivation'));
+                modal.show();
+            });
+        </script>
+        <?php unset($_SESSION['show_success_account_activation_modal']); ?>
+    <?php endif; ?>
+
+    <div class="modal fade success-message" id="successAccountActivation">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
                 <div class="modal-body">
-                    <form method="POST" action="app/auth/activate_account.php">
-                
-                        <div class="form-group">
-                            <label class="input-label">Email</label>
-                            <div class="input-box">
-                                <input type="email" name="email" placeholder="doe.john@example.com" required>
-                            </div>
-                        </div>
+                    <div class="info">
+                        <i class="fa-solid fa-square-check"></i>
+                        <h4>Account activated</h4>
+                        <p>Welcome to UrSafe! Your account has been activated successfully. You may now sign in and get started.</p>
+                    </div>
 
-                        <div class="form-group">
-                            <label class="input-label">Username</label>
-                            <div class="input-box">
-                                <input type="text" name="username" placeholder="john_doe" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="input-label">Password</label>
-                            <div class="input-box">
-                                <input type="password" id="password" name="password" placeholder="12345678" required>
-                                <i class="fa-solid fa-eye-slash toggle-password"></i>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn primary-btn">
-                            Activate Account
+                    <div class="action-buttons">
+                        <button type="button" class="btn primary-btn" data-bs-dismiss="modal">
+                            Okay, Get Started
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Reset password modal -->
-    <div class="modal fade primary-modal" id="lostPasswordModal" tabindex="-1" aria-hidden="true">
+    <!-- Success password reset -->
+    <?php if (isset($_SESSION['show_success_password_reset_modal'])): ?>
+        <script>
+            window.addEventListener('DOMContentLoaded', function () {
+                var modal = new bootstrap.Modal(document.getElementById('successPasswordReset'));
+                modal.show();
+            });
+        </script>
+        <?php unset($_SESSION['show_success_password_reset_modal']); ?>
+    <?php endif; ?>
+
+    <div class="modal fade success-message" id="successPasswordReset">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-key"></i>
-                        Forgot Your Password?
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
                 <div class="modal-body">
-                    <!--Send OTP -->
-                    <form method="POST" action="app/otp/send_otp.php">
-                
-                        <div class="form-group">
-                            <label class="input-label">Email</label>
-                            <div class="input-box">
-                                <input type="email" name="email" placeholder="Enter your email" required>
-                            </div>
-                        </div>
+                    <div class="info">
+                        <i class="fa-solid fa-square-check"></i>
+                        <h4>Check your email</h4>
+                        <p>We have sent a temporary password to your email address. Please check your inbox and use it to sign in to your UrSafe account.</p>
+                    </div>
 
-                        <button type="submit" class="btn primary-btn">
-                            Send OTP
+                    <div class="action-buttons">
+                        <button type="button" class="btn primary-btn" data-bs-dismiss="modal">
+                            Okay, Got It
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -171,5 +243,44 @@ session_start();
 
 <!-- Js -->
 <script src="assets/js/script.js"></script>
+
+<script>
+function showAuthForms() {
+    var activationForm = document.getElementById("accountActivationForm");
+    var loginForm = document.getElementById("loginForm");
+    var resetPasswordForm = document.getElementById("resetPasswordForm");
+
+    if (window.location.hash === "#activate_account") {
+        loginForm.querySelector('input[name="loginEmail"]').value = "";
+        loginForm.querySelector('input[name="loginPassword"]').value = "";
+
+        activationForm.style.display = "flex";
+        loginForm.style.display = "none";
+        resetPasswordForm.style.display = "none";
+
+    } else if (window.location.hash === "#reset_password") {
+        loginForm.querySelector('input[name="loginEmail"]').value = "";
+        loginForm.querySelector('input[name="loginPassword"]').value = "";
+
+        activationForm.style.display = "none";
+        loginForm.style.display = "none";
+        resetPasswordForm.style.display = "flex";
+
+    } else {
+        activationForm.querySelector('input[name="accountActivationEmail"]').value = "";
+        activationForm.querySelector('input[name="accountActivationUsername"]').value = "";
+        activationForm.querySelector('input[name="accountActivationPassword"]').value = "";
+        activationForm.querySelector('input[name="accountActivationConfirmPassword"]').value = "";
+
+        resetPasswordForm.querySelector('input[name="resetPasswordEmail"]').value = "";
+
+        activationForm.style.display = "none";
+        resetPasswordForm.style.display = "none";
+        loginForm.style.display = "flex";
+    }
+}
+
+showAuthForms();
+</script>
 
 </html>

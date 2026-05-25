@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-$inputOtp = $_POST['otp'];
+$inputOtp = implode('', $_POST['otp']);
 
 if ($inputOtp == $_SESSION['otp']) {
     $_SESSION['alert_message'] = [

@@ -2,13 +2,14 @@
 require '../db_connection.php';
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$email = $_POST['loginEmail'];
+$password = $_POST['loginPassword'];
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['loginEmail']);
     $password = trim($_POST['loginPassword']);
 
     try {
-
         $stmt = $conn_local->prepare("CALL validateLogin(?)");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -52,13 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 header("Location: ../../index.php");
             }
+            
             exit;
 
         } else {
-            $_SESSION['alert_message'] = [
-                'type' => 'danger',
-                'text' => 'Invalid email or password'
-            ];
+            $_SESSION['login_email'] = $email;
+
+             $_SESSION['field_error']['email_or_password'] = '⚠️ Invalid email or password';
 
             header("Location: ../../index.php");
             exit;

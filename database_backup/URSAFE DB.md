@@ -212,9 +212,15 @@ BEGIN
 
 
 
-&#x20;   SELECT status, email INTO v\_status, v\_email
+&#x20;   SELECT status, email
 
-&#x20;   FROM users WHERE email = p\_email LIMIT 1;
+&#x20;   INTO v\_status, v\_email
+
+&#x20;   FROM users
+
+&#x20;   WHERE email = p\_email
+
+&#x20;   LIMIT 1;
 
 
 
@@ -222,7 +228,7 @@ BEGIN
 
 &#x20;       SIGNAL SQLSTATE '45000'
 
-&#x20;       SET MESSAGE\_TEXT = 'Please use your campus email to activate your account.';
+&#x20;       SET MESSAGE\_TEXT = 'EMAIL\_NOT\_FOUND';
 
 &#x20;   END IF;
 
@@ -232,7 +238,7 @@ BEGIN
 
 &#x20;       SIGNAL SQLSTATE '45000'
 
-&#x20;       SET MESSAGE\_TEXT = 'Account already activated. Please log in instead.';
+&#x20;       SET MESSAGE\_TEXT = 'ACCOUNT\_ALREADY\_ACTIVE';
 
 &#x20;   END IF;
 
@@ -240,7 +246,9 @@ BEGIN
 
 &#x20;   SELECT COUNT(\*) INTO v\_username\_count
 
-&#x20;   FROM users WHERE username = p\_username;
+&#x20;   FROM users
+
+&#x20;   WHERE username = p\_username;
 
 
 
@@ -248,7 +256,7 @@ BEGIN
 
 &#x20;       SIGNAL SQLSTATE '45000'
 
-&#x20;       SET MESSAGE\_TEXT = 'Username already exists.';
+&#x20;       SET MESSAGE\_TEXT = 'USERNAME\_EXISTS';
 
 &#x20;   END IF;
 
@@ -1372,6 +1380,8 @@ SELECT
 
 FROM users
 
+WHERE status = 'Active'
+
 ORDER BY created\_at DESC
 
 LIMIT 1;
@@ -2344,15 +2354,15 @@ BEGIN
 
 
 
-&#x20;   INNER JOIN users u ON la.user\_id = u.id
+INNER JOIN users u ON la.user\_id = u.id
 
-&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+LEFT JOIN locker\_slots ls ON la.slot\_id = ls.id
 
-&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+LEFT JOIN locker\_locations ll ON ls.location\_id = ll.id
 
-&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+LEFT JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
-&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
 
 
 
@@ -2450,13 +2460,11 @@ BEGIN
 
 &#x20;
 
-&#x20;   INNER JOIN users u ON la.user\_id = u.id
+&#x20;   LEFT JOIN locker\_slots ls ON la.slot\_id = ls.id
 
-&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+&#x20;   LEFT JOIN locker\_locations ll ON ls.location\_id = ll.id
 
-&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
-
-&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+&#x20;   LEFT JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
 &#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
 
@@ -2516,13 +2524,11 @@ BEGIN
 
 &#x20;
 
-&#x20;   INNER JOIN users u ON la.user\_id = u.id
+&#x20;   LEFT JOIN locker\_slots ls ON la.slot\_id = ls.id
 
-&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+&#x20;   LEFT JOIN locker\_locations ll ON ls.location\_id = ll.id
 
-&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
-
-&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+&#x20;   LEFT JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
 
 &#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
 
@@ -3184,9 +3190,7 @@ BEGIN
 
 &#x20;       DATE\_FORMAT(end\_at, '%M %d, %Y') AS end\_at,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at,
-
-&#x09;	DATE\_FORMAT(updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   	FROM academic\_calendar
 
@@ -3295,132 +3299,6 @@ BEGIN
 &#x20;   );
 
 
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### \-- ADD ACADEMIC YEAR (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE addAcademicYear (
-
-&#x20;   IN p\_academic\_year VARCHAR(255),
-
-&#x20;   IN p\_semester VARCHAR(255),
-
-&#x20;   IN p\_start\_at DATE,
-
-&#x20;   IN p\_end\_at DATE
-
-)
-
-
-
-BEGIN
-
-&#x20;   INSERT INTO academic\_calendar (academic\_year, semester, start\_at, end\_at)
-
-&#x20;   VALUES (p\_academic\_year, p\_semester, p\_start\_at, p\_end\_at);
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### \-- UPDATE ACADEMIC YEAR (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE PROCEDURE updateAcademicYear (
-
-&#x20;   IN p\_id INT,
-
-&#x20;   IN p\_academic\_year VARCHAR(255),
-
-&#x20;   IN p\_semester VARCHAR(255),
-
-&#x20;   IN p\_start\_at DATE,
-
-&#x20;   IN p\_end\_at DATE
-
-)
-
-
-
-BEGIN
-
-&#x20;   UPDATE academic\_calendar
-
-&#x20;   SET academic\_year = p\_academic\_year,
-
-&#x20;       semester = p\_semester,
-
-&#x20;       start\_at = p\_start\_at,
-
-&#x20;       end\_at = p\_end\_at,
-
-&#x20;       updated\_at = NOW()
-
-&#x20;   WHERE id = p\_id;
-
-END //
-
-
-
-DELIMITER ;
-
-##### \-- DELETE ACADEMIC YEAR (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE deleteAcademicYear (
-
-&#x20;   IN p\_id INT
-
-)
-
-
-
-BEGIN
-
-&#x09;DECLARE EXIT HANDLER FOR 1451
-
-&#x20;
-
-&#x20;   BEGIN
-
-&#x20;       SIGNAL SQLSTATE '45000'
-
-&#x20;       SET MESSAGE\_TEXT = 'Cannot delete: Academic year still assigned to slots.';
-
-&#x20;   END;
-
-&#x20;
-
-&#x20;   DELETE FROM academic\_calendar
-
-&#x20;   WHERE id = p\_id;
 
 END //
 
@@ -3602,6 +3480,14 @@ CREATE OR REPLACE PROCEDURE addLocker (
 
 BEGIN
 
+&#x20;   DECLARE v\_start\_at DATE;
+
+&#x20;   DECLARE v\_end\_at DATE;
+
+&#x20;   DECLARE v\_status VARCHAR(50);
+
+
+
 &#x20;   DECLARE EXIT HANDLER FOR 1062
 
 &#x20;   BEGIN
@@ -3611,6 +3497,32 @@ BEGIN
 &#x20;       SET MESSAGE\_TEXT = 'Cannot add: Slot number already exists.';
 
 &#x20;   END;
+
+
+
+&#x20;   SELECT start\_at, end\_at INTO v\_start\_at, v\_end\_at
+
+&#x20;   FROM academic\_calendar WHERE id = p\_academic\_year\_id;
+
+
+
+&#x20;   IF CURDATE() < v\_start\_at THEN
+
+&#x20;       SET v\_status = 'Not yet started';
+
+
+
+&#x20;   ELSEIF CURDATE() > v\_end\_at THEN
+
+&#x20;       SET v\_status = 'Already closed';
+
+
+
+&#x20;   ELSE
+
+&#x20;       SET v\_status = 'Available';
+
+&#x20;   END IF;
 
 
 
@@ -3638,9 +3550,11 @@ BEGIN
 
 &#x20;       p\_academic\_year\_id,
 
-&#x20;       'Available'
+&#x20;       v\_status
 
 &#x20;   );
+
+
 
 END //
 
@@ -3672,7 +3586,17 @@ CREATE OR REPLACE PROCEDURE updateLocker (
 
 )
 
+
+
 BEGIN
+
+&#x20;   DECLARE v\_start\_at DATE;
+
+&#x20;   DECLARE v\_end\_at DATE;
+
+&#x20;   DECLARE v\_status VARCHAR(255);
+
+
 
 &#x20;   DECLARE EXIT HANDLER FOR 1062
 
@@ -3686,6 +3610,42 @@ BEGIN
 
 
 
+&#x20;   SELECT start\_at, end\_at INTO v\_start\_at, v\_end\_at
+
+&#x20;   FROM academic\_calendar WHERE id = p\_academic\_year\_id;
+
+
+
+&#x20;   IF p\_status = 'Occupied' THEN
+
+&#x20;       SET v\_status = 'Occupied';
+
+
+
+&#x20;   ELSE
+
+&#x20;       IF CURDATE() < v\_start\_at THEN
+
+&#x20;           SET v\_status = 'Not yet started';
+
+
+
+&#x20;       ELSEIF CURDATE() > v\_end\_at THEN
+
+&#x20;           SET v\_status = 'Already closed';
+
+
+
+&#x20;       ELSE
+
+&#x20;           SET v\_status = 'Available';
+
+&#x20;       END IF;
+
+&#x20;   END IF;
+
+
+
 &#x20;   UPDATE locker\_slots
 
 &#x20;   SET
@@ -3696,11 +3656,13 @@ BEGIN
 
 &#x20;       academic\_year\_id = p\_academic\_year\_id,
 
-&#x20;       status = p\_status,
+&#x20;       status = v\_status,
 
 &#x20;       updated\_at = NOW()
 
 &#x20;   WHERE id = p\_id;
+
+
 
 END //
 
@@ -3728,23 +3690,63 @@ CREATE OR REPLACE PROCEDURE deleteLocker (
 
 BEGIN
 
-&#x09;DECLARE EXIT HANDLER FOR 1451
+&#x20;   DECLARE v\_status VARCHAR(255);
 
-&#x20;
+&#x20;   DECLARE v\_block\_count INT DEFAULT 0;
 
-&#x20;   BEGIN
+
+
+&#x20;   SELECT status INTO v\_status
+
+&#x20;   FROM locker\_slots
+
+&#x20;   WHERE id = p\_id;
+
+
+
+&#x20;   SELECT COUNT(\*) INTO v\_block\_count FROM locker\_applications
+
+&#x20;   WHERE slot\_id = p\_id
+
+&#x20;     AND (
+
+&#x20;           status = 'Pending'
+
+&#x20;           OR status = 'Accepted'
+
+&#x20;           OR (status = 'Ended' AND payment = 'Unpaid')
+
+&#x20;     );
+
+
+
+&#x20;   IF v\_status = 'Occupied' THEN
 
 &#x20;       SIGNAL SQLSTATE '45000'
 
-&#x20;       SET MESSAGE\_TEXT = 'Cannot delete: Slot already has an application.';
+&#x20;       SET MESSAGE\_TEXT = 'Cannot delete: Locker is currently occupied.';
 
-&#x20;   END;
 
-&#x20;
 
-&#x20;   DELETE FROM locker\_slots
+&#x20;   ELSEIF v\_block\_count > 0 THEN
 
-&#x20;   WHERE id = p\_id;
+&#x20;       SIGNAL SQLSTATE '45000'
+
+&#x20;       SET MESSAGE\_TEXT = 'Cannot delete: Locker has active applications.';
+
+
+
+&#x20;   ELSE
+
+&#x20;       DELETE FROM locker\_slots
+
+&#x20;       WHERE id = p\_id;
+
+
+
+&#x20;   END IF;
+
+
 
 END //
 
@@ -3979,62 +3981,6 @@ BEGIN
 
 
 &#x20;   COMMIT;
-
-
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### \-- END LOCKER APPLICATION (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE endLockerApplication()
-
-BEGIN
-
-
-
-&#x20;   UPDATE locker\_slots SET status = 'Available'
-
-&#x20;   WHERE status = 'Occupied' AND end\_at <= CURRENT\_DATE;
-
-
-
-&#x20;   UPDATE locker\_applications la INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
-
-&#x20;   SET
-
-&#x20;       la.status = 'Ended',
-
-&#x20;       la.payment = 'Unpaid',
-
-&#x20;       la.updated\_at = NOW()
-
-&#x20;   WHERE la.status = 'Accepted' AND ls.end\_at <= CURRENT\_DATE;
-
-
-
-&#x20;   UPDATE locker\_applications la INNER JOIN locker\_slots ls
-
-&#x20;       ON la.slot\_id = ls.id
-
-&#x20;   SET
-
-&#x20;       la.status = 'Cancelled',
-
-&#x20;       la.updated\_at = NOW()
-
-&#x20;   WHERE la.status = 'Pending' AND ls.end\_at <= CURRENT\_DATE;
 
 
 
@@ -6352,7 +6298,7 @@ DELIMITER ;
 
 
 
-##### \-- AUTO END LOCKER (EVENT)
+##### \-- UPDATE LOCKER APPLICATION DAILY (PROCEDURE)
 
 
 
@@ -6360,7 +6306,67 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE EVENT auto\_end\_locker
+CREATE OR REPLACE PROCEDURE updateLockerApplicationStatusDaily()
+
+
+
+BEGIN
+
+&#x20;   UPDATE locker\_applications la
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+&#x20;   SET
+
+&#x20;       la.status = 'Ended',
+
+&#x20;       la.payment = 'Unpaid',
+
+&#x20;       la.updated\_at = NOW()
+
+&#x20;   WHERE la.status = 'Accepted' AND CURRENT\_DATE() >= ac.end\_at;
+
+
+
+&#x20;   UPDATE locker\_applications la
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+&#x20;   SET
+
+&#x20;       la.status = 'Cancelled',
+
+&#x20;       la.updated\_at = NOW()
+
+&#x20;   WHERE la.status = 'Pending'
+
+&#x20;   AND CURRENT\_DATE() >= ac.end\_at;
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+
+
+##### \-- UPDATE LOCKER APPLICATION DAILY (EVENT)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE EVENT update\_locker\_application\_status\_daily
 
 ON SCHEDULE EVERY 1 DAY
 
@@ -6368,11 +6374,95 @@ STARTS CURRENT\_TIMESTAMP
 
 DO
 
+
+
 BEGIN
 
-&#x20;   CALL endLockerApplication();
+&#x20;   CALL updateLockerApplicationStatusDaily();
 
-END//
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- UPDATE LOCKER STATUS DAILY (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE updateLockerStatusDaily()
+
+
+
+BEGIN
+
+&#x20;   UPDATE locker\_slots ls
+
+&#x20;   INNER JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+&#x20;   SET ls.status = 'Not yet started'
+
+&#x20;   WHERE CURRENT\_DATE() < ac.start\_at AND ls.status <> 'Occupied';
+
+
+
+&#x20;   UPDATE locker\_slots ls
+
+&#x20;   INNER JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+&#x20;   SET ls.status = 'Available'
+
+&#x20;   WHERE CURRENT\_DATE() >= ac.start\_at AND CURRENT\_DATE() < ac.end\_at AND ls.status <> 'Occupied';
+
+
+
+&#x20;   UPDATE locker\_slots ls
+
+&#x20;   INNER JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+&#x20;   SET ls.status = 'Already closed'
+
+&#x20;   WHERE CURRENT\_DATE() >= ac.end\_at;
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- UPDATE LOCKER STATUS DAILY (EVENT)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE EVENT update\_locker\_status\_daily
+
+ON SCHEDULE EVERY 1 DAY
+
+STARTS CURRENT\_TIMESTAMP
+
+DO
+
+
+
+BEGIN
+
+&#x20;   CALL updateLockerStatusDaily();
+
+END //
 
 
 

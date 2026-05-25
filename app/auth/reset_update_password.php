@@ -74,7 +74,13 @@ if ($success) {
 $update->close();
 
 // Cleanup
-unset($_SESSION['email'], $_SESSION['otp'], $_SESSION['otp_sent']);
+unset(
+    $_SESSION['email'], 
+    $_SESSION['otp'], 
+    $_SESSION['otp_sent']
+);
+
+$_SESSION['show_success_password_reset_modal'] = true;
 
 header("Location: ../../index.php");
 exit();

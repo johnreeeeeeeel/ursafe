@@ -3,7 +3,7 @@ session_start();
 require '../db_connection.php';
 require '../emails/reset_password_email.php';
 
-$email = $_POST['email'] ?? null;
+$email = $_POST['resetPasswordEmail'] ?? null;
 
 if (!$email) {
     $_SESSION['alert_message'] = [
@@ -11,7 +11,7 @@ if (!$email) {
         'text' => 'Something went wrong. Please try again.'
     ];
 
-    header("Location: ../../index.php");
+    header("Location: ../../index.php#reset_password");
     exit();
 }
 
@@ -28,7 +28,7 @@ if ($result->num_rows === 0) {
         'text' => 'Email not found'
     ];
 
-    header("Location: ../../index.php");
+    header("Location: ../../index.php#reset_password");
     exit();
 }
 

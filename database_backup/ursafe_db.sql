@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 24, 2026 at 10:25 AM
+-- Generation Time: May 25, 2026 at 06:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -97,11 +97,28 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `addAcademicYear` (IN `p_academic_ye
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `addLocker` (IN `p_slot_number` INT, IN `p_location_id` INT, IN `p_size_id` INT, IN `p_academic_year_id` INT)   BEGIN
+    DECLARE v_start_at DATE;
+    DECLARE v_end_at DATE;
+    DECLARE v_status VARCHAR(50);
+
     DECLARE EXIT HANDLER FOR 1062
     BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Cannot add: Slot number already exists.';
     END;
+
+    SELECT start_at, end_at INTO v_start_at, v_end_at
+    FROM academic_calendar WHERE id = p_academic_year_id;
+
+    IF CURDATE() < v_start_at THEN
+        SET v_status = 'Not yet started';
+
+    ELSEIF CURDATE() > v_end_at THEN
+        SET v_status = 'Already closed';
+
+    ELSE
+        SET v_status = 'Available';
+    END IF;
 
     INSERT INTO locker_slots (
         slot_number,
@@ -115,8 +132,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `addLocker` (IN `p_slot_number` INT,
         p_location_id,
         p_size_id,
         p_academic_year_id,
-        'Available'
+        v_status
     );
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `addLockerLocation` (IN `p_location` VARCHAR(255))   BEGIN
@@ -227,15 +245,35 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteAcademicYear` (IN `p_id` INT)
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteLocker` (IN `p_id` INT)   BEGIN
-	DECLARE EXIT HANDLER FOR 1451
- 
-    BEGIN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Cannot delete: Slot already has an application.';
-    END;
- 
-    DELETE FROM locker_slots
+    DECLARE v_status VARCHAR(255);
+    DECLARE v_block_count INT DEFAULT 0;
+
+    SELECT status INTO v_status
+    FROM locker_slots
     WHERE id = p_id;
+
+    SELECT COUNT(*) INTO v_block_count FROM locker_applications
+    WHERE slot_id = p_id
+      AND (
+            status = 'Pending'
+            OR status = 'Accepted'
+            OR (status = 'Ended' AND payment = 'Unpaid')
+      );
+
+    IF v_status = 'Occupied' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot delete: Locker is currently occupied.';
+
+    ELSEIF v_block_count > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot delete: Locker has active applications.';
+
+    ELSE
+        DELETE FROM locker_slots
+        WHERE id = p_id;
+
+    END IF;
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteLockerLocation` (IN `p_id` INT)   BEGIN
@@ -283,6 +321,31 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `endLockerApplication` ()   BEGIN
 
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `endLockerApplicationDaily` ()   BEGIN
+    UPDATE locker_slots ls
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET ls.status = 'Already closed' WHERE ls.status = 'Occupied' AND ac.end_at <= CURRENT_DATE();
+
+    UPDATE locker_applications la
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET
+        la.status = 'Ended',
+        la.payment = 'Unpaid',
+        la.updated_at = NOW()
+    WHERE la.status = 'Accepted' AND ac.end_at <= CURRENT_DATE();
+
+    UPDATE locker_applications la
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET
+        la.status = 'Cancelled',
+        la.updated_at = NOW()
+    WHERE la.status = 'Pending'
+    AND ac.end_at <= CURRENT_DATE();
+
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcademicCalendar` (IN `p_limit` INT, IN `p_offset` INT)   BEGIN
     SELECT
     	id,
@@ -290,8 +353,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcademicCalendar` (IN `p_limit` 
         semester,
         DATE_FORMAT(start_at, '%M %d, %Y') AS start_at,
         DATE_FORMAT(end_at, '%M %d, %Y') AS end_at,
-        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at,
-		DATE_FORMAT(updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     	FROM academic_calendar
     ORDER BY created_at DESC LIMIT p_limit OFFSET p_offset;
  
@@ -490,9 +552,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerApplicationHistory` (IN `p
     FROM locker_applications la
 
     INNER JOIN users u ON la.user_id = u.id
-    INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    INNER JOIN locker_locations ll ON ls.location_id = ll.id
-    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
+    LEFT JOIN locker_slots ls ON la.slot_id = ls.id
+    LEFT JOIN locker_locations ll ON ls.location_id = ll.id
+    LEFT JOIN locker_sizes lsz ON ls.size_id = lsz.id
     LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
 
     WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
@@ -1074,10 +1136,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerApplicationHis
         DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
  
-    INNER JOIN users u ON la.user_id = u.id
-    INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    INNER JOIN locker_locations ll ON ls.location_id = ll.id
-    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
+    LEFT JOIN locker_slots ls ON la.slot_id = ls.id
+    LEFT JOIN locker_locations ll ON ls.location_id = ll.id
+    LEFT JOIN locker_sizes lsz ON ls.size_id = lsz.id
     LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
  
     WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid')
@@ -1107,10 +1168,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerApplicationHis
     SELECT COUNT(*) AS historyTotal
     FROM locker_applications la
  
-    INNER JOIN users u ON la.user_id = u.id
-    INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    INNER JOIN locker_locations ll ON ls.location_id = ll.id
-    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
+    LEFT JOIN locker_slots ls ON la.slot_id = ls.id
+    LEFT JOIN locker_locations ll ON ls.location_id = ll.id
+    LEFT JOIN locker_sizes lsz ON ls.size_id = lsz.id
     LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
  
     WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid')
@@ -1726,20 +1786,85 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `updateAcademicYear` (IN `p_id` INT,
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLocker` (IN `p_id` INT, IN `p_slot_number` INT, IN `p_size_id` INT, IN `p_academic_year_id` INT, IN `p_status` VARCHAR(255))   BEGIN
+    DECLARE v_start_at DATE;
+    DECLARE v_end_at DATE;
+    DECLARE v_status VARCHAR(255);
+
     DECLARE EXIT HANDLER FOR 1062
     BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Cannot update: Slot number already exists.';
     END;
 
+    SELECT start_at, end_at INTO v_start_at, v_end_at
+    FROM academic_calendar WHERE id = p_academic_year_id;
+
+    IF p_status = 'Occupied' THEN
+        SET v_status = 'Occupied';
+
+    ELSE
+        IF CURDATE() < v_start_at THEN
+            SET v_status = 'Not yet started';
+
+        ELSEIF CURDATE() > v_end_at THEN
+            SET v_status = 'Already closed';
+
+        ELSE
+            SET v_status = 'Available';
+        END IF;
+    END IF;
+
     UPDATE locker_slots
     SET
         slot_number = p_slot_number,
         size_id = p_size_id,
         academic_year_id = p_academic_year_id,
-        status = p_status,
+        status = v_status,
         updated_at = NOW()
     WHERE id = p_id;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerApplicationDaily` ()   BEGIN
+    UPDATE locker_applications la
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET
+        la.status = 'Ended',
+        la.payment = 'Unpaid',
+        la.updated_at = NOW()
+    WHERE la.status = 'Accepted' AND CURRENT_DATE() >= ac.end_at;
+
+    UPDATE locker_applications la
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET
+        la.status = 'Cancelled',
+        la.updated_at = NOW()
+    WHERE la.status = 'Pending'
+    AND CURRENT_DATE() >= ac.end_at;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerApplicationStatusDaily` ()   BEGIN
+    UPDATE locker_applications la
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET
+        la.status = 'Ended',
+        la.payment = 'Unpaid',
+        la.updated_at = NOW()
+    WHERE la.status = 'Accepted' AND CURRENT_DATE() >= ac.end_at;
+
+    UPDATE locker_applications la
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET
+        la.status = 'Cancelled',
+        la.updated_at = NOW()
+    WHERE la.status = 'Pending'
+    AND CURRENT_DATE() >= ac.end_at;
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerLocation` (IN `p_id` INT, IN `p_location` VARCHAR(255))   BEGIN
@@ -1758,6 +1883,24 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerSize` (IN `p_id` INT, I
     WHERE id = p_id;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerStatusDaily` ()   BEGIN
+    UPDATE locker_slots ls
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET ls.status = 'Not yet started'
+    WHERE CURRENT_DATE() < ac.start_at AND ls.status <> 'Occupied';
+
+    UPDATE locker_slots ls
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET ls.status = 'Available'
+    WHERE CURRENT_DATE() >= ac.start_at AND CURRENT_DATE() < ac.end_at AND ls.status <> 'Occupied';
+
+    UPDATE locker_slots ls
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET ls.status = 'Already closed'
+    WHERE CURRENT_DATE() >= ac.end_at;
+
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateUserPassword` (IN `p_email` VARCHAR(255), IN `p_password` VARCHAR(255))   BEGIN
     UPDATE users
     SET password = p_password
@@ -1770,25 +1913,29 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `validateAndActivateUserAccount` (IN
     DECLARE v_email VARCHAR(255);
     DECLARE v_username_count INT DEFAULT 0;
 
-    SELECT status, email INTO v_status, v_email
-    FROM users WHERE email = p_email LIMIT 1;
+    SELECT status, email
+    INTO v_status, v_email
+    FROM users
+    WHERE email = p_email
+    LIMIT 1;
 
     IF v_email IS NULL THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Please use your campus email to activate your account.';
+        SET MESSAGE_TEXT = 'EMAIL_NOT_FOUND';
     END IF;
 
     IF v_status = 'Active' THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Account already activated. Please log in instead.';
+        SET MESSAGE_TEXT = 'ACCOUNT_ALREADY_ACTIVE';
     END IF;
 
     SELECT COUNT(*) INTO v_username_count
-    FROM users WHERE username = p_username;
+    FROM users
+    WHERE username = p_username;
 
     IF v_username_count > 0 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Username already exists.';
+        SET MESSAGE_TEXT = 'USERNAME_EXISTS';
     END IF;
 
     UPDATE users
@@ -2012,17 +2159,16 @@ CREATE TABLE `academic_calendar` (
   `semester` varchar(255) NOT NULL,
   `start_at` date NOT NULL,
   `end_at` date NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT NULL
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `academic_calendar`
 --
 
-INSERT INTO `academic_calendar` (`id`, `academic_year`, `semester`, `start_at`, `end_at`, `created_at`, `updated_at`) VALUES
-(1, '2026-2027', '1st Semester', '2026-05-03', '2027-01-08', '2026-05-23 15:03:43', '2026-05-23 16:01:40'),
-(2, '2026-2027', '2nd Semester', '2027-01-18', '2027-06-18', '2026-05-23 15:03:43', NULL);
+INSERT INTO `academic_calendar` (`id`, `academic_year`, `semester`, `start_at`, `end_at`, `created_at`) VALUES
+(1, '2026-2027', '1st Semester', '2026-05-14', '2026-05-30', '2026-05-23 15:03:43'),
+(2, '2026-2027', '2nd Semester', '2027-01-18', '2027-06-18', '2026-05-23 15:03:43');
 
 --
 -- Triggers `academic_calendar`
@@ -2464,10 +2610,28 @@ CREATE TABLE `locker_logs` (
 --
 
 INSERT INTO `locker_logs` (`id`, `action`, `description`, `created_at`) VALUES
-(133, 'Update', 'Location AB 1st Floor has been updated to AB 1st Floorl.', '2026-05-24 08:24:25'),
-(134, 'Update', 'Location AB 1st Floorl has been updated to AB 1st Floor.', '2026-05-24 08:24:29'),
-(135, 'Update', 'Location AB 2nd Floor has been updated to AB 2nd Floo.', '2026-05-24 08:24:31'),
-(136, 'Update', 'Location AB 2nd Floo has been updated to AB 2nd Floor.', '2026-05-24 08:24:34');
+(1, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:49'),
+(2, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:49'),
+(3, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:49'),
+(4, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:54'),
+(5, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:56'),
+(6, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:57'),
+(7, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:57'),
+(8, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:57'),
+(9, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:58'),
+(10, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:01'),
+(11, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:05'),
+(12, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:05'),
+(13, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:05'),
+(14, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:13'),
+(15, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:13'),
+(16, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:13'),
+(17, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:21'),
+(18, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:21'),
+(19, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:21'),
+(20, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:29'),
+(21, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:29'),
+(22, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:29');
 
 -- --------------------------------------------------------
 
@@ -2586,16 +2750,9 @@ CREATE TABLE `locker_slots` (
 --
 
 INSERT INTO `locker_slots` (`id`, `academic_year_id`, `slot_number`, `location_id`, `size_id`, `status`, `created_at`, `updated_at`) VALUES
-(26, 1, 1, 6, 5, 'Available', '2026-05-22 14:06:38', '2026-05-23 04:10:21'),
-(32, 1, 2, 6, 5, 'Available', '2026-05-23 04:55:06', '2026-05-24 05:00:22'),
-(35, 1, 1, 7, 6, 'Available', '2026-05-23 05:05:03', '2026-05-23 05:05:17'),
-(36, 1, 2, 7, 6, 'Available', '2026-05-23 05:05:10', '2026-05-23 05:05:20'),
-(37, 1, 1, 8, 6, 'Available', '2026-05-23 05:05:40', NULL),
-(38, 1, 2, 8, 6, 'Available', '2026-05-23 05:05:48', '2026-05-24 05:00:16'),
-(39, 1, 1, 9, 10, 'Available', '2026-05-23 05:07:04', '2026-05-24 05:00:13'),
-(40, 1, 2, 9, 10, 'Available', '2026-05-23 05:07:11', NULL),
-(45, 1, 3, 9, 10, 'Available', '2026-05-23 08:51:17', NULL),
-(46, 1, 3, 8, 6, 'Available', '2026-05-23 08:51:24', NULL);
+(1, 1, 1, 6, 5, 'Available', '2026-05-25 06:46:04', '2026-05-25 06:48:03'),
+(2, 1, 2, 6, 5, 'Available', '2026-05-25 06:46:10', '2026-05-25 06:48:06'),
+(3, 1, 3, 6, 5, 'Available', '2026-05-25 06:46:13', '2026-05-25 06:48:09');
 
 --
 -- Triggers `locker_slots`
@@ -2824,9 +2981,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `lastname`, `firstname`, `middlename`, `sex`, `dob`, `institute`, `program`, `status`, `username`, `email`, `password`, `created_at`, `updated_at`) VALUES
-('2024-11231', 'Bulay-og', 'Jason', 'Dy', 'Male', '2004-11-21', 'Institute of Computing', 'Bachelor of Science in Information System', 'Inactive', NULL, 'bulay-og.jason@dnscedu.onmicrosoft.com', '', '2026-05-24 05:33:38', NULL),
+('2024-11231', 'Bulay-og', 'Jason', 'Dy', 'Male', '2004-11-21', 'Institute of Computing', 'Bachelor of Science in Information System', 'Inactive', NULL, 'bulay-og.jason@dnscedu.onmicrosoft.com', NULL, '2026-05-24 05:33:38', NULL),
 ('2024-11468', 'Getalla', 'Joviet', 'Batang', 'Male', '2003-02-19', 'Institute of Computing', 'Bachelor of Science in Information System', 'Active', 'jovietgetalla', 'getalla.joviet@dnscedu.onmicrosoft.com', '$2y$10$AAjH4kHWBsCZHcHm0wApAOFpQDheHyAz5FwBRyZoi5GX6S5ifpsj6', '2026-05-22 06:46:04', '2026-05-22 06:46:04'),
-('2024-98798', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'Active', 'febyjohnrelmalbino', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com', '$2y$10$W4gbe7ZDqD/i1NCrdhMxEukZ/p6q27O8BEkrfO.N44jQUOB.1QjcS', '2026-05-24 08:11:14', '2026-05-24 08:14:13');
+('2024-98798', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'Active', 'febyjohnrelmalbino', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com', '$2y$10$UDcSEoQ3fxMUgUOX4H2PPOI566TisLQI7eAyu59GfG5MqWxWjDnMO', '2026-05-24 08:11:14', '2026-05-25 15:18:36');
 
 --
 -- Triggers `users`
@@ -2996,7 +3153,7 @@ ALTER TABLE `user_account_logs`
 -- AUTO_INCREMENT for table `academic_calendar`
 --
 ALTER TABLE `academic_calendar`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `admin`
@@ -3008,7 +3165,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `locker_applications`
 --
 ALTER TABLE `locker_applications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
 
 --
 -- AUTO_INCREMENT for table `locker_locations`
@@ -3020,7 +3177,7 @@ ALTER TABLE `locker_locations`
 -- AUTO_INCREMENT for table `locker_logs`
 --
 ALTER TABLE `locker_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=137;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `locker_sizes`
@@ -3032,13 +3189,13 @@ ALTER TABLE `locker_sizes`
 -- AUTO_INCREMENT for table `locker_slots`
 --
 ALTER TABLE `locker_slots`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT for table `user_account_logs`
 --
 ALTER TABLE `user_account_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -3048,7 +3205,6 @@ ALTER TABLE `user_account_logs`
 -- Constraints for table `locker_applications`
 --
 ALTER TABLE `locker_applications`
-  ADD CONSTRAINT `LockerSlotID` FOREIGN KEY (`slot_id`) REFERENCES `locker_slots` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `UserID` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE;
 
 --
@@ -3063,8 +3219,16 @@ DELIMITER $$
 --
 -- Events
 --
-CREATE DEFINER=`root`@`localhost` EVENT `auto_end_locker` ON SCHEDULE EVERY 1 DAY STARTS '2026-05-24 12:12:28' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
-    CALL endLockerApplication();
+CREATE DEFINER=`root`@`localhost` EVENT `auto_end_locker_daily` ON SCHEDULE EVERY 1 DAY STARTS '2026-05-25 13:01:00' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+    CALL endLockerApplicationDaily();
+END$$
+
+CREATE DEFINER=`root`@`localhost` EVENT `update_locker_status_daily` ON SCHEDULE EVERY 8 SECOND STARTS '2026-05-25 14:12:21' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+    CALL updateLockerStatusDaily();
+END$$
+
+CREATE DEFINER=`root`@`localhost` EVENT `update_locker_application_status_daily` ON SCHEDULE EVERY 8 SECOND STARTS '2026-05-25 14:12:21' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+    CALL updateLockerApplicationStatusDaily();
 END$$
 
 DELIMITER ;

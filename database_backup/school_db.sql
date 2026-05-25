@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 24, 2026 at 10:22 AM
+-- Generation Time: May 25, 2026 at 06:14 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,8 +18,83 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `campus_db`
+-- Database: `school_db`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `academic_calendar`
+--
+
+CREATE TABLE `academic_calendar` (
+  `id` int(11) NOT NULL,
+  `academic_year` varchar(255) NOT NULL,
+  `semester` varchar(255) NOT NULL,
+  `start_at` date NOT NULL,
+  `end_at` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `academic_calendar`
+--
+
+INSERT INTO `academic_calendar` (`id`, `academic_year`, `semester`, `start_at`, `end_at`, `created_at`) VALUES
+(1, '2026-2027', '1st Semester', '2026-05-14', '2026-05-30', '2026-05-23 15:03:43'),
+(2, '2026-2027', '2nd Semester', '2027-01-18', '2027-06-18', '2026-05-23 15:03:43');
+
+--
+-- Triggers `academic_calendar`
+--
+DELIMITER $$
+CREATE TRIGGER `after_academic_year_delete` AFTER DELETE ON `academic_calendar` FOR EACH ROW BEGIN
+    DELETE FROM ursafe_db.academic_calendar
+    WHERE id = OLD.id;
+
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_academic_year_insert` AFTER INSERT ON `academic_calendar` FOR EACH ROW BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM ursafe_db.academic_calendar WHERE id = NEW.id
+    ) THEN
+
+        INSERT INTO ursafe_db.academic_calendar (
+            id,
+            academic_year,
+            semester,
+            start_at,
+            end_at,
+            created_at
+        )
+        VALUES (
+            NEW.id,
+            NEW.academic_year,
+            NEW.semester,
+            NEW.start_at,
+            NEW.end_at,
+            NEW.created_at
+        );
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_academic_year_update` AFTER UPDATE ON `academic_calendar` FOR EACH ROW BEGIN
+    UPDATE ursafe_db.academic_calendar
+    SET
+        academic_year = NEW.academic_year,
+        semester = NEW.semester,
+        start_at = NEW.start_at,
+        end_at = NEW.end_at,
+        created_at = NEW.created_at
+    WHERE id = NEW.id;
+
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -185,11 +260,27 @@ DELIMITER ;
 --
 
 --
+-- Indexes for table `academic_calendar`
+--
+ALTER TABLE `academic_calendar`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `students`
 --
 ALTER TABLE `students`
   ADD UNIQUE KEY `unique_student_id` (`id`),
   ADD UNIQUE KEY `unique_email` (`email`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `academic_calendar`
+--
+ALTER TABLE `academic_calendar`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -140,11 +140,6 @@ body #links div:nth-child(2) a:hover {
   border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
-}
-
-.auth-container img {
-  width: 235px;
 }
 
 .auth-container .auth-form {
@@ -155,6 +150,11 @@ body #links div:nth-child(2) a:hover {
   padding: 0;
 }
 
+.auth-container .auth-form img {
+  width: 235px;
+  margin-bottom: 18px;
+}
+
 .auth-container .auth-form form {
   display: flex;
   flex-direction: column;
@@ -163,13 +163,21 @@ body #links div:nth-child(2) a:hover {
   padding: 0;
 }
 
+.auth-container .auth-form form h2 {
+  color: var(--color-primary-base);
+  font-weight: 700;
+  text-transform: capitalize;
+  
+}
+
 /* Forgot password */
 .auth-container .auth-form form .forgot-password {
   display: flex;
   justify-content: flex-end;
   text-decoration: none;
-  color: var(--color-primary-base);
+  color: var(--danger-base);
   cursor: pointer;
+  font-size: .95rem;
 }
 
 /* Verify OTP */
@@ -178,18 +186,21 @@ body #links div:nth-child(2) a:hover {
 }
 
 .verify-otp-container form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px;
+  width: 100% !important;
 }
 
 .verify-otp-container form h2 {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    color: var(--color-primary-base);
-    font-weight: 400;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary-base);
+  font-weight: 600;
 }
 
 .verify-otp-container form h2 a {
@@ -204,12 +215,155 @@ body #links div:nth-child(2) a:hover {
   color: var(--text-dark-secondary);
 }
 
-.verify-otp-container form small a {
-  text-decoration: none;
-  color: var(--color-primary-base);
+.verify-otp-container form .inputs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
-.verify-otp-container form small a:hover {
-  color: var(--color-primary-6);
-  text-decoration: underline;
+.verify-otp-container form .inputs input {
+  width: 42px;
+  height: 42px;
+  text-align: center;
+  border: none;
+  border-bottom: 2px solid var(--color-primary-3);
+  background-color: transparent;
+  font-size: 18px;
+  font-weight: 600;
 }
+
+.verify-otp-container form .inputs input:focus {
+  border-bottom: 1.5px solid var(--color-primary-base);
+  outline: none;
+}
+
+.verify-otp-container form .action-buttons {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.verify-otp-container form .action-buttons .primary-btn {
+  background-color: var(--color-primary-base) !important;
+  color: var(--text-light-primary) !important;
+  font-weight: 400 !important;
+}
+
+.verify-otp-container form .action-buttons .primary-btn:hover {
+  background-color: var(--color-primary-6) !important;
+  color: var(--text-light-primary) !important;
+  font-weight: 400 !important;
+}
+
+.verify-otp-container form .action-buttons .secondary-btn {
+  border: 1px solid var(--color-primary-base) !important;
+  background-color: transparent !important;
+  color: var(--color-primary-base) !important;
+  font-weight: 400 !important;
+}
+
+.verify-otp-container form .action-buttons .secondary-btn:hover {
+  border: 1px solid var(--color-primary-base) !important;
+  background-color: var(--color-primary-6) !important;
+  color: var(--text-light-primary) !important;
+  font-weight: 400 !important;
+}
+
+.success-message .modal-dialog {
+    max-width: 400px !important;
+}
+
+.success-message.modal-content {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.success-message .modal-content .modal-body {
+    border: none !important;
+    background-color: transparent !important;
+    padding-top: 18px;
+    padding-bottom: 18px;
+    padding-left: 38px;
+    padding-right: 38px;
+    position: relative !important;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.success-message .modal-content .modal-body .info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.success-message .modal-content .modal-body .info i {
+  font-size: 98px;
+  color: var(--success-base);
+}
+
+.success-message .modal-content .modal-body .info h4 {
+  font-weight: 600;
+  color: var(--success-base);
+  text-transform: capitalize;
+}
+
+.success-message .modal-content .modal-body .info p {
+  text-align: center;
+  color: var(--text-dark-tertiary);
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.success-message .modal-content .modal-body .action-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-message .modal-body .action-buttons {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.success-message .modal-body .action-buttons .btn {
+    width: 100% !important;
+}
+
+.success-message .modal-content .modal-body .primary-btn {
+    background-color: var(--success-base) !important;
+    color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
+}
+
+.success-message .modal-content .modal-body .primary-btn:hover {
+    background-color: var(--success-6) !important;
+    color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
+}
+
+.success-message .modal-content .modal-body .secondary-btn {
+    border: 1px solid var(--success-base) !important;
+    background-color: transparent !important;
+    color: var(--success-base) !important;
+    font-weight: 400 !important;
+}
+
+.success-message .modal-content .modal-body .secondary-btn:hover {
+    border: 1px solid var(--success-base) !important;
+    background-color: var(--success-6) !important;
+    color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
+} 
