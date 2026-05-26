@@ -1942,7 +1942,15 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                         <div class="input-box">
                                                             <select name="size_id" required>
                                                                 <?php
-                                                                    $sizesResult = $conn_local->query("SELECT * FROM locker_sizes");
+                                                                    $stmtSizes = $conn_local->prepare("CALL getLockerSizesNormal()");
+                                                                    $stmtSizes->execute();
+                                                                    $sizesResult = $stmtSizes->get_result();
+
+                                                                    $stmtSizes->close();
+
+                                                                    while ($conn_local->next_result()) {
+                                                                        $conn_local->store_result();
+                                                                    }
                                                                 ?>
                                                                     <option value="">Select Size</option>
                                                                     <?php foreach ($sizesResult as $sizesList) { ?>
@@ -1959,8 +1967,17 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                                         <div class="input-box">
                                                             <select name="academic_year_id" required>
                                                                 <?php
-                                                                    $academicYearResult = $conn_local->query("SELECT * FROM academic_calendar");
+                                                                    $stmtAcademicYear = $conn_local->prepare("CALL getAcademicCalendarNormal()");
+                                                                    $stmtAcademicYear->execute();
+                                                                    $academicYearResult = $stmtAcademicYear->get_result();
+
+                                                                    $stmtAcademicYear->close();
+
+                                                                    while ($conn_local->next_result()) {
+                                                                        $conn_local->store_result();
+                                                                    }
                                                                 ?>
+
                                                                     <option value="">Select Academic Year</option>
                                                                     <?php foreach ($academicYearResult as $academicYearList) { ?>
                                                                         <option value="<?= $academicYearList['id'] ?>">

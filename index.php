@@ -226,7 +226,7 @@ unset($_SESSION['field_error']);
                 <div class="modal-body">
                     <div class="info">
                         <i class="fa-solid fa-square-check"></i>
-                        <h4>Check your email</h4>
+                        <h4>Password has been reset</h4>
                         <p>We have sent a temporary password to your email address. Please check your inbox and use it to sign in to your UrSafe account.</p>
                     </div>
 

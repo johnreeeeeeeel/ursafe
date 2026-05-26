@@ -188,7 +188,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get total lockers
-                        $stmtTotalLockersCount = $conn_local->prepare("CALL get_total_lockers_count()");
+                        $stmtTotalLockersCount = $conn_local->prepare("CALL getTotalLockersCount()");
                         $stmtTotalLockersCount->execute();
 
                         $totalLockersCountResultSet = $stmtTotalLockersCount->get_result();
@@ -198,7 +198,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get available lockers
-                        $stmtAvailableLockersCount = $conn_local->prepare("CALL get_available_lockers_count()");
+                        $stmtAvailableLockersCount = $conn_local->prepare("CALL getAvailableLockersCount()");
                         $stmtAvailableLockersCount->execute();
 
                         $availableLockersCountResultSet = $stmtAvailableLockersCount->get_result();
@@ -208,7 +208,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get occupied lockers
-                        $stmtOccupiedLockersCount = $conn_local->prepare("CALL get_occupied_lockers_count()");
+                        $stmtOccupiedLockersCount = $conn_local->prepare("CALL getOccupiedLockersCount()");
                         $stmtOccupiedLockersCount->execute();
 
                         $occupiedLockersCountResultSet = $stmtOccupiedLockersCount->get_result();
@@ -218,7 +218,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get total locker application
-                        $stmtTotalLockerApplicationsCount = $conn_local->prepare("CALL get_total_locker_applications_count()");
+                        $stmtTotalLockerApplicationsCount = $conn_local->prepare("CALL getTotalLockerApplicationsCount()");
                         $stmtTotalLockerApplicationsCount->execute();
 
                         $totalLockerApplicationsCountResultSet = $stmtTotalLockerApplicationsCount->get_result();
@@ -228,7 +228,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get pending locker application
-                        $stmtPendingLockerApplicationsCount = $conn_local->prepare("CALL get_pending_locker_applications_count()");
+                        $stmtPendingLockerApplicationsCount = $conn_local->prepare("CALL getPendingLockerApplicationsCount()");
                         $stmtPendingLockerApplicationsCount->execute();
 
                         $pendingLockerApplicationsCountResultSet = $stmtPendingLockerApplicationsCount->get_result();
@@ -238,7 +238,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get cancelled locker application
-                        $stmtCancelledLockerApplicationsCount = $conn_local->prepare("CALL get_cancelled_locker_applications_count()");
+                        $stmtCancelledLockerApplicationsCount = $conn_local->prepare("CALL getCancelledLockerApplicationsCount()");
                         $stmtCancelledLockerApplicationsCount->execute();
 
                         $cancelledLockerApplicationsCountResultSet = $stmtCancelledLockerApplicationsCount->get_result();
@@ -248,7 +248,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get accepted locker application
-                        $stmtAcceptedLockerApplicationsCount = $conn_local->prepare("CALL get_accepted_locker_applications_count()");
+                        $stmtAcceptedLockerApplicationsCount = $conn_local->prepare("CALL getAcceptedLockerApplicationsCount()");
                         $stmtAcceptedLockerApplicationsCount->execute();
 
                         $acceptedLockerApplicationsCountResultSet = $stmtAcceptedLockerApplicationsCount->get_result();
@@ -258,7 +258,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get rejected locker application
-                        $stmtRejectedLockerApplicationsCount = $conn_local->prepare("CALL get_rejected_locker_applications_count()");
+                        $stmtRejectedLockerApplicationsCount = $conn_local->prepare("CALL getRejectedLockerApplicationsCount()");
                         $stmtRejectedLockerApplicationsCount->execute();
 
                         $rejectedLockerApplicationsCountResultSet = $stmtRejectedLockerApplicationsCount->get_result();
@@ -268,7 +268,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get revoked locker application
-                        $stmtRevokedLockerApplicationsCount = $conn_local->prepare("CALL get_revoked_locker_applications_count()");
+                        $stmtRevokedLockerApplicationsCount = $conn_local->prepare("CALL getRevokedLockerApplicationsCount()");
                         $stmtRevokedLockerApplicationsCount->execute();
 
                         $revokedLockerApplicationsCountResultSet = $stmtRevokedLockerApplicationsCount->get_result();
@@ -278,7 +278,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get paid locker applications count
-                        $stmtPaidLockerApplicationsCount = $conn_local->prepare("CALL get_paid_ended_locker_applications_count()");
+                        $stmtPaidLockerApplicationsCount = $conn_local->prepare("CALL getPaidEndedLockerApplicationsCount()");
                         $stmtPaidLockerApplicationsCount->execute();
 
                         $paidLockerApplicationsCountResultSet = $stmtPaidLockerApplicationsCount->get_result();
@@ -288,7 +288,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get paid locker applications amount
-                        $stmtPaidLockerApplicationsAmount = $conn_local->prepare("CALL get_paid_ended_locker_applications_amount()");
+                        $stmtPaidLockerApplicationsAmount = $conn_local->prepare("CALL getPaidEndedLockerApplicationsAmount()");
                         $stmtPaidLockerApplicationsAmount->execute();
 
                         $paidLockerApplicationsAmountResultSet = $stmtPaidLockerApplicationsAmount->get_result();
@@ -298,7 +298,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get unpaid locker applications count
-                        $stmtUnpaidLockerApplicationsCount = $conn_local->prepare("CALL get_unpaid_ended_locker_applications_count()");
+                        $stmtUnpaidLockerApplicationsCount = $conn_local->prepare("CALL getUnpaidEndedLockerApplicationsCount()");
                         $stmtUnpaidLockerApplicationsCount->execute();
 
                         $unpaidLockerApplicationsCountResultSet = $stmtUnpaidLockerApplicationsCount->get_result();
@@ -308,7 +308,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         $conn_local->next_result();
 
                         // Get unpaid locker applications amount
-                        $stmtUnpaidLockerApplicationsAmount = $conn_local->prepare("CALL get_unpaid_ended_locker_applications_amount()");
+                        $stmtUnpaidLockerApplicationsAmount = $conn_local->prepare("CALL getUnpaidEndedLockerApplicationsAmount()");
                         $stmtUnpaidLockerApplicationsAmount->execute();
 
                         $unpaidLockerApplicationsAmountResultSet = $stmtUnpaidLockerApplicationsAmount->get_result();
@@ -412,7 +412,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     <div class="recent-user-account-activation">
                         <?php
                             // Get recent activated user
-                            $stmtRecentActivatedUser = $conn_local->prepare("CALL get_recent_user_account_activation()");
+                            $stmtRecentActivatedUser = $conn_local->prepare("CALL getRecentUserAccountActivation()");
                             $stmtRecentActivatedUser->execute();
 
                             $recentActivatedUserResultSet = $stmtRecentActivatedUser->get_result();
@@ -462,7 +462,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     <div class="recent-locker-application"> 
                         <?php
                             // Get recent locker application
-                            $stmtRecentLockerApplication = $conn_local->prepare("CALL get_recent_locker_application()");
+                            $stmtRecentLockerApplication = $conn_local->prepare("CALL getRecentLockerApplication()");
                             $stmtRecentLockerApplication->execute();
 
                             $recentLockerApplicationResultSet = $stmtRecentLockerApplication->get_result();

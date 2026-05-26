@@ -2,6 +2,9 @@
 session_start();
 require '../app/db_connection.php';
 
+$fieldErrors = $_SESSION['field_error'] ?? [];
+unset($_SESSION['field_error']);
+
 if (isset($_SESSION['role']) && $_SESSION['role'] == 'user') {
 
 } else {
@@ -19,7 +22,7 @@ $middlename = $_SESSION['middlename'] ?? '';
 $fullname = $firstname . ' ' . (!empty($middlename) ? $middlename . ' ' : '') . $lastname;
 
 $sex = $_SESSION['sex'] ?? '';
-$dob = $_SESSION['dob'] ?? '';
+$dob = isset($_SESSION['dob']) ? date("M d, Y", strtotime($_SESSION['dob'])) : '';
 
 $institute = $_SESSION['institute'] ?? '';
 $program = $_SESSION['program'] ?? '';
@@ -183,24 +186,24 @@ $password = $_SESSION['password'] ?? '';
 
         <div class="content">
             <div id="profile">
-                <div class="profile-container">
+                <div class="profile-container" style="display: none;">
                     <div class="profile">
                         <i class="fa-solid fa-circle-user"></i>
                         <h4><span><?= htmlspecialchars($fullname)?></span></h4>
+                        <small>@<?= htmlspecialchars($username)?> | <?= htmlspecialchars($id)?></small>
                     </div>
-                    
+
+                    <hr>
                     
                     <div class="profile-section">
                         <h6>Personal Information</h6>
-                        <p>
-                            <small><b>ID: </b><span><?= htmlspecialchars($id)?></span></small>
-                            <small><b>Username: </b><span><?= htmlspecialchars($username)?></span></small>
-                        </p>
                         <p>
                             <small><b>Sex: </b><span><?= htmlspecialchars($sex)?></span></small>
                             <small><b>Date of Birth: </b><span><?= htmlspecialchars($dob)?></span></small>
                         </p>
                     </div>
+
+                    <hr>
 
                     <div class="profile-section">
                         <h6>Academic Information</h6>
@@ -212,6 +215,8 @@ $password = $_SESSION['password'] ?? '';
                         </p>
                     </div>
 
+                    <hr>
+
                     <div class="profile-section">
                         <h6>Account Information</h6>
                         <p>
@@ -219,36 +224,27 @@ $password = $_SESSION['password'] ?? '';
                         </p>
                     </div>
 
-                    <button class="btn secondary-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <hr>
+
+                    <button class="btn secondary-btn" onclick="window.location.hash='change_password'; showProfileSections();">
                         <i class="fa-solid fa-key"></i>
                         Change Password
                     </button>
                 </div>
-            </div>  
-        </div>
-    </section>
-    
-    <!-- Change password modal -->
-    <div class="modal fade success-modal" id="changePasswordModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
 
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-key"></i>
-                        Change Password
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
+                <div class="change-password-form" id="changePasswordForm">
                     <form method="POST" action="../app/auth/change_update_password.php">
+                        <h2>Change Password</h2>
+
                         <div class="form-group">
                             <label class="input-label">Current Password</label>
                             <div class="input-box">
-                                <input type="password" name="old_password" placeholder="eg., 123456" required>
+                                <input type="password" name="current_password" placeholder="eg., 123456" required>
                                 <i class="fa-solid fa-eye-slash toggle-password"></i>
                             </div>
+                            <span class="field-error">
+                                <?= $fieldErrors['current_password'] ?? '' ?>
+                            </span>
                         </div>
 
                         <div class="form-group">
@@ -265,12 +261,52 @@ $password = $_SESSION['password'] ?? '';
                                 <input type="password" name="confirm_password" placeholder="eg., 000000" required>
                                 <i class="fa-solid fa-eye-slash toggle-password"></i>
                             </div>
+                            <span class="field-error">
+                                <?= $fieldErrors['confirm_password'] ?? '' ?>
+                            </span>
                         </div>
 
-                        <button type="submit" class="btn primary-btn">
-                            Update Password
-                        </button>
+                        <div class="action-buttons">
+                            <button type="submit" class="btn primary-btn">
+                                Update Password
+                            </button>
+
+                            <button type="button" class="btn secondary-btn" onclick="window.location.hash='profile'; showProfileSections();">
+                                Cancel
+                            </button>
+                        </div>
                     </form>
+                </div>
+            </div>  
+        </div>
+    </section>
+
+    <!-- Success password change -->
+    <?php if (isset($_SESSION['show_success_password_change_modal'])): ?>
+        <script>
+            window.addEventListener('DOMContentLoaded', function () {
+                var modal = new bootstrap.Modal(document.getElementById('successPasswordChange'));
+                modal.show();
+            });
+        </script>
+        <?php unset($_SESSION['show_success_password_change_modal']); ?>
+    <?php endif; ?>
+
+    <div class="modal fade success-message" id="successPasswordChange">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="info">
+                        <i class="fa-solid fa-square-check"></i>
+                        <h4>Password has been changed</h4>
+                        <p>Your password has been changed successfully. You can now continue using your UrSafe account with your new password.</p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="button" class="btn primary-btn" data-bs-dismiss="modal">
+                            Okay, Got It
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -304,3 +340,24 @@ $password = $_SESSION['password'] ?? '';
 
 <!-- Js -->
 <script src="../assets/js/script.js"></script>
+
+<script>
+function showProfileSections() {
+    var profileContainer = document.querySelector(".profile-container");
+    var changePasswordForm = document.getElementById("changePasswordForm");
+
+    if (window.location.hash === "#change_password") {
+        profileContainer.style.display = "none";
+        changePasswordForm.style.display = "flex";
+    } else {
+        changePasswordForm.querySelector('input[name="current_password"]').value = "";
+        changePasswordForm.querySelector('input[name="new_password"]').value = "";
+        changePasswordForm.querySelector('input[name="confirm_password"]').value = "";
+
+        profileContainer.style.display = "flex";
+        changePasswordForm.style.display = "none";
+    }
+}
+
+showProfileSections();
+</script>

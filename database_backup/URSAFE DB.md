@@ -350,11 +350,11 @@ BEGIN
 
 &#x20;       SELECT 1 FROM admin WHERE email = p\_email
 
-&#x20;       
+&#x20;
 
 &#x20;   ) THEN
 
-&#x20;       SELECT NULL INTO v\_status; 
+&#x20;       SELECT NULL INTO v\_status;
 
 &#x20;       SELECT
 
@@ -396,7 +396,7 @@ BEGIN
 
 &#x20;       SELECT 1 FROM users WHERE email = p\_email
 
-&#x20;       
+&#x20;
 
 &#x20;   ) THEN
 
@@ -526,30 +526,6 @@ DELIMITER ;
 
 
 
-##### \-- GET INACTIVE USER COUNT (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE getInactiveUserCount()
-
-BEGIN
-
-&#x20;   SELECT COUNT(\*) AS inactive\_user\_count
-
-&#x20;   FROM users WHERE status = 'Inactive';
-
-END //
-
-
-
-DELIMITER ;
-
-
-
 ##### \-- GET ACTIVE USERS (PROCEDURE)
 
 
@@ -600,7 +576,7 @@ BEGIN
 
 &#x20;   FROM users WHERE status = 'Active'
 
-&#x20;   
+&#x20;
 
 &#x20;   ORDER BY created\_at DESC
 
@@ -762,6 +738,30 @@ DELIMITER ;
 
 
 
+##### \-- GET INACTIVE USER COUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getInactiveUserCount()
+
+BEGIN
+
+&#x20;   SELECT COUNT(\*) AS inactive\_user\_count
+
+&#x20;   FROM users WHERE status = 'Inactive';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
 ##### \-- GET INACTIVE USERS (PROCEDURE)
 
 
@@ -812,7 +812,7 @@ BEGIN
 
 &#x20;   FROM users WHERE status = 'Inactive'
 
-&#x20;   
+&#x20;
 
 &#x20;   ORDER BY created\_at DESC
 
@@ -1024,194 +1024,6 @@ DELIMITER ;
 
 
 
-##### \-- GET USERS COUNT
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE get\_users\_count()
-
-BEGIN
-
-&#x20;   SELECT COUNT(\*) AS users\_count
-
-&#x20;   FROM users;
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### \-- GET RECENT USER ACCOUNT ACTIVATION (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE get\_recent\_user\_account\_activation()
-
-BEGIN
-
-&#x20;   SELECT
-
-&#x20;       id,
-
-&#x20;       username,
-
-&#x20;       lastname,
-
-&#x09;firstname,
-
-&#x09;middlename,
-
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y') AS created\_at
-
-&#x20;   FROM recent\_user\_account\_activation;
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### \-- GET PAID LOCKER APPLICATIONS COUNT (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE get\_paid\_ended\_locker\_applications\_count()
-
-BEGIN
-
-&#x20;   SELECT
-
-&#x20;       COUNT(\*) AS paid\_total\_transactions
-
-&#x20;   FROM locker\_applications
-
-&#x20;   WHERE payment = 'Paid'
-
-&#x20;   AND status = 'Ended';
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### \-- GET PAID LOCKER APPLICATIONS AMOUNT (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE get\_paid\_ended\_locker\_applications\_amount()
-
-BEGIN
-
-&#x20;   SELECT
-
-&#x20;       COALESCE(SUM(lsz.price), 0) AS paid\_total\_amount
-
-&#x20;   FROM locker\_applications la
-
-&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
-
-&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
-
-&#x20;   WHERE la.payment = 'Paid'
-
-&#x20;   AND la.status = 'Ended';
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### \-- GET UNPAID LOCKER APPLICATIONS COUNT (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE get\_unpaid\_ended\_locker\_applications\_count()
-
-BEGIN
-
-&#x20;   SELECT
-
-&#x20;       COUNT(\*) AS unpaid\_total\_transactions
-
-&#x20;   FROM locker\_applications
-
-&#x20;   WHERE payment = 'Unpaid'
-
-&#x20;   AND status = 'Ended';
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### \-- GET UNPAID LOCKER APPLICATIONS AMOUNT (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE get\_unpaid\_ended\_locker\_applications\_amount()
-
-BEGIN
-
-&#x20;   SELECT
-
-&#x20;       COALESCE(SUM(lsz.price), 0) AS unpaid\_total\_amount
-
-&#x20;   FROM locker\_applications la
-
-&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
-
-&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
-
-&#x20;   WHERE la.payment = 'Unpaid'
-
-&#x20;   AND la.status = 'Ended';
-
-END //
-
-
-
-DELIMITER ;
-
-
-
 ##### \-- AFTER USER ACTIVATION (TRIGGER)
 
 
@@ -1385,6 +1197,260 @@ WHERE status = 'Active'
 ORDER BY created\_at DESC
 
 LIMIT 1;
+
+
+
+##### \-- GET RECENT USER ACCOUNT ACTIVATION (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getRecentUserAccountActivation()
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+&#x20;       username,
+
+&#x20;       lastname,
+
+&#x09;firstname,
+
+&#x09;middlename,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y') AS created\_at
+
+&#x20;   FROM recent\_user\_account\_activation;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET RECENT LOCKER APPLICATION (VIEW)
+
+
+
+CREATE OR REPLACE VIEW recent\_locker\_application AS
+
+
+
+SELECT
+
+&#x20;   la.id,
+
+&#x20;   la.user\_id,
+
+&#x20;   ls.slot\_number,
+
+&#x20;   ll.location,
+
+&#x20;   lsz.size,
+
+&#x20;   lsz.price,
+
+&#x20;   la.status,
+
+&#x20;   la.payment,
+
+&#x20;   la.created\_at
+
+FROM locker\_applications la
+
+
+
+INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+
+
+WHERE la.status = 'Pending'
+
+ORDER BY la.created\_at DESC
+
+LIMIT 1;
+
+
+
+##### \-- GET RECENT LOCKER APPLICATION (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getRecentLockerApplication()
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;   	id,
+
+&#x20;       user\_id,
+
+&#x20;       slot\_number,
+
+&#x20;       location,
+
+&#x20;       size,
+
+&#x20;       price,
+
+&#x20;       status,
+
+&#x20;       payment,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y') AS created\_at
+
+&#x20;   FROM recent\_locker\_application;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET PAID ENDED LOCKER APPLICATIONS COUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getPaidEndedLockerApplicationsCount()
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       COUNT(\*) AS paid\_total\_transactions
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE payment = 'Paid'
+
+&#x20;   AND status = 'Ended';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET PAID ENDED LOCKER APPLICATIONS AMOUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getPaidEndedLockerApplicationsAmount()
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       COALESCE(SUM(lsz.price), 0) AS paid\_total\_amount
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   WHERE la.payment = 'Paid'
+
+&#x20;   AND la.status = 'Ended';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET UNPAID LOCKER APPLICATIONS COUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getUnpaidEndedLockerApplicationsCount()
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       COUNT(\*) AS unpaid\_total\_transactions
+
+&#x20;   FROM locker\_applications
+
+&#x20;   WHERE payment = 'Unpaid'
+
+&#x20;   AND status = 'Ended';
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET UNPAID LOCKER APPLICATIONS AMOUNT (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getUnpaidEndedLockerApplicationsAmount()
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       COALESCE(SUM(lsz.price), 0) AS unpaid\_total\_amount
+
+&#x20;   FROM locker\_applications la
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
+
+&#x20;   WHERE la.payment = 'Unpaid'
+
+&#x20;   AND la.status = 'Ended';
+
+END //
+
+
+
+DELIMITER ;
 
 
 
@@ -2886,6 +2952,30 @@ DELIMITER ;
 
 
 
+##### \-- GET LOCKER SIZES NORMAL (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getLockerSizesNormal()
+
+
+
+BEGIN
+
+&#x20;   SELECT \* FROM locker\_sizes;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
 ##### \-- GET LOCKER SIZES (PROCEDURE)
 
 
@@ -3151,6 +3241,30 @@ BEGIN
 &#x20;   DELETE FROM locker\_sizes
 
 &#x20;   WHERE id = p\_id;
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET ACADEMIC CALENDAR NORMAL (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getAcademicCalendarNormal()
+
+
+
+BEGIN
+
+&#x20;   SELECT \* FROM academic\_calendar;
 
 END //
 
@@ -4586,7 +4700,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE get\_total\_lockers\_count()
+CREATE OR REPLACE PROCEDURE getTotalLockersCount()
 
 BEGIN
 
@@ -4610,7 +4724,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE get\_available\_lockers\_count()
+CREATE OR REPLACE PROCEDURE getAvailableLockersCount()
 
 BEGIN
 
@@ -4636,7 +4750,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE get\_occupied\_lockers\_count()
+CREATE OR REPLACE PROCEDURE getOccupiedLockersCount()
 
 BEGIN
 
@@ -4662,7 +4776,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE get\_total\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE getTotalLockerApplicationsCount()
 
 BEGIN
 
@@ -4686,7 +4800,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE get\_pending\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE getPendingLockerApplicationsCount()
 
 BEGIN
 
@@ -4712,7 +4826,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE get\_cancelled\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE getCancelledLockerApplicationsCount()
 
 BEGIN
 
@@ -4738,7 +4852,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE get\_accepted\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE getAcceptedLockerApplicationsCount()
 
 BEGIN
 
@@ -4764,7 +4878,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE get\_rejected\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE getRejectedLockerApplicationsCount()
 
 BEGIN
 
@@ -4790,7 +4904,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE get\_revoked\_locker\_applications\_count()
+CREATE OR REPLACE PROCEDURE getRevokedLockerApplicationsCount()
 
 BEGIN
 
@@ -4799,48 +4913,6 @@ BEGIN
 &#x20;   FROM locker\_applications
 
 &#x20;   WHERE status = 'Revoked';
-
-END //
-
-
-
-DELIMITER ;
-
-
-
-##### \-- GET RECENT LOCKER APPLICATION (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE get\_recent\_locker\_application()
-
-BEGIN
-
-&#x20;   SELECT
-
-&#x20;   	id,
-
-&#x20;       user\_id,
-
-&#x20;       slot\_number,
-
-&#x20;       location,
-
-&#x20;       size,
-
-&#x20;       price,
-
-&#x20;       status,
-
-&#x20;       payment,
-
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y') AS created\_at
-
-&#x20;   FROM recent\_locker\_application;
 
 END //
 
@@ -6356,8 +6428,6 @@ DELIMITER ;
 
 
 
-
-
 ##### \-- UPDATE LOCKER APPLICATION DAILY (EVENT)
 
 
@@ -6467,52 +6537,4 @@ END //
 
 
 DELIMITER ;
-
-
-
-##### \-- GET RECENT LOCKER APPLICATION (VIEW)
-
-
-
-CREATE OR REPLACE VIEW recent\_locker\_application AS
-
-
-
-SELECT
-
-&#x20;   la.id,
-
-&#x20;   la.user\_id,
-
-&#x20;   ls.slot\_number,
-
-&#x20;   ll.location,
-
-&#x20;   lsz.size,
-
-&#x20;   lsz.price,
-
-&#x20;   la.status,
-
-&#x20;   la.payment,
-
-&#x20;   la.created\_at
-
-FROM locker\_applications la
-
-
-
-INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
-
-INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
-
-INNER JOIN locker\_sizes lsz ON ls.size\_id = lsz.id
-
-
-
-WHERE la.status = 'Pending'
-
-ORDER BY la.created\_at DESC
-
-LIMIT 1;
 

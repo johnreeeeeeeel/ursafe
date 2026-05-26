@@ -167,7 +167,6 @@ body #links div:nth-child(2) a:hover {
   color: var(--color-primary-base);
   font-weight: 700;
   text-transform: capitalize;
-  
 }
 
 /* Forgot password */
@@ -201,14 +200,6 @@ body #links div:nth-child(2) a:hover {
   gap: 8px;
   color: var(--color-primary-base);
   font-weight: 600;
-}
-
-.verify-otp-container form h2 a {
-  cursor: pointer;
-}
-
-.verify-otp-container form h2 a:hover {
-  color: var(--color-primary-6);
 }
 
 .verify-otp-container form small {
@@ -270,100 +261,3 @@ body #links div:nth-child(2) a:hover {
   color: var(--text-light-primary) !important;
   font-weight: 400 !important;
 }
-
-.success-message .modal-dialog {
-    max-width: 400px !important;
-}
-
-.success-message.modal-content {
-    background-color: var(--bg-secondary) !important;
-    color: var(--text-primary) !important;
-    border: none !important;
-    border-radius: 12px !important;
-    padding: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-.success-message .modal-content .modal-body {
-    border: none !important;
-    background-color: transparent !important;
-    padding-top: 18px;
-    padding-bottom: 18px;
-    padding-left: 38px;
-    padding-right: 38px;
-    position: relative !important;
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-}
-
-.success-message .modal-content .modal-body .info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-}
-
-.success-message .modal-content .modal-body .info i {
-  font-size: 98px;
-  color: var(--success-base);
-}
-
-.success-message .modal-content .modal-body .info h4 {
-  font-weight: 600;
-  color: var(--success-base);
-  text-transform: capitalize;
-}
-
-.success-message .modal-content .modal-body .info p {
-  text-align: center;
-  color: var(--text-dark-tertiary);
-  font-weight: 400;
-  font-size: 0.9rem;
-}
-
-.success-message .modal-content .modal-body .action-buttons {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-}
-
-.success-message .modal-body .action-buttons {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-
-.success-message .modal-body .action-buttons .btn {
-    width: 100% !important;
-}
-
-.success-message .modal-content .modal-body .primary-btn {
-    background-color: var(--success-base) !important;
-    color: var(--text-light-primary) !important;
-    font-weight: 400 !important;
-}
-
-.success-message .modal-content .modal-body .primary-btn:hover {
-    background-color: var(--success-6) !important;
-    color: var(--text-light-primary) !important;
-    font-weight: 400 !important;
-}
-
-.success-message .modal-content .modal-body .secondary-btn {
-    border: 1px solid var(--success-base) !important;
-    background-color: transparent !important;
-    color: var(--success-base) !important;
-    font-weight: 400 !important;
-}
-
-.success-message .modal-content .modal-body .secondary-btn:hover {
-    border: 1px solid var(--success-base) !important;
-    background-color: var(--success-6) !important;
-    color: var(--text-light-primary) !important;
-    font-weight: 400 !important;
-} 

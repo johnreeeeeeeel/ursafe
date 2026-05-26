@@ -213,7 +213,7 @@ section .content {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 12px;
+    padding: 12px 34px;
     background-color: #ffffff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     border-radius: 12px;
@@ -225,28 +225,34 @@ section .content {
     gap: 8px;
 }
 
-#home .hero .left h3 {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+#home .hero .left img {
+    width: 250px;
 }
 
-#home .hero .left h3 span {
+@media (max-width: 768px) {
+    #home .hero .left img {
+        display: none;
+    }
+}
+
+#home .hero .right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+#home .hero .right h1 {
     color: var(--color-primary-base);
+    text-transform: uppercase;
     font-weight: 700;
 }
 
-#home .hero .left h3 img {
-    width: 320px;
-}
-
-#home .hero .left p {
-    font-weight: 400;
+#home .hero .right p {
     color: var(--text-dark-secondary);
-}
-
-#home .hero .right h3 img {
-    width: 320px;
+    font-weight: 400;
+    text-align: center;
 }
 
 /* Lockers */
@@ -749,9 +755,16 @@ section #profile {
 section #profile .profile-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
     max-width: 400px;
-    width: 100%;            
+    width: 100%;      
+    background-color: #ffffff;    
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 18px;
+}
+
+section #profile .profile-container hr {
+    margin: 8px;
 }
 
 section #profile .profile-container .profile {
@@ -759,17 +772,23 @@ section #profile .profile-container .profile {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
 }
 
 section #profile .profile-container .profile i {
     color: var(--text-dark-tertiary);
     font-size: 128px;
+    margin-bottom: 18px;
 }
 
 section #profile .profile-container .profile h4 {
     color: var(--text-dark-secondary);
     text-align: center;
+}
+
+section #profile .profile-container .profile small {
+    color: var(--text-dark-secondary);
+    text-align: center;
+    font-weight: 400;
 }
 
 section #profile .profile-container .profile-section {
@@ -786,7 +805,6 @@ section #profile .profile-container .profile-section h6 {
 }
 
 section #profile .profile-container .profile-section p {
-    color: var(--text-dark-tertiary);
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -794,5 +812,51 @@ section #profile .profile-container .profile-section p {
 }
 
 section #profile .profile-container .profile-section p small {
-    font-size: 13px;
+    color: var(--text-dark-tertiary);
+    font-size: 0.8em;
+}
+
+section #profile .profile-container .profile-section p b {
+    color: var(--text-dark-tertiary);
+    font-weight: 600;
+}
+
+section #profile .profile-container .profile-section p span {
+    color: var(--text-dark-tertiary);
+    font-weight: 400;
+}
+
+section #profile .change-password-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    width: 100%;      
+    background-color: #ffffff;    
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 18px;
+}
+
+section #profile .change-password-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100% !important;      
+}
+
+section #profile .change-password-form form h2 {
+  color: var(--color-primary-base);
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+section #profile .change-password-form form .action-buttons {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+section #profile .change-password-form form .action-buttons .btn {
+    width: 100%;
 }

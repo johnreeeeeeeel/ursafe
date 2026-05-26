@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['login_email'] = $email;
 
-             $_SESSION['field_error']['email_or_password'] = '⚠️ Invalid email or password';
+            $_SESSION['field_error']['email_or_password'] = '⚠️ Invalid email or password';
 
             header("Location: ../../index.php");
             exit;

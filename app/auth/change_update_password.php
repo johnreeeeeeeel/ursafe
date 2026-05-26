@@ -15,16 +15,14 @@ if (!$email) {
     exit();
 }
 
-$old = $_POST['old_password'];
+$current = $_POST['current_password'];
 $new = $_POST['new_password'];
 $confirm = $_POST['confirm_password'];
 
 if ($new !== $confirm) {
-    $_SESSION['alert_message'] = [
-        'type' => 'danger',
-        'text' => 'Passwords do not match.'
-    ];
-    header("Location: ../../user/profile.php");
+    $_SESSION['field_error']['confirm_password'] = '⚠️ Passwords do not match';
+
+    header("Location: ../../user/profile.php#change_password");
     exit();
 }
 
@@ -42,7 +40,7 @@ while ($conn_local->more_results()) {
 }
 
 // Verify old password
-if ($user && password_verify($old, $user['password'])) {
+if ($user && password_verify($current, $user['password'])) {
 
     $hashedPassword = password_hash($new, PASSWORD_DEFAULT);
 
@@ -63,18 +61,26 @@ if ($user && password_verify($old, $user['password'])) {
             'type' => 'success',
             'text' => 'Password updated successfully!'
         ];
+
+        $_SESSION['show_success_password_change_modal'] = true;
+    
+        header("Location: ../../user/profile.php");
+        exit();
     } else {
         $_SESSION['alert_message'] = [
             'type' => 'danger',
             'text' => 'Failed to update password.'
         ];
+
+        header("Location: ../../user/profile.php#change_password");
+        exit();
     }
 
 } else {
-    $_SESSION['alert_message'] = [
-        'type' => 'danger',
-        'text' => 'Incorrect current password.'
-    ];
+    $_SESSION['field_error']['current_password'] = '⚠️ Incorrect current password';
+    
+    header("Location: ../../user/profile.php#change_password");
+    exit();
 }
 
 header("Location: ../../user/profile.php");

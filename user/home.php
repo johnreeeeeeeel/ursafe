@@ -183,18 +183,18 @@ $password = $_SESSION['password'] ?? '';
             <div id="home">
                 <div class="hero">
                     <div class="left">
-                        <h3>
-                            <span>WELCOME TO</span>
-                            <img src="../assets/images/ursafe_logo_3.png" alt="reload">
-                        </h3>
-                        <p>Make locker applicaton and management easier and faster</p>
+                        <img src="../assets/images/ursafe_logo_1.png" alt="reload">
                     </div>
 
                     <div class="right">
-                        <a href="lockers.php" class="btn primary-btn">
-                            <i class="fa-solid fa-angle-right"></i>
-                            Apply Now
-                        </a>
+                        <h1>Welcome to UrSafe</h1>
+                        <p>Make locker application and management easier and faster</p>
+
+                        <div class="action-buttons">
+                            <a href="lockers.php" class="btn primary-btn">
+                                Apply Now
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>  
