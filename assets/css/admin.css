@@ -1583,14 +1583,14 @@ section #users .table-container table tbody tr td {
 
 #viewActiveUserModal .modal-content,
 #viewInactiveUserModal .modal-content {
-    background-color: var(--bg-secondary) !important;
-    color: var(--text-primary) !important;
-    border: none !important;
-    border-radius: 12px !important;
-    padding: 18px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 18px !important;
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    width: 100%;      
+    background-color: #ffffff;    
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 18px;
 }
 
 #viewActiveUserModal .modal-content .modal-header,
@@ -1621,8 +1621,13 @@ section #users .table-container table tbody tr td {
 #viewInactiveUserModal .modal-content .modal-body {
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
+
+#viewActiveUserModal .modal-content .modal-body hr,
+#viewInactiveUserModal .modal-content .modal-body hr {
+    margin: 8px !important;
+}
+
 
 #viewActiveUserModal .modal-content .modal-body .profile,
 #viewInactiveUserModal .modal-content .modal-body .profile {
@@ -1630,19 +1635,33 @@ section #users .table-container table tbody tr td {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
 }
 
 #viewActiveUserModal .modal-content .modal-body .profile i,
 #viewInactiveUserModal .modal-content .modal-body .profile i {
     color: var(--text-dark-tertiary);
     font-size: 128px;
+    margin-bottom: 18px;
 }
 
 #viewActiveUserModal .modal-content .modal-body .profile h4,
 #viewInactiveUserModal .modal-content .modal-body .profile h4 {
     color: var(--text-dark-secondary);
     text-align: center;
+}
+
+#viewActiveUserModal .modal-content .modal-body .profile small,
+#viewInactiveUserModal .modal-content .modal-body .profile small {
+    color: var(--text-dark-secondary);
+    text-align: center;
+    font-weight: 400;
+}
+
+#viewActiveUserModal .modal-content .modal-body .profile small span,
+#viewInactiveUserModal .modal-content .modal-body .profile small span {
+    color: var(--text-dark-secondary);
+    text-align: center;
+    font-weight: 400;
 }
 
 #viewActiveUserModal .modal-content .modal-body .profile-section,
@@ -1662,7 +1681,6 @@ section #users .table-container table tbody tr td {
 
 #viewActiveUserModal .modal-content .modal-body .profile-section p,
 #viewInactiveUserModal .modal-content .modal-body .profile-section p {
-    color: var(--text-dark-tertiary);
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1671,5 +1689,18 @@ section #users .table-container table tbody tr td {
 
 #viewActiveUserModal .modal-content .modal-body .profile-section p small,
 #viewInactiveUserModal .modal-content .modal-body .profile-section p small {
-    font-size: 13px;
+    color: var(--text-dark-tertiary) !important;
+    font-size: 0.8em !important;
+}
+
+#viewActiveUserModal .modal-content .modal-body .profile-section p b,
+#viewInactiveUserModal .modal-content .modal-body .profile-section p b {
+    color: var(--text-dark-tertiary) !important;
+    font-weight: 600 !important;
+}
+
+#viewActiveUserModal .modal-content .modal-body .profile-section p span,
+#viewInactiveUserModal .modal-content .modal-body .profile-section p span {
+    color: var(--text-dark-tertiary) !important;
+    font-weight: 400 !important;
 }

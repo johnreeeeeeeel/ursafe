@@ -3,14 +3,14 @@ require 'fpdf/fpdf.php';
 require '../db_connection.php';
 
 // PAID AMOUNT
-$stmtPaidAmount = $conn_local->prepare("CALL get_paid_ended_locker_applications_amount()");
+$stmtPaidAmount = $conn_local->prepare("CALL getPaidEndedLockerApplicationsAmount()");
 $stmtPaidAmount->execute();
 $paidAmount = $stmtPaidAmount->get_result()->fetch_assoc();
 $stmtPaidAmount->close();
 $conn_local->next_result();
 
 // PAID COUNT
-$stmtPaidCount = $conn_local->prepare("CALL get_paid_ended_locker_applications_count()");
+$stmtPaidCount = $conn_local->prepare("CALL getPaidEndedLockerApplicationsCount()");
 $stmtPaidCount->execute();
 $paidCount = $stmtPaidCount->get_result()->fetch_assoc();
 $stmtPaidCount->close();
@@ -18,14 +18,14 @@ $conn_local->next_result();
 
 
 // UNPAID AMOUNT
-$stmtUnpaidAmount = $conn_local->prepare("CALL get_unpaid_ended_locker_applications_amount()");
+$stmtUnpaidAmount = $conn_local->prepare("CALL getUnpaidEndedLockerApplicationsAmount()");
 $stmtUnpaidAmount->execute();
 $unpaidAmount = $stmtUnpaidAmount->get_result()->fetch_assoc();
 $stmtUnpaidAmount->close();
 $conn_local->next_result();
 
 // UNPAID COUNT
-$stmtUnpaidCount = $conn_local->prepare("CALL get_unpaid_ended_locker_applications_count()");
+$stmtUnpaidCount = $conn_local->prepare("CALL getUnpaidEndedLockerApplicationsCount()");
 $stmtUnpaidCount->execute();
 $unpaidCount = $stmtUnpaidCount->get_result()->fetch_assoc();
 $stmtUnpaidCount->close();

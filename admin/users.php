@@ -641,20 +641,20 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         <div class="profile">
                             <i class="fa-solid fa-circle-user"></i>
                             <h4><span id="a_fullname"></span></h4>
+                            <small><span id="a_username"></span> | <span id="a_id">@</span></small>
                         </div>
                         
+                        <hr>
                         
                         <div class="profile-section">
                             <h6>Personal Information</h6>
-                            <p>
-                                <small><b>ID: </b><span id="a_id"></span></small>
-                                <small><b>Username: </b><span id="a_username"></span></small>
-                            </p>
                             <p>
                                 <small><b>Sex: </b><span id="a_sex"></span></small>
                                 <small><b>Date of Birth: </b><span id="a_dob"></span></small>
                             </p>
                         </div>
+
+                        <hr>
 
                         <div class="profile-section">
                             <h6>Academic Information</h6>
@@ -665,6 +665,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                                 <small><b>Program: </b><span id="a_program"></span></small>
                             </p>
                         </div>
+
+                        <hr>
 
                         <div class="profile-section">
                             <h6>Account Information</h6>
@@ -698,19 +700,20 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                         <div class="profile">
                             <i class="fa-solid fa-circle-user"></i>
                             <h4><span id="i_fullname"></span></h4>
+                            <small><span id="i_username"></span> | <span id="i_id">@</span></small>
                         </div>
-                        
-                        
+
+                        <hr>
+
                         <div class="profile-section">
                             <h6>Personal Information</h6>
-                            <p>
-                                <small><b>ID: </b><span id="i_id"></span></small>
-                            </p>
                             <p>
                                 <small><b>Sex: </b><span id="i_sex"></span></small>
                                 <small><b>Date of Birth: </b><span id="i_dob"></span></small>
                             </p>
                         </div>
+
+                        <hr>
 
                         <div class="profile-section">
                             <h6>Academic Information</h6>
@@ -722,6 +725,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             </p>
                         </div>
 
+                        <hr>
+
                         <div class="profile-section">
                             <h6>Account Information</h6>
                             <p>
@@ -729,6 +734,9 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             </p>
                             <p>
                                 <small><b>Status: </b><span id="i_status"></span></small>
+                            </p>
+                            <p>
+                                <small><b>Date Activated: </b><span id="i_updated_at"></span></small>
                             </p>
                             <p>
                                 <small><b>Date Created: </b><span id="i_created_at"></span></small>
