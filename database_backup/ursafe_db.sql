@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 25, 2026 at 06:16 PM
+-- Generation Time: May 30, 2026 at 09:21 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -59,41 +59,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `acceptLockerApplication` (IN `p_app
     WHERE id = v_slot_id;
 
     COMMIT;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `activateUserAccount` (IN `p_id` VARCHAR(255), IN `p_lastname` VARCHAR(255), IN `p_firstname` VARCHAR(255), IN `p_middlename` VARCHAR(255), IN `p_sex` VARCHAR(6), IN `p_dob` DATE, IN `p_institute` VARCHAR(255), IN `p_program` VARCHAR(255), IN `p_username` VARCHAR(255), IN `p_email` VARCHAR(255), IN `p_password` VARCHAR(255))   BEGIN
-    INSERT INTO users (
-        id,
-        lastname,
-        firstname,
-        middlename,
-        sex,
-        dob,
-        institute,
-        program,
-        username,
-        email,
-        password
-    )
-    VALUES (
-        p_id,
-        p_lastname,
-        p_firstname,
-        p_middlename,
-        p_sex,
-        p_dob,
-        p_institute,
-        p_program,
-        p_username,
-        p_email,
-        p_password
-    );
-
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `addAcademicYear` (IN `p_academic_year` VARCHAR(255), IN `p_semester` VARCHAR(255), IN `p_start_at` DATE, IN `p_end_at` DATE)   BEGIN
-    INSERT INTO academic_calendar (academic_year, semester, start_at, end_at)
-    VALUES (p_academic_year, p_semester, p_start_at, p_end_at);
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `addLocker` (IN `p_slot_number` INT, IN `p_location_id` INT, IN `p_size_id` INT, IN `p_academic_year_id` INT)   BEGIN
@@ -232,18 +197,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `cancelLockerApplication` (IN `p_app
       AND status = 'Pending';
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteAcademicYear` (IN `p_id` INT)   BEGIN
-	DECLARE EXIT HANDLER FOR 1451
- 
-    BEGIN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Cannot delete: Academic year still assigned to slots.';
-    END;
- 
-    DELETE FROM academic_calendar
-    WHERE id = p_id;
-END$$
-
 CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteLocker` (IN `p_id` INT)   BEGIN
     DECLARE v_status VARCHAR(255);
     DECLARE v_block_count INT DEFAULT 0;
@@ -300,32 +253,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteLockerSize` (IN `p_id` INT)  
     WHERE id = p_id;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `endLockerApplication` ()   BEGIN
-
-    UPDATE locker_slots SET status = 'Available'
-    WHERE status = 'Occupied' AND end_at <= CURRENT_DATE;
-
-    UPDATE locker_applications la INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    SET
-        la.status = 'Ended',
-        la.payment = 'Unpaid',
-        la.updated_at = NOW()
-    WHERE la.status = 'Accepted' AND ls.end_at <= CURRENT_DATE;
-
-    UPDATE locker_applications la INNER JOIN locker_slots ls
-        ON la.slot_id = ls.id
-    SET
-        la.status = 'Cancelled',
-        la.updated_at = NOW()
-    WHERE la.status = 'Pending' AND ls.end_at <= CURRENT_DATE;
-
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `endLockerApplicationDaily` ()   BEGIN
-    UPDATE locker_slots ls
-    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
-    SET ls.status = 'Already closed' WHERE ls.status = 'Occupied' AND ac.end_at <= CURRENT_DATE();
-
+CREATE DEFINER=`root`@`localhost` PROCEDURE `endLockerApplication_applicationStatus` ()   BEGIN
     UPDATE locker_applications la
     INNER JOIN locker_slots ls ON la.slot_id = ls.id
     INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
@@ -333,7 +261,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `endLockerApplicationDaily` ()   BEG
         la.status = 'Ended',
         la.payment = 'Unpaid',
         la.updated_at = NOW()
-    WHERE la.status = 'Accepted' AND ac.end_at <= CURRENT_DATE();
+    WHERE la.status = 'Accepted' AND CURRENT_DATE() >= ac.end_at;
 
     UPDATE locker_applications la
     INNER JOIN locker_slots ls ON la.slot_id = ls.id
@@ -342,7 +270,25 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `endLockerApplicationDaily` ()   BEG
         la.status = 'Cancelled',
         la.updated_at = NOW()
     WHERE la.status = 'Pending'
-    AND ac.end_at <= CURRENT_DATE();
+    AND CURRENT_DATE() >= ac.end_at;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `endLockerApplication_lockerStatus` ()   BEGIN
+    UPDATE locker_slots ls
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET ls.status = 'Not yet started'
+    WHERE CURRENT_DATE() < ac.start_at AND ls.status <> 'Occupied';
+
+    UPDATE locker_slots ls
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET ls.status = 'Available'
+    WHERE CURRENT_DATE() >= ac.start_at AND CURRENT_DATE() <= ac.end_at AND ls.status <> 'Occupied';
+
+    UPDATE locker_slots ls
+    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+    SET ls.status = 'Already closed'
+    WHERE CURRENT_DATE() >= ac.end_at;
 
 END$$
 
@@ -359,6 +305,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcademicCalendar` (IN `p_limit` 
  
     SELECT COUNT(*) AS academicCalendarTotal
     FROM academic_calendar;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcademicCalendarNormal` ()   BEGIN
+    SELECT * FROM academic_calendar;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcceptedLockerApplications` (IN `p_limit` INT, IN `p_offset` INT)   BEGIN
@@ -402,6 +352,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcceptedLockerApplications` (IN 
 
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcceptedLockerApplicationsCount` ()   BEGIN
+    SELECT COUNT(*) AS accepted_locker_applications_count
+    FROM locker_applications
+    WHERE status = 'Accepted';
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getActiveUserCount` ()   BEGIN
     SELECT COUNT(*) AS active_user_count
     FROM users WHERE status = 'Active';
@@ -424,7 +380,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getActiveUsers` (IN `p_limit` INT, 
         DATE_FORMAT(created_at, '%M %d, %Y') AS created_at,
         DATE_FORMAT(updated_at, '%M %d, %Y') AS updated_at
     FROM users WHERE status = 'Active'
-    
+ 
     ORDER BY created_at DESC
     LIMIT p_limit OFFSET p_offset;
 
@@ -450,6 +406,18 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAdminByEmail` (IN `p_email` VARC
     FROM admin
     WHERE email = p_email
     LIMIT 1;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getAvailableLockersCount` ()   BEGIN
+    SELECT COUNT(*) AS available_lockers_count
+    FROM locker_slots
+    WHERE status = 'Available';
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getCancelledLockerApplicationsCount` ()   BEGIN
+    SELECT COUNT(*) AS cancelled_locker_applications_count
+    FROM locker_applications
+    WHERE status = 'Cancelled';
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getEndedLockerApplications` (IN `p_limit` INT, IN `p_offset` INT)   BEGIN
@@ -515,7 +483,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getInactiveUsers` (IN `p_limit` INT
         DATE_FORMAT(created_at, '%M %d, %Y') AS created_at,
         DATE_FORMAT(updated_at, '%M %d, %Y') AS updated_at
     FROM users WHERE status = 'Inactive'
-    
+ 
     ORDER BY created_at DESC
     LIMIT p_limit OFFSET p_offset;
 
@@ -551,11 +519,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerApplicationHistory` (IN `p
         DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
 
-    INNER JOIN users u ON la.user_id = u.id
-    LEFT JOIN locker_slots ls ON la.slot_id = ls.id
-    LEFT JOIN locker_locations ll ON ls.location_id = ll.id
-    LEFT JOIN locker_sizes lsz ON ls.size_id = lsz.id
-    LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+INNER JOIN users u ON la.user_id = u.id
+LEFT JOIN locker_slots ls ON la.slot_id = ls.id
+LEFT JOIN locker_locations ll ON ls.location_id = ll.id
+LEFT JOIN locker_sizes lsz ON ls.size_id = lsz.id
+LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
 
     WHERE la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended')
     ORDER BY la.updated_at DESC LIMIT p_limit OFFSET p_offset;
@@ -633,6 +601,25 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerSizes` (IN `p_limit` INT, 
     FROM locker_sizes;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLockerSizesNormal` ()   BEGIN
+    SELECT * FROM locker_sizes;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLogs` (IN `p_limit` INT, IN `p_offset` INT)   BEGIN
+    SELECT
+        id,
+        action,
+        description,
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
+    FROM logs
+    ORDER BY created_at DESC
+    LIMIT p_offset, p_limit;
+
+    SELECT COUNT(*) AS logsTotal
+    FROM logs;
+
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyAcceptedLockerApplications` (IN `p_user_id` VARCHAR(255), IN `p_limit` INT, IN `p_offset` INT)   BEGIN
     SELECT
         la.id AS application_id,
@@ -644,8 +631,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyAcceptedLockerApplications` (I
         sz.price,
 	ac.academic_year,
 	ac.semester,
-        ac.start_at,
-        ac.end_at,
+        DATE_FORMAT(ac.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ac.end_at, '%M %d, %Y') AS end_at,
         DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
 
@@ -673,8 +660,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyEndedLockerApplications` (IN `
         sz.price,
 	ac.academic_year,
 	ac.semester,
-        ac.start_at,
-        ac.end_at,
+        DATE_FORMAT(ac.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ac.end_at, '%M %d, %Y') AS end_at,
         DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
 
@@ -703,8 +690,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyLockerApplicationHistory` (IN 
         sz.price,
 	ac.academic_year,
 	ac.semester,
-        ac.start_at,
-        ac.end_at,
+        DATE_FORMAT(ac.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ac.end_at, '%M %d, %Y') AS end_at,
         DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
 
@@ -732,8 +719,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyPendingLockerApplications` (IN
         sz.price,
 	ac.academic_year,
 	ac.semester,
-        ac.start_at,
-        ac.end_at,
+	DATE_FORMAT(ac.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ac.end_at, '%M %d, %Y') AS end_at,
         DATE_FORMAT(la.created_at, '%M %d, %Y') AS created_at
     FROM locker_applications la
 
@@ -748,6 +735,30 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getMyPendingLockerApplications` (IN
     SELECT COUNT(*) AS myPendingTotal FROM locker_applications
     WHERE user_id = p_user_id AND status = 'Pending';
 
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getOccupiedLockersCount` ()   BEGIN
+    SELECT COUNT(*) AS occupied_lockers_count
+    FROM locker_slots
+    WHERE status = 'Occupied';
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getPaidEndedLockerApplicationsAmount` ()   BEGIN
+    SELECT
+        COALESCE(SUM(lsz.price), 0) AS paid_total_amount
+    FROM locker_applications la
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
+    WHERE la.payment = 'Paid'
+    AND la.status = 'Ended';
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getPaidEndedLockerApplicationsCount` ()   BEGIN
+    SELECT
+        COUNT(*) AS paid_total_transactions
+    FROM locker_applications
+    WHERE payment = 'Paid'
+    AND status = 'Ended';
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getPendingLockerApplications` (IN `p_limit` INT, IN `p_offset` INT)   BEGIN
@@ -791,6 +802,49 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getPendingLockerApplications` (IN `
 
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getPendingLockerApplicationsCount` ()   BEGIN
+    SELECT COUNT(*) AS pending_locker_applications_count
+    FROM locker_applications
+    WHERE status = 'Pending';
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getRecentLockerApplication` ()   BEGIN
+    SELECT
+    	id,
+        user_id,
+        slot_number,
+        location,
+        size,
+        price,
+        status,
+        payment,
+        DATE_FORMAT(created_at, '%M %d, %Y') AS created_at
+    FROM recent_locker_application;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getRecentUserAccountActivation` ()   BEGIN
+    SELECT
+        id,
+        username,
+        lastname,
+	firstname,
+	middlename,
+        DATE_FORMAT(created_at, '%M %d, %Y') AS created_at
+    FROM recent_user_account_activation;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getRejectedLockerApplicationsCount` ()   BEGIN
+    SELECT COUNT(*) AS rejected_locker_applications_count
+    FROM locker_applications
+    WHERE status = 'Rejected';
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getRevokedLockerApplicationsCount` ()   BEGIN
+    SELECT COUNT(*) AS revoked_locker_applications_count
+    FROM locker_applications
+    WHERE status = 'Revoked';
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterAcademicCalendar` (IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255), IN `p_limit` INT, IN `p_offset` INT)   BEGIN
     SELECT
         id,
@@ -798,8 +852,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterAcademicCalendar` (I
         semester,
         DATE_FORMAT(start_at, '%M %d, %Y') AS start_at,
         DATE_FORMAT(end_at, '%M %d, %Y') AS end_at,
-        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at,
-        DATE_FORMAT(updated_at, '%M %d, %Y %h:%i:%s %p') AS updated_at
+        DATE_FORMAT(created_at, '%M %d, %Y %h:%i:%s %p') AS created_at
     FROM academic_calendar
 
     WHERE (
@@ -1136,6 +1189,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerApplicationHis
         DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
     FROM locker_applications la
  
+    INNER JOIN users u ON la.user_id = u.id
     LEFT JOIN locker_slots ls ON la.slot_id = ls.id
     LEFT JOIN locker_locations ll ON ls.location_id = ll.id
     LEFT JOIN locker_sizes lsz ON ls.size_id = lsz.id
@@ -1168,6 +1222,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerApplicationHis
     SELECT COUNT(*) AS historyTotal
     FROM locker_applications la
  
+    INNER JOIN users u ON la.user_id = u.id
     LEFT JOIN locker_slots ls ON la.slot_id = ls.id
     LEFT JOIN locker_locations ll ON ls.location_id = ll.id
     LEFT JOIN locker_sizes lsz ON ls.size_id = lsz.id
@@ -1260,6 +1315,278 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterLockerSizes` (IN `se
 
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterMyAcceptedLockerApplications` (IN `p_user_id` VARCHAR(255), IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255), IN `p_limit` INT, IN `p_offset` INT)   BEGIN
+    SELECT
+        la.id AS application_id,
+        la.status,
+        la.payment,
+        ls.slot_number,
+        ll.location,
+        sz.size,
+        sz.price,
+        ac.academic_year,
+        ac.semester,
+        DATE_FORMAT(ac.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ac.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
+    FROM locker_applications la
+
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes sz ON ls.size_id = sz.id
+    LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+
+    WHERE la.user_id = p_user_id
+    AND la.status = 'Accepted'
+
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR sz.size LIKE CONCAT('%', searchTerm, '%')
+        OR ac.academic_year LIKE CONCAT('%', searchTerm, '%')
+        OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+    )
+
+    ORDER BY
+        CASE WHEN filterTerm = 'newest' THEN la.updated_at END DESC,
+        CASE WHEN filterTerm = 'oldest' THEN la.updated_at END ASC,
+        la.updated_at DESC
+
+    LIMIT p_limit OFFSET p_offset;
+
+    SELECT COUNT(*) AS myAcceptedTotal
+    FROM locker_applications la
+
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes sz ON ls.size_id = sz.id
+    LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+
+    WHERE la.user_id = p_user_id
+    AND la.status = 'Accepted'
+
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR sz.size LIKE CONCAT('%', searchTerm, '%')
+        OR ac.academic_year LIKE CONCAT('%', searchTerm, '%')
+        OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+    );
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterMyEndedLockerApplications` (IN `p_user_id` VARCHAR(255), IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255), IN `p_limit` INT, IN `p_offset` INT)   BEGIN
+    SELECT
+        la.id AS application_id,
+        la.status,
+        la.payment,
+        ls.slot_number,
+        ll.location,
+        sz.size,
+        sz.price,
+        ac.academic_year,
+        ac.semester,
+        DATE_FORMAT(ac.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ac.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
+    FROM locker_applications la
+
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes sz ON ls.size_id = sz.id
+    LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+
+    WHERE la.user_id = p_user_id
+    AND la.status = 'Ended' AND la.payment = 'Unpaid'
+
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR sz.size LIKE CONCAT('%', searchTerm, '%')
+        OR ac.academic_year LIKE CONCAT('%', searchTerm, '%')
+        OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+    )
+
+    ORDER BY
+        CASE WHEN filterTerm = 'newest' THEN la.updated_at END DESC,
+        CASE WHEN filterTerm = 'oldest' THEN la.updated_at END ASC,
+        la.updated_at DESC
+
+    LIMIT p_limit OFFSET p_offset;
+
+    SELECT COUNT(*) AS myEndedTotal
+    FROM locker_applications la
+
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes sz ON ls.size_id = sz.id
+    LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+
+    WHERE la.user_id = p_user_id
+    AND la.status = 'Ended' AND la.payment = 'Unpaid'
+
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR sz.size LIKE CONCAT('%', searchTerm, '%')
+        OR ac.academic_year LIKE CONCAT('%', searchTerm, '%')
+        OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+    );
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterMyLockerApplicationHistory` (IN `p_user_id` VARCHAR(255), IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255), IN `p_limit` INT, IN `p_offset` INT)   BEGIN
+    SELECT
+        la.id AS application_id,
+        la.status,
+        la.payment,
+        ls.slot_number,
+        ll.location,
+        sz.size,
+        sz.price,
+        ac.academic_year,
+        ac.semester,
+        DATE_FORMAT(ac.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ac.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.updated_at, '%M %d, %Y') AS updated_at
+    FROM locker_applications la
+
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes sz ON ls.size_id = sz.id
+    LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+
+    WHERE la.user_id = p_user_id
+    AND la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid')
+
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR sz.size LIKE CONCAT('%', searchTerm, '%')
+        OR ac.academic_year LIKE CONCAT('%', searchTerm, '%')
+        OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+    )
+
+    ORDER BY
+        CASE WHEN filterTerm = 'newest' THEN la.updated_at END DESC,
+        CASE WHEN filterTerm = 'oldest' THEN la.updated_at END ASC,
+        la.updated_at DESC
+
+    LIMIT p_limit OFFSET p_offset;
+
+    SELECT COUNT(*) AS myHistoryTotal
+    FROM locker_applications la
+
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes sz ON ls.size_id = sz.id
+    LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+
+    WHERE la.user_id = p_user_id
+    AND la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid')
+
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR sz.size LIKE CONCAT('%', searchTerm, '%')
+        OR ac.academic_year LIKE CONCAT('%', searchTerm, '%')
+        OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+    );
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterMyPendingLockerApplications` (IN `p_user_id` VARCHAR(255), IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255), IN `p_limit` INT, IN `p_offset` INT)   BEGIN
+    SELECT
+        la.id AS application_id,
+        la.status,
+        la.payment,
+        ls.slot_number,
+        ll.location,
+        sz.size,
+        sz.price,
+        ac.academic_year,
+        ac.semester,
+        DATE_FORMAT(ac.start_at, '%M %d, %Y') AS start_at,
+        DATE_FORMAT(ac.end_at, '%M %d, %Y') AS end_at,
+        DATE_FORMAT(la.created_at, '%M %d, %Y') AS created_at
+    FROM locker_applications la
+
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes sz ON ls.size_id = sz.id
+    LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+
+    WHERE la.user_id = p_user_id
+    AND la.status = 'Pending'
+
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR sz.size LIKE CONCAT('%', searchTerm, '%')
+        OR ac.academic_year LIKE CONCAT('%', searchTerm, '%')
+        OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+    )
+
+    ORDER BY
+        CASE WHEN filterTerm = 'newest' THEN la.created_at END DESC,
+        CASE WHEN filterTerm = 'oldest' THEN la.created_at END ASC,
+        la.created_at DESC
+
+    LIMIT p_limit OFFSET p_offset;
+
+    SELECT COUNT(*) AS myPendingTotal
+    FROM locker_applications la
+
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_locations ll ON ls.location_id = ll.id
+    INNER JOIN locker_sizes sz ON ls.size_id = sz.id
+    LEFT JOIN academic_calendar ac ON ls.academic_year_id = ac.id
+
+    WHERE la.user_id = p_user_id
+    AND la.status = 'Pending'
+
+    AND (
+        searchTerm IS NULL
+        OR searchTerm = ''
+
+        OR la.id LIKE CONCAT('%', searchTerm, '%')
+        OR ls.slot_number LIKE CONCAT('%', searchTerm, '%')
+        OR ll.location LIKE CONCAT('%', searchTerm, '%')
+        OR sz.size LIKE CONCAT('%', searchTerm, '%')
+        OR ac.academic_year LIKE CONCAT('%', searchTerm, '%')
+        OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+    );
+
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterPendingLockerApplications` (IN `searchTerm` VARCHAR(255), IN `filterTerm` VARCHAR(255), IN `p_limit` INT, IN `p_offset` INT)   BEGIN
     SELECT
         la.id AS application_id,
@@ -1344,61 +1671,32 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterPendingLockerApplica
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getSearchFilterUsers` (IN `searchTerm` VARCHAR(255), IN `sortOrder` VARCHAR(255), IN `p_limit` INT, IN `p_offset` INT)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getTotalLockerApplicationsCount` ()   BEGIN
+    SELECT COUNT(*) AS total_locker_applications_count
+    FROM locker_applications;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getTotalLockersCount` ()   BEGIN
+    SELECT COUNT(*) AS total_lockers_count
+    FROM locker_slots;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getUnpaidEndedLockerApplicationsAmount` ()   BEGIN
     SELECT
-        id,
-        firstname,
-        middlename,
-        lastname,
-        TRIM(CONCAT(
-            firstname, ' ',
-            IFNULL(CONCAT(middlename, ' '), ''),
-            lastname
-        )) AS fullname,
-        sex,
-        DATE_FORMAT(dob, '%M %d, %Y') AS dob,
-        institute,
-        program,
-        status,
-        username,
-        email,
-        DATE_FORMAT(created_at, '%M %d, %Y') AS created_at,
-        DATE_FORMAT(updated_at, '%M %d, %Y') AS updated_at
-    FROM users
-    WHERE status = 'Active'
-    AND (
-        searchTerm IS NULL
-        OR searchTerm = ''
-        OR id LIKE CONCAT('%', searchTerm, '%')
-        OR firstname LIKE CONCAT('%', searchTerm, '%')
-        OR middlename LIKE CONCAT('%', searchTerm, '%')
-        OR lastname LIKE CONCAT('%', searchTerm, '%')
-        OR username LIKE CONCAT('%', searchTerm, '%')
-        OR email LIKE CONCAT('%', searchTerm, '%')
-    )
+        COALESCE(SUM(lsz.price), 0) AS unpaid_total_amount
+    FROM locker_applications la
+    INNER JOIN locker_slots ls ON la.slot_id = ls.id
+    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
+    WHERE la.payment = 'Unpaid'
+    AND la.status = 'Ended';
+END$$
 
-    ORDER BY
-        CASE WHEN sortOrder = 'a-z' THEN firstname END ASC,
-        CASE WHEN sortOrder = 'z-a' THEN firstname END DESC,
-        CASE WHEN sortOrder = 'oldest' THEN created_at END ASC,
-        CASE WHEN sortOrder = 'newest' THEN created_at END DESC
-
-    LIMIT p_limit OFFSET p_offset;
-
-    SELECT COUNT(*) AS activeUsersTotal
-    FROM users
-    WHERE status = 'Active'
-    AND (
-        searchTerm IS NULL
-        OR searchTerm = ''
-        OR id LIKE CONCAT('%', searchTerm, '%')
-        OR firstname LIKE CONCAT('%', searchTerm, '%')
-        OR middlename LIKE CONCAT('%', searchTerm, '%')
-        OR lastname LIKE CONCAT('%', searchTerm, '%')
-        OR username LIKE CONCAT('%', searchTerm, '%')
-        OR email LIKE CONCAT('%', searchTerm, '%')
-    );
-
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getUnpaidEndedLockerApplicationsCount` ()   BEGIN
+    SELECT
+        COUNT(*) AS unpaid_total_transactions
+    FROM locker_applications
+    WHERE payment = 'Unpaid'
+    AND status = 'Ended';
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getUserAccountLogs` (IN `p_limit` INT, IN `p_offset` INT)   BEGIN
@@ -1486,211 +1784,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getUserLockerApplicationId` (IN `p_
     LIMIT 1;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getUsers` (IN `p_limit` INT, IN `p_offset` INT)   BEGIN
-    SELECT
-        id,
-        firstname,
-        middlename,
-        lastname,
-        TRIM(CONCAT(firstname, ' ', IFNULL(CONCAT(middlename, ' '), ''), lastname)) AS fullname,
-        sex,
-        DATE_FORMAT(dob, '%M %d, %Y') AS dob,
-        institute,
-        program,
-        status,
-        username,
-        email,
-        DATE_FORMAT(created_at, '%M %d, %Y') AS created_at,
-        DATE_FORMAT(updated_at, '%M %d, %Y') AS updated_at
-    FROM users
-    ORDER BY created_at DESC
-    LIMIT p_limit OFFSET p_offset;
-
-    SELECT COUNT(*) AS usersTotal
-    FROM users;
-
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_accepted_locker_applications_count` ()   BEGIN
-    SELECT COUNT(*) AS accepted_locker_applications_count
-    FROM locker_applications
-    WHERE status = 'Accepted';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_available_lockers_count` ()   BEGIN
-    SELECT COUNT(*) AS available_lockers_count
-    FROM locker_slots
-    WHERE status = 'Available';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_cancelled_locker_applications_count` ()   BEGIN
-    SELECT COUNT(*) AS cancelled_locker_applications_count
-    FROM locker_applications
-    WHERE status = 'Cancelled';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_occupied_lockers_count` ()   BEGIN
-    SELECT COUNT(*) AS occupied_lockers_count
-    FROM locker_slots
-    WHERE status = 'Occupied';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_paid_ended_locker_applications_amount` ()   BEGIN
-    SELECT
-        COALESCE(SUM(lsz.price), 0) AS paid_total_amount
-    FROM locker_applications la
-    INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
-    WHERE la.payment = 'Paid'
-    AND la.status = 'Ended';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_paid_ended_locker_applications_count` ()   BEGIN
-    SELECT
-        COUNT(*) AS paid_total_transactions
-    FROM locker_applications
-    WHERE payment = 'Paid'
-    AND status = 'Ended';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_pending_locker_applications_count` ()   BEGIN
-    SELECT COUNT(*) AS pending_locker_applications_count
-    FROM locker_applications
-    WHERE status = 'Pending';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_recent_locker_application` ()   BEGIN
-    SELECT
-    	id,
-        user_id,
-        slot_number,
-        location,
-        size,
-        price,
-        status,
-        payment,
-        DATE_FORMAT(created_at, '%M %d, %Y') AS created_at
-    FROM recent_locker_application;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_recent_user_account_activation` ()   BEGIN
-    SELECT
-        id,
-        username,
-        lastname,
-	firstname,
-	middlename,
-        DATE_FORMAT(created_at, '%M %d, %Y') AS created_at
-    FROM recent_user_account_activation;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_rejected_locker_applications_count` ()   BEGIN
-    SELECT COUNT(*) AS rejected_locker_applications_count
-    FROM locker_applications
-    WHERE status = 'Rejected';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_revoked_locker_applications_count` ()   BEGIN
-    SELECT COUNT(*) AS revoked_locker_applications_count
-    FROM locker_applications
-    WHERE status = 'Revoked';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_total_lockers_count` ()   BEGIN
-    SELECT COUNT(*) AS total_lockers_count
-    FROM locker_slots;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_total_locker_applications_count` ()   BEGIN
-    SELECT COUNT(*) AS total_locker_applications_count
-    FROM locker_applications;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_unpaid_ended_locker_applications_amount` ()   BEGIN
-    SELECT
-        COALESCE(SUM(lsz.price), 0) AS unpaid_total_amount
-    FROM locker_applications la
-    INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    INNER JOIN locker_sizes lsz ON ls.size_id = lsz.id
-    WHERE la.payment = 'Unpaid'
-    AND la.status = 'Ended';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_unpaid_ended_locker_applications_count` ()   BEGIN
-    SELECT
-        COUNT(*) AS unpaid_total_transactions
-    FROM locker_applications
-    WHERE payment = 'Unpaid'
-    AND status = 'Ended';
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `get_users_count` ()   BEGIN
-    SELECT COUNT(*) AS users_count
-    FROM users;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `loginAccount` (IN `p_email` VARCHAR(255))   BEGIN
-
-    -- Check admin
-    IF EXISTS (
-        SELECT 1
-        FROM admin
-        WHERE email = p_email
-    ) THEN
-
-        SELECT
-            id,
-            NULL AS lastname,
-            NULL AS firstname,
-            NULL AS middlename,
-            NULL AS sex,
-            NULL AS dob,
-            NULL AS institute,
-            NULL AS program,
-            username,
-            email,
-            password,
-            'admin' AS role
-
-        FROM admin
-        WHERE email = p_email
-        LIMIT 1;
-
-    -- Check user
-    ELSEIF EXISTS (
-        SELECT 1
-        FROM users
-        WHERE email = p_email
-    ) THEN
-
-        SELECT
-            id,
-            lastname,
-            firstname,
-            middlename,
-            sex,
-            dob,
-            institute,
-            program,
-            username,
-            email,
-            password,
-            'user' AS role
-
-        FROM users
-        WHERE email = p_email
-        LIMIT 1;
-
-    -- No account found
-    ELSE
-
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Account not found';
-
-    END IF;
-
-END$$
-
 CREATE DEFINER=`root`@`localhost` PROCEDURE `paidLockerApplication` (IN `p_application_id` INT)   BEGIN
     DECLARE v_slot_id INT;
     DECLARE v_status VARCHAR(255);
@@ -1775,16 +1868,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `revokeLockerApplication` (IN `p_app
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `updateAcademicYear` (IN `p_id` INT, IN `p_academic_year` VARCHAR(255), IN `p_semester` VARCHAR(255), IN `p_start_at` DATE, IN `p_end_at` DATE)   BEGIN
-    UPDATE academic_calendar
-    SET academic_year = p_academic_year,
-        semester = p_semester,
-        start_at = p_start_at,
-        end_at = p_end_at,
-        updated_at = NOW()
-    WHERE id = p_id;
-END$$
-
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLocker` (IN `p_id` INT, IN `p_slot_number` INT, IN `p_size_id` INT, IN `p_academic_year_id` INT, IN `p_status` VARCHAR(255))   BEGIN
     DECLARE v_start_at DATE;
     DECLARE v_end_at DATE;
@@ -1825,48 +1908,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLocker` (IN `p_id` INT, IN `p
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerApplicationDaily` ()   BEGIN
-    UPDATE locker_applications la
-    INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
-    SET
-        la.status = 'Ended',
-        la.payment = 'Unpaid',
-        la.updated_at = NOW()
-    WHERE la.status = 'Accepted' AND CURRENT_DATE() >= ac.end_at;
-
-    UPDATE locker_applications la
-    INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
-    SET
-        la.status = 'Cancelled',
-        la.updated_at = NOW()
-    WHERE la.status = 'Pending'
-    AND CURRENT_DATE() >= ac.end_at;
-
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerApplicationStatusDaily` ()   BEGIN
-    UPDATE locker_applications la
-    INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
-    SET
-        la.status = 'Ended',
-        la.payment = 'Unpaid',
-        la.updated_at = NOW()
-    WHERE la.status = 'Accepted' AND CURRENT_DATE() >= ac.end_at;
-
-    UPDATE locker_applications la
-    INNER JOIN locker_slots ls ON la.slot_id = ls.id
-    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
-    SET
-        la.status = 'Cancelled',
-        la.updated_at = NOW()
-    WHERE la.status = 'Pending'
-    AND CURRENT_DATE() >= ac.end_at;
-
-END$$
-
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerLocation` (IN `p_id` INT, IN `p_location` VARCHAR(255))   BEGIN
     UPDATE locker_locations
     SET
@@ -1881,24 +1922,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerSize` (IN `p_id` INT, I
         price = p_price,
 	updated_at = NOW()
     WHERE id = p_id;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `updateLockerStatusDaily` ()   BEGIN
-    UPDATE locker_slots ls
-    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
-    SET ls.status = 'Not yet started'
-    WHERE CURRENT_DATE() < ac.start_at AND ls.status <> 'Occupied';
-
-    UPDATE locker_slots ls
-    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
-    SET ls.status = 'Available'
-    WHERE CURRENT_DATE() >= ac.start_at AND CURRENT_DATE() < ac.end_at AND ls.status <> 'Occupied';
-
-    UPDATE locker_slots ls
-    INNER JOIN academic_calendar ac ON ls.academic_year_id = ac.id
-    SET ls.status = 'Already closed'
-    WHERE CURRENT_DATE() >= ac.end_at;
-
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updateUserPassword` (IN `p_email` VARCHAR(255), IN `p_password` VARCHAR(255))   BEGIN
@@ -1972,9 +1995,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `validateLogin` (IN `p_email` VARCHA
     -- Check admin
     IF EXISTS (
         SELECT 1 FROM admin WHERE email = p_email
-        
+ 
     ) THEN
-        SELECT NULL INTO v_status; 
+        SELECT NULL INTO v_status;
         SELECT
             id,
             NULL AS lastname,
@@ -1995,7 +2018,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `validateLogin` (IN `p_email` VARCHA
     -- Check user
     ELSEIF EXISTS (
         SELECT 1 FROM users WHERE email = p_email
-        
+ 
     ) THEN
         SELECT status INTO v_status
         FROM users WHERE email = p_email LIMIT 1;
@@ -2029,122 +2052,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `validateLogin` (IN `p_email` VARCHA
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `validateLoginAccount` (IN `p_email` VARCHAR(255))   BEGIN
-
-    -- Check admin
-    IF EXISTS (
-        SELECT 1
-        FROM admin
-        WHERE email = p_email
-    ) THEN
-
-        SELECT
-            id,
-            NULL AS lastname,
-            NULL AS firstname,
-            NULL AS middlename,
-            NULL AS sex,
-            NULL AS dob,
-            NULL AS institute,
-            NULL AS program,
-            username,
-            email,
-            password,
-            'admin' AS role
-
-        FROM admin
-        WHERE email = p_email
-        LIMIT 1;
-
-    -- Check user
-    ELSEIF EXISTS (
-        SELECT 1
-        FROM users
-        WHERE email = p_email
-    ) THEN
-
-        SELECT
-            id,
-            lastname,
-            firstname,
-            middlename,
-            sex,
-            dob,
-            institute,
-            program,
-            username,
-            email,
-            password,
-            'user' AS role
-
-        FROM users
-        WHERE email = p_email
-        LIMIT 1;
-
-    -- No account found
-    ELSE
-
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Account not found';
-
-    END IF;
-
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `validateUserAccountActivation` (IN `p_email` VARCHAR(255), IN `p_username` VARCHAR(255))   BEGIN
-    DECLARE v_status VARCHAR(255);
-    DECLARE v_email VARCHAR(255);
-    DECLARE v_username_count INT DEFAULT 0;
-
-    SELECT
-        status,
-        email
-    INTO
-        v_status,
-        v_email
-    FROM users
-    WHERE email = p_email
-    LIMIT 1;
-
-    IF v_email IS NULL THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Please use your campus email to activate your account.';
-    END IF;
-
-    IF v_status <> 'Inactive' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Account already activated. Please log in instead.';
-    END IF;
-
-    SELECT COUNT(*)
-    INTO v_username_count
-    FROM users
-    WHERE username = p_username;
-
-    IF v_username_count > 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Username already exists.';
-    END IF;
-
-    SELECT
-        id,
-        lastname,
-        firstname,
-        middlename,
-        sex,
-        dob,
-        institute,
-        program,
-        status,
-        username,
-        email,
-        password
-    FROM users
-    WHERE email = p_email
-    LIMIT 1;
-
-END$$
-
 DELIMITER ;
 
 -- --------------------------------------------------------
@@ -2167,8 +2074,8 @@ CREATE TABLE `academic_calendar` (
 --
 
 INSERT INTO `academic_calendar` (`id`, `academic_year`, `semester`, `start_at`, `end_at`, `created_at`) VALUES
-(1, '2026-2027', '1st Semester', '2026-05-14', '2026-05-30', '2026-05-23 15:03:43'),
-(2, '2026-2027', '2nd Semester', '2027-01-18', '2027-06-18', '2026-05-23 15:03:43');
+(1, '2026-2027', '1st Semester', '2026-05-14', '2026-05-31', '2026-05-23 15:03:43'),
+(2, '2026-2027', '2nd Semester', '2025-01-18', '2025-06-18', '2026-05-23 15:03:43');
 
 --
 -- Triggers `academic_calendar`
@@ -2190,7 +2097,7 @@ CREATE TRIGGER `after_academic_calendar_deletion` AFTER DELETE ON `academic_cale
         ' has been deleted.'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2217,7 +2124,7 @@ CREATE TRIGGER `after_academic_calendar_insertion` AFTER INSERT ON `academic_cal
         '.'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2248,7 +2155,7 @@ CREATE TRIGGER `after_academic_calendar_updation` AFTER UPDATE ON `academic_cale
         '.'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2324,7 +2231,7 @@ CREATE TRIGGER `after_locker_acception` AFTER UPDATE ON `locker_applications` FO
             ' accepted.'
         );
 
-        INSERT INTO locker_logs (action, description)
+        INSERT INTO logs (action, description)
         VALUES (action, description);
 
     END IF;
@@ -2353,7 +2260,7 @@ CREATE TRIGGER `after_locker_application` AFTER INSERT ON `locker_applications` 
         ').'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2387,7 +2294,7 @@ CREATE TRIGGER `after_locker_cancellation` AFTER UPDATE ON `locker_applications`
             ').'
         );
 
-        INSERT INTO locker_logs (
+        INSERT INTO logs (
             action,
             description
         ) VALUES (
@@ -2426,7 +2333,7 @@ CREATE TRIGGER `after_locker_ending` AFTER UPDATE ON `locker_applications` FOR E
             ' ended.'
         );
 
-        INSERT INTO locker_logs (action, description)
+        INSERT INTO logs (action, description)
         VALUES (action, description);
 
     END IF;
@@ -2460,7 +2367,7 @@ CREATE TRIGGER `after_locker_rejection` AFTER UPDATE ON `locker_applications` FO
             ' rejected.'
         );
 
-        INSERT INTO locker_logs (action, description)
+        INSERT INTO logs (action, description)
         VALUES (action, description);
 
     END IF;
@@ -2494,7 +2401,7 @@ CREATE TRIGGER `after_locker_revoking` AFTER UPDATE ON `locker_applications` FOR
             ' revoked.'
         );
 
-        INSERT INTO locker_logs (action, description)
+        INSERT INTO logs (action, description)
         VALUES (action, description);
 
     END IF;
@@ -2521,10 +2428,10 @@ CREATE TABLE `locker_locations` (
 --
 
 INSERT INTO `locker_locations` (`id`, `location`, `created_at`, `updated_at`) VALUES
-(6, 'AB 1st Floor', '2026-05-22 06:07:29', '2026-05-24 08:24:29'),
-(7, 'AB 2nd Floor', '2026-05-22 06:07:32', '2026-05-24 08:24:34'),
-(8, 'AB 3rd Floor', '2026-05-22 06:07:36', '2026-05-22 10:29:13'),
-(9, 'AB 4th Floor', '2026-05-22 06:07:38', '2026-05-23 08:56:27');
+(35, 'AB 1st Floor', '2026-05-29 10:38:52', NULL),
+(37, 'AB 2nd Floor', '2026-05-29 10:38:59', NULL),
+(38, 'AB 3rd Floor', '2026-05-29 10:39:03', NULL),
+(39, 'AB 4th Floor', '2026-05-29 10:39:06', NULL);
 
 --
 -- Triggers `locker_locations`
@@ -2540,7 +2447,7 @@ CREATE TRIGGER `after_locker_location_deletion` AFTER DELETE ON `locker_location
         ' has been deleted.'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2557,7 +2464,7 @@ CREATE TRIGGER `after_locker_location_insertion` AFTER INSERT ON `locker_locatio
 
     SET description = CONCAT('Location ', NEW.location, ' has been added.');
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2580,7 +2487,7 @@ CREATE TRIGGER `after_locker_location_updation` AFTER UPDATE ON `locker_location
         '.'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2591,47 +2498,6 @@ CREATE TRIGGER `after_locker_location_updation` AFTER UPDATE ON `locker_location
 END
 $$
 DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `locker_logs`
---
-
-CREATE TABLE `locker_logs` (
-  `id` int(11) NOT NULL,
-  `action` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `locker_logs`
---
-
-INSERT INTO `locker_logs` (`id`, `action`, `description`, `created_at`) VALUES
-(1, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:49'),
-(2, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:49'),
-(3, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:49'),
-(4, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:54'),
-(5, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:56'),
-(6, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:57'),
-(7, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:57'),
-(8, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:57'),
-(9, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:15:58'),
-(10, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:01'),
-(11, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:05'),
-(12, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:05'),
-(13, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:05'),
-(14, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:13'),
-(15, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:13'),
-(16, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:13'),
-(17, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:21'),
-(18, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:21'),
-(19, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:21'),
-(20, 'Update', 'Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #1 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:29'),
-(21, 'Update', 'Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #2 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:29'),
-(22, 'Update', 'Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available) updated to Slot #3 (AB 1st Floor, Small, May 14, 2026 - May 30, 2026, Available).', '2026-05-25 16:16:29');
 
 -- --------------------------------------------------------
 
@@ -2652,9 +2518,9 @@ CREATE TABLE `locker_sizes` (
 --
 
 INSERT INTO `locker_sizes` (`id`, `size`, `price`, `created_at`, `updated_at`) VALUES
-(5, 'Small', 79.00, '2026-05-22 06:07:46', NULL),
-(6, 'Medium ', 99.00, '2026-05-22 06:07:51', NULL),
-(10, 'Large', 149.00, '2026-05-22 09:50:02', '2026-05-23 08:56:43');
+(22, 'Small', 89.00, '2026-05-29 10:39:12', NULL),
+(23, 'Medium ', 129.00, '2026-05-29 10:39:20', NULL),
+(24, 'Large', 159.00, '2026-05-29 10:39:32', NULL);
 
 --
 -- Triggers `locker_sizes`
@@ -2672,7 +2538,7 @@ CREATE TRIGGER `after_locker_sizes_deletion` AFTER DELETE ON `locker_sizes` FOR 
         ') has been deleted.'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2689,7 +2555,7 @@ CREATE TRIGGER `after_locker_sizes_insertion` AFTER INSERT ON `locker_sizes` FOR
 
     SET description = CONCAT('Size ', NEW.size, ' with price ₱', NEW.price, ' has been added.');
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2716,7 +2582,7 @@ CREATE TRIGGER `after_locker_sizes_updation` AFTER UPDATE ON `locker_sizes` FOR 
         '.'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2750,9 +2616,14 @@ CREATE TABLE `locker_slots` (
 --
 
 INSERT INTO `locker_slots` (`id`, `academic_year_id`, `slot_number`, `location_id`, `size_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 6, 5, 'Available', '2026-05-25 06:46:04', '2026-05-25 06:48:03'),
-(2, 1, 2, 6, 5, 'Available', '2026-05-25 06:46:10', '2026-05-25 06:48:06'),
-(3, 1, 3, 6, 5, 'Available', '2026-05-25 06:46:13', '2026-05-25 06:48:09');
+(13, 1, 1, 39, 22, 'Available', '2026-05-29 14:36:57', '2026-05-30 07:20:21'),
+(14, 1, 2, 39, 22, 'Available', '2026-05-29 14:37:04', NULL),
+(15, 1, 3, 39, 22, 'Available', '2026-05-29 14:37:08', NULL),
+(16, 1, 4, 39, 22, 'Available', '2026-05-29 14:37:12', NULL),
+(17, 1, 1, 38, 23, 'Available', '2026-05-29 15:08:32', NULL),
+(18, 1, 2, 38, 23, 'Available', '2026-05-29 15:08:37', NULL),
+(19, 1, 3, 38, 23, 'Available', '2026-05-29 15:08:43', NULL),
+(20, 1, 4, 38, 23, 'Available', '2026-05-29 15:08:49', NULL);
 
 --
 -- Triggers `locker_slots`
@@ -2793,7 +2664,7 @@ CREATE TRIGGER `after_locker_slot_deletion` AFTER DELETE ON `locker_slots` FOR E
         ') has been deleted.'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2838,7 +2709,7 @@ CREATE TRIGGER `after_locker_slot_insertion` AFTER INSERT ON `locker_slots` FOR 
         ') has been added.'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2908,7 +2779,7 @@ CREATE TRIGGER `after_locker_slot_updation` AFTER UPDATE ON `locker_slots` FOR E
         ').'
     );
 
-    INSERT INTO locker_logs (
+    INSERT INTO logs (
         action,
         description
     ) VALUES (
@@ -2919,6 +2790,19 @@ CREATE TRIGGER `after_locker_slot_updation` AFTER UPDATE ON `locker_slots` FOR E
 END
 $$
 DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `logs`
+--
+
+CREATE TABLE `logs` (
+  `id` int(11) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -2982,32 +2866,24 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `lastname`, `firstname`, `middlename`, `sex`, `dob`, `institute`, `program`, `status`, `username`, `email`, `password`, `created_at`, `updated_at`) VALUES
 ('2024-11231', 'Bulay-og', 'Jason', 'Dy', 'Male', '2004-11-21', 'Institute of Computing', 'Bachelor of Science in Information System', 'Inactive', NULL, 'bulay-og.jason@dnscedu.onmicrosoft.com', NULL, '2026-05-24 05:33:38', NULL),
-('2024-11468', 'Getalla', 'Joviet', 'Batang', 'Male', '2003-02-19', 'Institute of Computing', 'Bachelor of Science in Information System', 'Active', 'jovietgetalla', 'getalla.joviet@dnscedu.onmicrosoft.com', '$2y$10$AAjH4kHWBsCZHcHm0wApAOFpQDheHyAz5FwBRyZoi5GX6S5ifpsj6', '2026-05-22 06:46:04', '2026-05-22 06:46:04'),
-('2024-98798', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'Active', 'febyjohnrelmalbino', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com', '$2y$10$UDcSEoQ3fxMUgUOX4H2PPOI566TisLQI7eAyu59GfG5MqWxWjDnMO', '2026-05-24 08:11:14', '2026-05-25 15:18:36');
+('2024-11468', 'Getalla', 'Joviet', 'Batang', 'Male', '2003-02-19', 'Institute of Computing', 'Bachelor of Science in Information System', 'Inactive', NULL, 'getalla.joviet@dnscedu.onmicrosoft.com', NULL, '2026-05-22 06:46:04', NULL),
+('2024-98798', 'Malbino', 'Feby Johnrel', 'Roferos', 'Male', '2006-02-11', 'Institute of Computing', 'Bachelor of Science in Information Technology', 'Active', 'febyjohnrelmalbino', 'malbino.febyjohnrel@dnscedu.onmicrosoft.com', '$2y$10$d/Ruk1t5.COvUebKg6XYzOTwdj..VFhEf4IVEbbzMWPrQanjWOT2y', '2026-05-24 08:11:14', '2026-05-29 14:37:24');
 
 --
 -- Triggers `users`
 --
 DELIMITER $$
 CREATE TRIGGER `after_user_activation` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
-    IF NEW.status = 'Active' AND NEW.status <> 'Inactive' THEN
+     IF OLD.status <> 'Active' AND NEW.status = 'Active' THEN
 
-        INSERT INTO user_account_logs (
+        INSERT INTO logs (
             action,
             description
         )
         VALUES (
             'Activate',
             CONCAT(
-                'Activated user: ',
-                NEW.username,
-                ' | ', NEW.id,
-                ' | ', NEW.status,
-                ' | ', NEW.sex,
-                ' | ', NEW.dob,
-                ' | ', NEW.institute,
-                ' | ', NEW.program,
-                ' | ', NEW.email
+                NEW.lastname, ', ', NEW.firstname, ' ', IFNULL(NEW.middlename, ''), ' | ', NEW.id, ' | ', NEW.email, ' account has been activated.'
             )
         );
 
@@ -3020,23 +2896,15 @@ DELIMITER $$
 CREATE TRIGGER `after_user_deactivation` AFTER UPDATE ON `users` FOR EACH ROW BEGIN
     IF OLD.status = 'Active' AND NEW.status = 'Inactive' THEN
 
-        INSERT INTO user_account_logs (
+        INSERT INTO logs (
             action,
             description
         )
         VALUES (
             'Deactivate',
             CONCAT(
-                'Deactivated user: ',
-                NEW.username,
-                ' | ', NEW.id,
-                ' | ', OLD.status, ' → ', NEW.status,
-                ' | ', NEW.sex,
-                ' | ', NEW.dob,
-                ' | ', NEW.institute,
-                ' | ', NEW.program,
-                ' | ', NEW.email
-            )
+                 NEW.lastname, ', ', NEW.firstname, ' ', IFNULL(NEW.middlename, ''), ' | ', NEW.id, ' | ', NEW.email, ' account has been deactivated.'            
+	    )
         );
 
     END IF;
@@ -3044,21 +2912,6 @@ CREATE TRIGGER `after_user_deactivation` AFTER UPDATE ON `users` FOR EACH ROW BE
 END
 $$
 DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_account_logs`
---
-
-CREATE TABLE `user_account_logs` (
-  `id` int(11) NOT NULL,
-  `user_id` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `action` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -3076,7 +2929,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `recent_user_account_activation`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `recent_user_account_activation`  AS SELECT `users`.`id` AS `id`, `users`.`lastname` AS `lastname`, `users`.`firstname` AS `firstname`, `users`.`middlename` AS `middlename`, `users`.`username` AS `username`, `users`.`created_at` AS `created_at` FROM `users` ORDER BY `users`.`created_at` DESC LIMIT 0, 1 ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `recent_user_account_activation`  AS SELECT `users`.`id` AS `id`, `users`.`lastname` AS `lastname`, `users`.`firstname` AS `firstname`, `users`.`middlename` AS `middlename`, `users`.`username` AS `username`, `users`.`created_at` AS `created_at` FROM `users` WHERE `users`.`status` = 'Active' ORDER BY `users`.`created_at` DESC LIMIT 0, 1 ;
 
 --
 -- Indexes for dumped tables
@@ -3110,12 +2963,6 @@ ALTER TABLE `locker_locations`
   ADD UNIQUE KEY `location` (`location`);
 
 --
--- Indexes for table `locker_logs`
---
-ALTER TABLE `locker_logs`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `locker_sizes`
 --
 ALTER TABLE `locker_sizes`
@@ -3133,17 +2980,17 @@ ALTER TABLE `locker_slots`
   ADD KEY `slot_academic_year` (`academic_year_id`);
 
 --
+-- Indexes for table `logs`
+--
+ALTER TABLE `logs`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD UNIQUE KEY `uniqueStudentID` (`id`),
   ADD UNIQUE KEY `uniqueEmail` (`email`);
-
---
--- Indexes for table `user_account_logs`
---
-ALTER TABLE `user_account_logs`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -3153,7 +3000,7 @@ ALTER TABLE `user_account_logs`
 -- AUTO_INCREMENT for table `academic_calendar`
 --
 ALTER TABLE `academic_calendar`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `admin`
@@ -3165,36 +3012,30 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `locker_applications`
 --
 ALTER TABLE `locker_applications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=139;
 
 --
 -- AUTO_INCREMENT for table `locker_locations`
 --
 ALTER TABLE `locker_locations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT for table `locker_logs`
---
-ALTER TABLE `locker_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `locker_sizes`
 --
 ALTER TABLE `locker_sizes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `locker_slots`
 --
 ALTER TABLE `locker_slots`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
--- AUTO_INCREMENT for table `user_account_logs`
+-- AUTO_INCREMENT for table `logs`
 --
-ALTER TABLE `user_account_logs`
+ALTER TABLE `logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -3219,16 +3060,12 @@ DELIMITER $$
 --
 -- Events
 --
-CREATE DEFINER=`root`@`localhost` EVENT `auto_end_locker_daily` ON SCHEDULE EVERY 1 DAY STARTS '2026-05-25 13:01:00' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
-    CALL endLockerApplicationDaily();
+CREATE DEFINER=`root`@`localhost` EVENT `endLockerApplication_applicationStatus` ON SCHEDULE EVERY 1 DAY STARTS '2026-05-30 15:19:51' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+    CALL endLockerApplication_applicationStatus();
 END$$
 
-CREATE DEFINER=`root`@`localhost` EVENT `update_locker_status_daily` ON SCHEDULE EVERY 8 SECOND STARTS '2026-05-25 14:12:21' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
-    CALL updateLockerStatusDaily();
-END$$
-
-CREATE DEFINER=`root`@`localhost` EVENT `update_locker_application_status_daily` ON SCHEDULE EVERY 8 SECOND STARTS '2026-05-25 14:12:21' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
-    CALL updateLockerApplicationStatusDaily();
+CREATE DEFINER=`root`@`localhost` EVENT `endLockerApplication_lockerStatus` ON SCHEDULE EVERY 1 DAY STARTS '2026-05-30 15:19:51' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+    CALL endLockerApplication_lockerStatus();
 END$$
 
 DELIMITER ;

@@ -38,6 +38,6 @@ try {
     ];
 }
 
-header("Location: ../../admin/lockers.php");
+header("Location: ../../admin/lockers.php?tab=lockerSlotsTab");
 exit();
 ?>

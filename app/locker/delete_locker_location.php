@@ -25,6 +25,6 @@ try {
     ];
 }
 
-header("Location: ../../admin/lockers.php#lockerLocationsOffcanvas");
+header("Location: ../../admin/lockers.php?tab=lockerLocationsTab");
 exit();
 ?>

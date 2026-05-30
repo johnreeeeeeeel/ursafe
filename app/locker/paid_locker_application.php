@@ -75,6 +75,6 @@ try {
     ];
 }
 
-header("Location: ../../admin/lockers.php#lockerEndedApplicationOffcanvas");
+header("Location: ../../admin/applications.php?tab=endedApplicationsTab");
 exit;
 ?>

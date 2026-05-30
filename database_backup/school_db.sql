@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 25, 2026 at 06:14 PM
+-- Generation Time: May 30, 2026 at 09:21 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,8 +41,8 @@ CREATE TABLE `academic_calendar` (
 --
 
 INSERT INTO `academic_calendar` (`id`, `academic_year`, `semester`, `start_at`, `end_at`, `created_at`) VALUES
-(1, '2026-2027', '1st Semester', '2026-05-14', '2026-05-30', '2026-05-23 15:03:43'),
-(2, '2026-2027', '2nd Semester', '2027-01-18', '2027-06-18', '2026-05-23 15:03:43');
+(1, '2026-2027', '1st Semester', '2026-05-14', '2026-05-31', '2026-05-23 15:03:43'),
+(2, '2026-2027', '2nd Semester', '2025-01-18', '2025-06-18', '2026-05-23 15:03:43');
 
 --
 -- Triggers `academic_calendar`
@@ -136,26 +136,6 @@ CREATE TRIGGER `after_student_delete` AFTER DELETE ON `students` FOR EACH ROW BE
         WHERE id = OLD.id;
 
     END IF;
-
-    INSERT INTO ursafe_db.user_account_logs (
-        action,
-        description
-    )
-    VALUES (
-        'Delete',
-        CONCAT(
-            'Deleted user: ',
-            OLD.lastname, ', ', OLD.firstname, ' ', IFNULL(OLD.middlename, ''),
-
-            ' | ', OLD.id,
-            ' | ', OLD.sex,
-            ' | ', OLD.dob,
-            ' | ', OLD.institute,
-            ' | ', OLD.program,
-            ' | ', OLD.email
-        )
-    );
-
 END
 $$
 DELIMITER ;
@@ -166,49 +146,29 @@ CREATE TRIGGER `after_student_insert` AFTER INSERT ON `students` FOR EACH ROW BE
     ) THEN
 
         INSERT INTO ursafe_db.users (
-            id, 
-            lastname, 
-            firstname, 
+            id,
+            lastname,
+            firstname,
             middlename,
-            sex, 
-            dob, 
-            institute, 
-            program, 
+            sex,
+            dob,
+            institute,
+            program,
             email
         )
         VALUES (
-            NEW.id, 
-            NEW.lastname, 
-            NEW.firstname, 
+            NEW.id,
+            NEW.lastname,
+            NEW.firstname,
             NEW.middlename,
-            NEW.sex, 
-            NEW.dob, 
-            NEW.institute, 
-            NEW.program, 
+            NEW.sex,
+            NEW.dob,
+            NEW.institute,
+            NEW.program,
             NEW.email
         );
 
     END IF;
-
-    INSERT INTO ursafe_db.user_account_logs (
-        action,
-        description
-    )
-    VALUES (
-        'Add',
-        CONCAT(
-            'Added user: ',
-            NEW.lastname, ', ', NEW.firstname, ' ', IFNULL(NEW.middlename, ''),
-
-            ' | ', NEW.id,
-            ' | ', NEW.sex,
-            ' | ', NEW.dob,
-            ' | ', NEW.institute,
-            ' | ', NEW.program,
-            ' | ', NEW.email
-        )
-    );
-
 END
 $$
 DELIMITER ;
@@ -231,26 +191,6 @@ CREATE TRIGGER `after_student_update` AFTER UPDATE ON `students` FOR EACH ROW BE
         WHERE id = NEW.id;
 
     END IF;
-
-    INSERT INTO ursafe_db.user_account_logs (
-        action,
-        description
-    )
-    VALUES (
-        'Update',
-        CONCAT(
-            'Updated user: ',
-            NEW.lastname, ', ', NEW.firstname, ' ', IFNULL(NEW.middlename, ''),
-
-            ' | ', NEW.id,
-            ' | ', NEW.sex,
-            ' | ', NEW.dob,
-            ' | ', NEW.institute,
-            ' | ', NEW.program,
-            ' | ', NEW.email
-        )
-    );
-
 END
 $$
 DELIMITER ;
@@ -280,7 +220,7 @@ ALTER TABLE `students`
 -- AUTO_INCREMENT for table `academic_calendar`
 --
 ALTER TABLE `academic_calendar`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

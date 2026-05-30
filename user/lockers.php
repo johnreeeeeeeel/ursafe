@@ -108,7 +108,14 @@ $password = $_SESSION['password'] ?? '';
                             <i class="fa-solid fa-vault"></i>
                             Lockers
                         </a>
-                    </li>       
+                    </li>    
+                    
+                    <li>
+                        <a class="link" href="my_applications.php">
+                            <i class="fa-solid fa-file-lines"></i>
+                            My Applications
+                        </a>
+                    </li> 
                 </div>
 
                 <div class="bottom-nav">
@@ -151,6 +158,13 @@ $password = $_SESSION['password'] ?? '';
                         Lockers
                     </a>
                 </li>
+
+                <li>
+                    <a class="link" href="my_applications.php">
+                        <i class="fa-solid fa-file-lines"></i>
+                        My Applications
+                    </a>
+                </li> 
             </div>
 
             <div class="bottom-nav">
@@ -177,489 +191,12 @@ $password = $_SESSION['password'] ?? '';
                 <i class="fa-solid fa-bars menuToggleButton" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile"></i>
                 <h1 class="page-title">Lockers</h1> 
             </div>
-
-            <div class="right">
-                <div class="dropdown">
-                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
-                        View
-                    </button>
-                    
-                    <ul class="dropdown-menu"> 
-                        <li>
-                            <button type="button" class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#myLockerApplicationOffcanvas" onclick="window.location.hash='myLockerApplicationOffcanvas';">
-                                My Locker Applications
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </header>
 
         <div class="content">
             <div id="lockers">
-                <!-- Offcanvas for my locker application -->
-                <div class="offcanvas offcanvas-end" id="myLockerApplicationOffcanvas">
-                    <div class="offcanvas-header">
-                        <h3 class="offcanvas-title">My Locker Applications</h3>
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-                    </div>
-
-                    <div class="offcanvas-body">
-                        <div class="locker-applications-container">
-                            <!-- Accepted applications -->
-                            <div class="card-container">
-                                <?php
-                                    // Accepted locker application
-                                    $limit = 4;
-                                    $acceptedPage = isset($_GET['acceptedPage']) ? (int)$_GET['acceptedPage'] : 1;
-                                    if ($acceptedPage < 1) $acceptedPage = 1;
-
-                                    $offset = ($acceptedPage - 1) * $limit;
-
-                                    $stmtAccepted = $conn_local->prepare("CALL getMyAcceptedLockerApplications(?, ?, ?)");
-                                    $stmtAccepted->bind_param("sii", $id, $limit, $offset);
-
-                                    $stmtAccepted->execute();
-
-                                    $acceptedResultSet = $stmtAccepted->get_result();
-
-                                    $stmtAccepted->next_result();
-                                    $totalAcceptedRow = $stmtAccepted->get_result()->fetch_assoc()['myAcceptedTotal'];
-
-                                    $totalPagesAccepted = ceil($totalAcceptedRow / $limit);
-
-                                    $stmtAccepted->close();
-
-                                    while ($conn_local->next_result()) {
-                                        $conn_local->store_result();
-                                    }
-                                ?>
-
-                                <h3>Accepted Applications</h3>
-
-                                <?php if ($acceptedResultSet->num_rows > 0): ?>
-                                    <div class="cards">
-                                        <?php while ($row = $acceptedResultSet->fetch_assoc()) { ?>
-                                            <div class="card accepted">
-                                                <div class="card-header">
-                                                    <h4>Slot <?= $row['slot_number'] ?></h4>
-                                                    <p><?= $row['location'] ?></p>
-
-                                                    <span class="badge rounded-pill accepted-badge">Accepted</span>
-                                                </div>
-
-                                                <div class="card-body">
-                                                    <div class="locker-details">
-                                                        <p class="label">
-                                                            <i class="fa-solid fa-vault"></i>
-                                                            Locker Details
-                                                        </p>
-
-                                                        <p>Size: <?= $row['size'] ?></p>
-                                                        <p>Price: &#8369;<?= $row['price'] ?></p>
-                                                        <p>Academic Year: <?= $row['academic_year'] ?></p>
-                                                        <p>Semester: <?= $row['semester'] ?></p>
-                                                        <p>Start on: <?= $row['start_at'] ?></p>
-                                                        <p>End on: <?= $row['end_at'] ?></p>
-                                                    </div>
-
-                                                    <div class="application-details">
-                                                        <p class="label">
-                                                            <i class="fa-brands fa-jxl"></i>
-                                                            Application Details
-                                                        </p>
-
-                                                        <p>Application ID: #<?= $row['application_id'] ?></p>
-                                                        <p>Payment: <?= $row['payment'] ?></p>
-                                                        <p>Accepted on: <?= $row['updated_at'] ?></p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php } ?>
-                                    </div>
-                                    <ul class="pagination">
-                                        <li class="page-item <?= ($acceptedPage <= 1) ? 'disabled' : '' ?>">
-                                            <a class="page-link"
-                                            href="?acceptedPage=<?= $acceptedPage - 1 ?>#myLockerApplicationOffcanvas">
-                                                Previous
-                                            </a>
-                                        </li>
-
-                                        <li class="page-item active">
-                                            <span class="page-link"><?= $acceptedPage ?></span>
-                                        </li>
-
-                                        <li class="page-item <?= ($acceptedPage >= $totalPagesAccepted) ? 'disabled' : '' ?>">
-                                            <a class="page-link"
-                                            href="?acceptedPage=<?= $acceptedPage + 1 ?>#myLockerApplicationOffcanvas">
-                                                Next
-                                            </a>
-                                        </li>
-                                    </ul>
-                                <?php else: ?>
-                                    <div id="empty">
-                                        <i class="fa-solid fa-ban"></i>
-                                        <small>No accepted application yet</small>
-                                        <small>Try to reload page</small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <!-- Pending applications -->
-                            <div class="card-container">
-                                <?php
-                                    // Pending locker application
-                                    $limit = 4;
-                                    $pendingPage = isset($_GET['pendingPage']) ? (int)$_GET['pendingPage'] : 1;
-                                    if ($pendingPage < 1) $pendingPage = 1;
-
-                                    $offset = ($pendingPage - 1) * $limit;
-
-                                    $stmtPending = $conn_local->prepare("CALL getMyPendingLockerApplications(?, ?, ?)");
-                                    $stmtPending->bind_param("sii", $id, $limit, $offset);
-
-                                    $stmtPending->execute();
-
-                                    $pendingResultSet = $stmtPending->get_result();
-
-                                    $stmtPending->next_result();
-                                    $totalPendingRow = $stmtPending->get_result()->fetch_assoc()['myPendingTotal'];
-
-                                    $totalPagesPending = ceil($totalPendingRow / $limit);
-
-                                    $stmtPending->close();
-
-                                    while ($conn_local->next_result()) {
-                                        $conn_local->store_result();
-                                    }
-                                ?>
-
-                                <h3>Pending Applications</h3>
-
-                                <?php if ($pendingResultSet->num_rows > 0): ?>
-                                    <div class="cards">
-                                        <?php while ($row = $pendingResultSet->fetch_assoc()) { ?>
-                                            <div class="card pending">
-                                                <div class="card-header">
-                                                    <h4>Slot <?= $row['slot_number'] ?></h4>
-                                                    <p><?= $row['location'] ?></p>
-
-                                                    <span class="badge rounded-pill pending-badge">Pending</span>
-                                                </div>
-
-                                                <div class="card-body">
-                                                    <div class="locker-details">
-                                                        <p class="label">
-                                                            <i class="fa-solid fa-vault"></i>
-                                                            Locker Details
-                                                        </p>
-
-                                                        <p>Size: <?= $row['size'] ?></p>
-                                                        <p>Price: &#8369;<?= $row['price'] ?></p>
-                                                        <p>Academic Year: <?= $row['academic_year'] ?></p>
-                                                        <p>Semester: <?= $row['semester'] ?></p>
-                                                        <p>Start on: <?= $row['start_at'] ?></p>
-                                                        <p>End on: <?= $row['end_at'] ?></p>
-                                                    </div>
-
-                                                    <div class="application-details">
-                                                        <p class="label">
-                                                            <i class="fa-brands fa-jxl"></i>
-                                                            Application Details
-                                                        </p>
-
-                                                        <p>Application ID: #<?= $row['application_id'] ?></p>
-                                                        <p>Payment: <?= $row['payment'] ?></p>
-                                                        <p>Applied on: <?= $row['created_at'] ?></p>
-                                                    </div>
-                                                </div>
-
-                                                <div class="card-footer">
-                                                    <div class="action-buttons">
-                                                        <button class="sm-btn danger-btn"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#cancelApplicationModal<?= $row['application_id'] ?>">
-                                                            <i class="fa-solid fa-xmark"></i>
-                                                            Cancel Application
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php } ?>
-                                    </div>
-                                    <ul class="pagination">
-                                        <li class="page-item <?= ($pendingPage <= 1) ? 'disabled' : '' ?>">
-                                            <a class="page-link"
-                                            href="?pendingPage=<?= $pendingPage - 1 ?>#myLockerApplicationOffcanvas">
-                                                Previous
-                                            </a>
-                                        </li>
-
-                                        <li class="page-item active">
-                                            <span class="page-link"><?= $pendingPage ?></span>
-                                        </li>
-
-                                        <li class="page-item <?= ($pendingPage >= $totalPagesPending) ? 'disabled' : '' ?>">
-                                            <a class="page-link"
-                                            href="?pendingPage=<?= $pendingPage + 1 ?>#myLockerApplicationOffcanvas">
-                                                Next
-                                            </a>
-                                        </li>
-                                    </ul>
-                                <?php else: ?>
-                                    <div id="empty">
-                                        <i class="fa-solid fa-ban"></i>
-                                        <small>No pending application yet</small>
-                                        <small>Try to reload page</small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <!-- Ended applications -->
-                            <div class="card-container">
-                                <?php
-                                    // Ended locker application
-                                    $limit = 4;
-                                    $endedPage = isset($_GET['endedPage']) ? (int)$_GET['endedPage'] : 1;
-                                    if ($endedPage < 1) $endedPage = 1;
-
-                                    $offset = ($endedPage - 1) * $limit;
-
-                                    $stmtEnded = $conn_local->prepare("CALL getMyEndedLockerApplications(?, ?, ?)");
-                                    $stmtEnded->bind_param("sii", $id, $limit, $offset);
-
-                                    $stmtEnded->execute();
-
-                                    $endedResultSet = $stmtEnded->get_result();
-
-                                    $stmtEnded->next_result();
-                                    $totalEndedRow = $stmtEnded->get_result()->fetch_assoc()['myEndedTotal'];
-
-                                    $totalPagesAccepted = ceil($totalEndedRow / $limit);
-
-                                    $stmtEnded->close();
-
-                                    while ($conn_local->next_result()) {
-                                        $conn_local->store_result();
-                                    }
-                                ?>
-
-                                <h3>Ended Applications</h3>
-
-                                <?php if ($endedResultSet->num_rows > 0): ?>
-                                    <div class="cards">
-                                        <?php while ($row = $endedResultSet->fetch_assoc()) { ?>
-                                            <div class="card ended">
-                                                <div class="card-header">
-                                                    <h4>Slot <?= $row['slot_number'] ?></h4>
-                                                    <p><?= $row['location'] ?></p>
-
-                                                    <span class="badge rounded-pill ended-badge">Ended</span>
-                                                </div>
-
-                                                <div class="card-body">
-                                                    <div class="locker-details">
-                                                        <p class="label">
-                                                            <i class="fa-solid fa-vault"></i>
-                                                            Locker Details
-                                                        </p>
-
-                                                        <p>Size: <?= $row['size'] ?></p>
-                                                        <p>Price: &#8369;<?= $row['price'] ?></p>
-                                                        <p>Academic Year: <?= $row['academic_year'] ?></p>
-                                                        <p>Semester: <?= $row['semester'] ?></p>
-                                                        <p>Start on: <?= $row['start_at'] ?></p>
-                                                        <p>End on: <?= $row['end_at'] ?></p>
-                                                    </div>
-
-                                                    <div class="application-details">
-                                                        <p class="label">
-                                                            <i class="fa-brands fa-jxl"></i>
-                                                            Application Details
-                                                        </p>
-
-                                                        <p>Application ID: #<?= $row['application_id'] ?></p>
-                                                        <p>Payment: <?= $row['payment'] ?></p>
-                                                        <p>Ended on: <?= $row['updated_at'] ?></p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php } ?>
-                                    </div>
-                                    <ul class="pagination">
-                                        <li class="page-item <?= ($endedPage <= 1) ? 'disabled' : '' ?>">
-                                            <a class="page-link"
-                                            href="?endedPage=<?= $endedPage - 1 ?>#myLockerApplicationOffcanvas">
-                                                Previous
-                                            </a>
-                                        </li>
-
-                                        <li class="page-item active">
-                                            <span class="page-link"><?= $endedPage ?></span>
-                                        </li>
-
-                                        <li class="page-item <?= ($endedPage >= $totalPagesAccepted) ? 'disabled' : '' ?>">
-                                            <a class="page-link"
-                                            href="?endedPage=<?= $endedPage + 1 ?>#myLockerApplicationOffcanvas">
-                                                Next
-                                            </a>
-                                        </li>
-                                    </ul>
-                                <?php else: ?>
-                                    <div id="empty">
-                                        <i class="fa-solid fa-ban"></i>
-                                        <small>No ended application yet</small>
-                                        <small>Try to reload page</small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <!-- Application history -->
-                            <div class="table-container">
-                                <h3>Application History</h3>
-
-                                <?php
-                                    // Locker application history 
-                                    $limit = 8;
-                                    $historyPage = isset($_GET['historyPage']) ? (int)$_GET['historyPage'] : 1;
-                                    if ($historyPage < 1) $historyPage = 1;
-
-                                    $offset = ($historyPage - 1) * $limit;
-
-                                    $stmtHistory = $conn_local->prepare("CALL getMyLockerApplicationHistory(?, ?, ?)");
-                                    $stmtHistory->bind_param("sii", $id, $limit, $offset);
-
-                                    $stmtHistory->execute();
-
-                                    $historyResultSet = $stmtHistory->get_result();
-
-                                    $stmtHistory->next_result();
-                                    $totalHistoryRow = $stmtHistory->get_result()->fetch_assoc()['myHistoryTotal'];
-
-                                    $totalPagesHistory = ceil($totalHistoryRow / $limit);
-
-                                    $stmtHistory->close();
-
-                                    while ($conn_local->next_result()) {
-                                        $conn_local->store_result();
-                                    }
-                                ?>
-
-                                <div class="table-container">
-                                    <?php if ($historyResultSet->num_rows > 0): ?>
-                                        <table class="table table-borderless">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Application ID</th>
-                                                        <th>Location</th>
-                                                        <th>Slot</th>
-                                                        <th>Size</th>
-                                                        <th>Price</th>
-                                                        <th>Academic Year - Semester</th>
-                                                        <th>Start On</th>
-                                                        <th>End On</th>
-                                                        <th>Status</th>
-                                                        <th>Date</th>
-                                                    </tr>
-                                                </thead>
-
-                                                <tbody>
-                                                    <?php while ($row = $historyResultSet->fetch_assoc()) { ?>
-                                                        <tr>
-                                                            <td data-label="Application ID"><?= $row['application_id'] ?></td>
-                                                            <td data-label="Location"><?= $row['location'] ?></td>
-                                                            <td data-label="Slot"><?= $row['slot_number'] ?></td>
-                                                            <td data-label="Size"><?= $row['size'] ?></td>
-                                                            <td data-label="Price">&#8369;<?= $row['price'] ?></td>
-
-                                                            <td data-label="Academic Year - Semester">
-                                                                <?= $row['academic_year'] ?> - <?= $row['semester'] ?>
-                                                            </td>
-
-                                                            <td data-label="Start On"><?= $row['start_at'] ?></td>
-                                                            <td data-label="End On"><?= $row['end_at'] ?></td>
-
-                                                            <td data-label="Status">
-                                                                <?php if ($row['status'] == 'Revoked') { ?>
-                                                                    <span class="badge rounded-pill revoked-badge">Revoked</span>
-                                                                <?php } elseif ($row['status'] == 'Cancelled') { ?>
-                                                                    <span class="badge rounded-pill cancelled-badge">Cancelled</span>
-                                                                <?php } elseif ($row['payment'] == 'Paid') { ?>
-                                                                    <span class="badge rounded-pill ended-badge">Ended - Paid</span>
-                                                                <?php } elseif ($row['payment'] == 'Unpaid') { ?>
-                                                                    <span class="badge rounded-pill ended-badge">Ended - Unpaid</span>
-                                                                <?php } else { ?>
-                                                                    <span class="badge rounded-pill rejected-badge">Rejected</span>
-                                                                <?php } ?>
-                                                            </td>
-
-                                                            <td data-label="Date"><?= $row['updated_at'] ?></td>
-                                                        </tr>
-                                                    <?php } ?>
-                                                </tbody>
-                                        </table>
-                                        <ul class="pagination">
-                                            <li class="page-item <?= ($historyPage <= 1) ? 'disabled' : '' ?>">
-                                                <a class="page-link"
-                                                href="?historyPage=<?= $historyPage - 1 ?>#myLockerApplicationOffcanvas">
-                                                    Previous
-                                                </a>
-                                            </li>
-
-                                            <li class="page-item active">
-                                                <span class="page-link"><?= $historyPage ?></span>
-                                            </li>
-
-                                            <li class="page-item <?= ($historyPage >= $totalPagesHistory) ? 'disabled' : '' ?>">
-                                                <a class="page-link"
-                                                href="?historyPage=<?= $historyPage + 1 ?>#myLockerApplicationOffcanvas">
-                                                    Next
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    <?php else: ?>
-                                        <div id="empty">
-                                            <i class="fa-solid fa-ban"></i>
-                                            <small>No application history yet</small>
-                                            <small>Try to reload page</small>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <?php foreach ($pendingResultSet as $row) { ?>
-                    <div class="modal fade danger-modal" id="cancelApplicationModal<?= $row['application_id'] ?>" tabindex="-1" data-bs-backdrop="true" data-bs-keyboard="true" style="z-index: 2000;">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-body">
-                                    <div class="message">
-                                        <i class="fa-solid fa-circle-xmark"></i>
-                                        <h5>Cancel Application</h5>
-                                        <p>Are you sure you want to cancel application on <span>slot <?= $row['slot_number'] ?></span>?</p>
-                                    </div>
-
-                                    <div class="action-buttons">
-                                        <button class="btn secondary-btn" data-bs-dismiss="modal">
-                                            No
-                                        </button>
-
-                                        <form method="POST" action="../app/locker/cancel_locker_application.php">
-                                            <input type="hidden" name="id" value="<?= $row['application_id'] ?>">
-                                            <button class="btn primary-btn">Yes, Cancel</button>
-                                        </form>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                <?php } ?>
-
                 <!-- Lockers header -->
-                 <header>
+                <header class="searchFilter">
                     <form method="GET">
                         <div class="search-group">
                             <i class="fa-solid fa-magnifying-glass"></i>
@@ -842,7 +379,7 @@ $password = $_SESSION['password'] ?? '';
                                     <div id="empty">
                                         <i class="fa-solid fa-ban"></i>
                                         <small>No locker slots yet</small>
-                                        <small>Try to reload page</small>
+                                        <small>Try to <a href="javascript:location.reload();"><i class="fa-solid fa-arrows-rotate"></i> reload</a> page</small>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -877,7 +414,7 @@ $password = $_SESSION['password'] ?? '';
                         <div id="empty">
                             <i class="fa-solid fa-ban"></i>
                             <small>No locker location yet</small>
-                            <small>Try to reload page</small>
+                            <small>Try to <a href="javascript:location.reload();"><i class="fa-solid fa-arrows-rotate"></i> reload</a> page</small>
                         </div>
                     <?php endif; ?>
                 </div>

@@ -149,16 +149,14 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
     margin-left: 2px !important;
 }
 
-/* .field-error::before {
-    content: "⚠ ";
-} */
-
 /* Empty */
 #empty {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
+    margin-top: 34px;
+    margin-bottom: 34px;
 }
 
 #empty > i {
@@ -169,6 +167,121 @@ a, p, span, strong, small, h1, h2, h3, h4, h5, h6 {
 #empty > small {
     font-weight: 400;
     color: var(--text-dark-secondary);
+}
+
+#empty > small a {
+    font-weight: 400;
+    color: var(--success-base);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#empty > small a:hover {
+    text-decoration: underline;
+}
+
+/* Search and filter */
+.searchFilter {
+    background-color: #ffffff;
+    display: flex;
+    width: 100%;
+}
+
+.searchFilter form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+}
+ 
+.searchFilter form .search-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.searchFilter form .search-group i {
+    color: var(--text-dark-secondary);
+}
+
+.searchFilter form .search-group input {
+    flex: 1;
+    width: 100%;
+    padding: 6px 12px;
+    border: 1px solid var(--text-light-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-dark-primary);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    font-weight: 400;
+}
+
+.searchFilter form .search-group input:focus {
+    border-color: var(--color-primary-base);
+}
+
+.searchFilter .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.searchFilter form .filter-group i {
+    color: var(--text-dark-secondary);
+}
+
+.searchFilter form .filter-group select {
+    padding: 6px 12px;
+    border: 1px solid var(--text-light-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-dark-primary);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    font-weight: 400;
+}
+
+.searchFilter form .filter-group select:focus {
+    border-color: var(--color-primary-base);
+}
+
+/* Nav tabs */
+.nav-tabs {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+}
+
+.nav-tabs li {
+    flex-shrink: 0;
+}
+
+.nav-tabs li a {
+    display: block;
+    color: var(--text-dark-secondary) !important;
+    font-weight: 400 !important;
+    font-size: 0.9rem !important;
+    white-space: nowrap;
+}
+
+.nav-tabs li a:hover {
+    background-color: var(--color-primary-base) !important;
+    color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
+}
+
+.nav-tabs li a.active {
+    background-color: var(--color-primary-base) !important;
+    color: var(--text-light-primary) !important;
+    font-weight: 400 !important;
 }
 
 /* Pagination */

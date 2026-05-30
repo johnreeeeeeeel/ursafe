@@ -61,6 +61,6 @@ try {
     ];
 }
 
-header("Location: ../../user/lockers.php#myLockerApplicationOffcanvas");
+header("Location: ../../user/my_applications.php?tab=pendingApplicationsTab");
 exit;
 ?>

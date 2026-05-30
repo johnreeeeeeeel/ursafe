@@ -94,6 +94,13 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     </li>
 
                     <li>
+                        <a class="link" href="applications.php">
+                            <i class="fa-solid fa-file-lines"></i>
+                            Applications
+                        </a>
+                    </li>
+
+                    <li>
                         <a class="link" href="users.php">
                             <i class="fa-solid fa-users"></i>
                             Users
@@ -132,6 +139,13 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                     <a class="link" href="lockers.php">
                         <i class="fa-solid fa-vault"></i>
                         Lockers
+                    </a>
+                </li>
+
+                <li>
+                    <a class="link" href="applications.php">
+                        <i class="fa-solid fa-file-lines"></i>
+                        Applications
                     </a>
                 </li>
 
@@ -453,7 +467,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             <div id="empty">
                                 <i class="fa-solid fa-ban"></i>
                                 <small>No recent activated user yet</small>
-                                <small>Try to reload page</small>
+                                <small>Try to <a href="javascript:location.reload();"><i class="fa-solid fa-arrows-rotate"></i> reload</a> page</small>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -509,7 +523,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
                             <div id="empty">
                                 <i class="fa-solid fa-ban"></i>
                                 <small>No recent locker application yet</small>
-                                <small>Try to reload page</small>
+                                <small>Try to <a href="javascript:location.reload();"><i class="fa-solid fa-arrows-rotate"></i> reload</a> page</small>
                             </div>
                         <?php endif; ?>
                     </div>

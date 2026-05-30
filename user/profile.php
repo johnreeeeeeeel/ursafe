@@ -113,7 +113,14 @@ $password = $_SESSION['password'] ?? '';
                             <i class="fa-solid fa-vault"></i>
                             Lockers
                         </a>
-                    </li>       
+                    </li>
+                    
+                    <li>
+                        <a class="link" href="my_applications.php">
+                            <i class="fa-solid fa-file-lines"></i>
+                            My Applications
+                        </a>
+                    </li> 
                 </div>
 
                 <div class="bottom-nav">
@@ -156,6 +163,13 @@ $password = $_SESSION['password'] ?? '';
                         Lockers
                     </a>
                 </li>
+
+                <li>
+                    <a class="link" href="my_applications.php">
+                        <i class="fa-solid fa-file-lines"></i>
+                        My Applications
+                    </a>
+                </li> 
             </div>
 
             <div class="bottom-nav">

@@ -974,56 +974,6 @@ DELIMITER ;
 
 
 
-##### \-- GET USER ACCOUNT LOGS (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE getUserAccountLogs(
-
-&#x20;   IN p\_limit INT,
-
-&#x20;   IN p\_offset INT
-
-)
-
-BEGIN
-
-&#x20;   SELECT
-
-&#x20;       id,
-
-&#x20;       action,
-
-&#x20;       description,
-
-&#x20;       created\_at
-
-&#x20;   FROM user\_account\_logs
-
-&#x20;   ORDER BY created\_at DESC
-
-&#x20;   LIMIT p\_offset, p\_limit;
-
-
-
-&#x20;   SELECT COUNT(\*) AS userLogsTotal
-
-&#x20;   FROM user\_account\_logs;
-
-
-
-END //
-
-
-
-DELIMITER ;
-
-
-
 ##### \-- AFTER USER ACTIVATION (TRIGGER)
 
 
@@ -1042,11 +992,11 @@ FOR EACH ROW
 
 BEGIN
 
-&#x20;   IF NEW.status = 'Active' AND NEW.status <> 'Inactive' THEN
+&#x20;    IF OLD.status <> 'Active' AND NEW.status = 'Active' THEN
 
 
 
-&#x20;       INSERT INTO user\_account\_logs (
+&#x20;       INSERT INTO logs (
 
 &#x20;           action,
 
@@ -1060,23 +1010,7 @@ BEGIN
 
 &#x20;           CONCAT(
 
-&#x20;               'Activated user: ',
-
-&#x20;               NEW.username,
-
-&#x20;               ' | ', NEW.id,
-
-&#x20;               ' | ', NEW.status,
-
-&#x20;               ' | ', NEW.sex,
-
-&#x20;               ' | ', NEW.dob,
-
-&#x20;               ' | ', NEW.institute,
-
-&#x20;               ' | ', NEW.program,
-
-&#x20;               ' | ', NEW.email
+&#x20;               NEW.lastname, ', ', NEW.firstname, ' ', IFNULL(NEW.middlename, ''), ' | ', NEW.id, ' | ', NEW.email, ' account has been activated.'
 
 &#x20;           )
 
@@ -1118,7 +1052,7 @@ BEGIN
 
 
 
-&#x20;       INSERT INTO user\_account\_logs (
+&#x20;       INSERT INTO logs (
 
 &#x20;           action,
 
@@ -1132,25 +1066,9 @@ BEGIN
 
 &#x20;           CONCAT(
 
-&#x20;               'Deactivated user: ',
+&#x20;                NEW.lastname, ', ', NEW.firstname, ' ', IFNULL(NEW.middlename, ''), ' | ', NEW.id, ' | ', NEW.email, ' account has been deactivated.'            
 
-&#x20;               NEW.username,
-
-&#x20;               ' | ', NEW.id,
-
-&#x20;               ' | ', OLD.status, ' → ', NEW.status,
-
-&#x20;               ' | ', NEW.sex,
-
-&#x20;               ' | ', NEW.dob,
-
-&#x20;               ' | ', NEW.institute,
-
-&#x20;               ' | ', NEW.program,
-
-&#x20;               ' | ', NEW.email
-
-&#x20;           )
+&#x09;    )
 
 &#x20;       );
 
@@ -2526,6 +2444,8 @@ BEGIN
 
 &#x20;
 
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
+
 &#x20;   LEFT JOIN locker\_slots ls ON la.slot\_id = ls.id
 
 &#x20;   LEFT JOIN locker\_locations ll ON ls.location\_id = ll.id
@@ -2589,6 +2509,8 @@ BEGIN
 &#x20;   FROM locker\_applications la
 
 &#x20;
+
+&#x20;   INNER JOIN users u ON la.user\_id = u.id
 
 &#x20;   LEFT JOIN locker\_slots ls ON la.slot\_id = ls.id
 
@@ -2902,56 +2824,6 @@ DELIMITER ;
 
 
 
-##### \-- GET LOCKER LOCATION LOGS (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE getLockerLogs(
-
-&#x20;   IN p\_limit INT,
-
-&#x20;   IN p\_offset INT
-
-)
-
-BEGIN
-
-&#x20;   SELECT
-
-&#x20;       id,
-
-&#x20;       action,
-
-&#x20;       description,
-
-&#x20;       created\_at
-
-&#x20;   FROM locker\_logs
-
-&#x20;   ORDER BY created\_at DESC
-
-&#x20;   LIMIT p\_offset, p\_limit;
-
-
-
-&#x20;   SELECT COUNT(\*) AS lockerLogsTotal
-
-&#x20;   FROM locker\_logs;
-
-
-
-END //
-
-
-
-DELIMITER ;
-
-
-
 ##### \-- GET LOCKER SIZES NORMAL (PROCEDURE)
 
 
@@ -3250,6 +3122,56 @@ DELIMITER ;
 
 
 
+##### \-- GET LOGS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getLogs(
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       id,
+
+&#x20;       action,
+
+&#x20;       description,
+
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
+
+&#x20;   FROM logs
+
+&#x20;   ORDER BY created\_at DESC
+
+&#x20;   LIMIT p\_offset, p\_limit;
+
+
+
+&#x20;   SELECT COUNT(\*) AS logsTotal
+
+&#x20;   FROM logs;
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
 ##### \-- GET ACADEMIC CALENDAR NORMAL (PROCEDURE)
 
 
@@ -3358,9 +3280,7 @@ BEGIN
 
 &#x20;       DATE\_FORMAT(end\_at, '%M %d, %Y') AS end\_at,
 
-&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at,
-
-&#x20;       DATE\_FORMAT(updated\_at, '%M %d, %Y %h:%i:%s %p') AS updated\_at
+&#x20;       DATE\_FORMAT(created\_at, '%M %d, %Y %h:%i:%s %p') AS created\_at
 
 &#x20;   FROM academic\_calendar
 
@@ -4182,88 +4102,6 @@ DELIMITER ;
 
 
 
-##### \-- GET MY ACCEPTED LOCKER APPLICATIONS (PROCEDURE)
-
-
-
-DELIMITER //
-
-
-
-CREATE OR REPLACE PROCEDURE getMyAcceptedLockerApplications(
-
-&#x20;   IN p\_user\_id VARCHAR(255),
-
-&#x20;   IN p\_limit INT,
-
-&#x20;   IN p\_offset INT
-
-)
-
-
-
-BEGIN
-
-&#x20;   SELECT
-
-&#x20;       la.id AS application\_id,
-
-&#x20;       la.status,
-
-&#x20;       la.payment,
-
-&#x20;       ls.slot\_number,
-
-&#x20;       ll.location,
-
-&#x20;       sz.size,
-
-&#x20;       sz.price,
-
-&#x09;ac.academic\_year,
-
-&#x09;ac.semester,
-
-&#x20;       ac.start\_at,
-
-&#x20;       ac.end\_at,
-
-&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
-
-&#x20;   FROM locker\_applications la
-
-
-
-&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
-
-&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
-
-&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
-
-&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
-
-
-
-&#x20;   WHERE la.user\_id = p\_user\_id AND la.status = 'Accepted'
-
-&#x20;   ORDER BY la.updated\_at DESC LIMIT p\_limit OFFSET p\_offset;
-
-
-
-&#x20;   SELECT COUNT(\*) AS myAcceptedTotal FROM locker\_applications
-
-&#x20;   WHERE user\_id = p\_user\_id AND status = 'Accepted';
-
-
-
-END //
-
-
-
-DELIMITER ;
-
-
-
 ##### \-- GET MY PENDING LOCKER APPLICATIONS (PROCEDURE)
 
 
@@ -4306,9 +4144,9 @@ BEGIN
 
 &#x09;ac.semester,
 
-&#x20;       ac.start\_at,
+&#x09;DATE\_FORMAT(ac.start\_at, '%M %d, %Y') AS start\_at,
 
-&#x20;       ac.end\_at,
+&#x20;       DATE\_FORMAT(ac.end\_at, '%M %d, %Y') AS end\_at,
 
 &#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y') AS created\_at
 
@@ -4335,6 +4173,416 @@ BEGIN
 &#x20;   SELECT COUNT(\*) AS myPendingTotal FROM locker\_applications
 
 &#x20;   WHERE user\_id = p\_user\_id AND status = 'Pending';
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET SEARCH AND FILTER MY PENDING LOCKER APPLICATIONS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getSearchFilterMyPendingLockerApplications(
+
+&#x20;   IN p\_user\_id VARCHAR(255),
+
+&#x20;   IN searchTerm VARCHAR(255),
+
+&#x20;   IN filterTerm VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.status,
+
+&#x20;       la.payment,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       sz.size,
+
+&#x20;       sz.price,
+
+&#x20;       ac.academic\_year,
+
+&#x20;       ac.semester,
+
+&#x20;       DATE\_FORMAT(ac.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ac.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.created\_at, '%M %d, %Y') AS created\_at
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;   AND la.status = 'Pending'
+
+
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR sz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.academic\_year LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
+
+
+
+&#x20;   ORDER BY
+
+&#x20;       CASE WHEN filterTerm = 'newest' THEN la.created\_at END DESC,
+
+&#x20;       CASE WHEN filterTerm = 'oldest' THEN la.created\_at END ASC,
+
+&#x20;       la.created\_at DESC
+
+
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS myPendingTotal
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;   AND la.status = 'Pending'
+
+
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR sz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.academic\_year LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   );
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET MY ACCEPTED LOCKER APPLICATIONS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getMyAcceptedLockerApplications(
+
+&#x20;   IN p\_user\_id VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.status,
+
+&#x20;       la.payment,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       sz.size,
+
+&#x20;       sz.price,
+
+&#x09;ac.academic\_year,
+
+&#x09;ac.semester,
+
+&#x20;       DATE\_FORMAT(ac.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ac.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+
+
+&#x20;   WHERE la.user\_id = p\_user\_id AND la.status = 'Accepted'
+
+&#x20;   ORDER BY la.updated\_at DESC LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS myAcceptedTotal FROM locker\_applications
+
+&#x20;   WHERE user\_id = p\_user\_id AND status = 'Accepted';
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET SEARCH AND FILTER MY ACCEPTED LOCKER APPLICATIONS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getSearchFilterMyAcceptedLockerApplications(
+
+&#x20;   IN p\_user\_id VARCHAR(255),
+
+&#x20;   IN searchTerm VARCHAR(255),
+
+&#x20;   IN filterTerm VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.status,
+
+&#x20;       la.payment,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       sz.size,
+
+&#x20;       sz.price,
+
+&#x20;       ac.academic\_year,
+
+&#x20;       ac.semester,
+
+&#x20;       DATE\_FORMAT(ac.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ac.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;   AND la.status = 'Accepted'
+
+
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR sz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.academic\_year LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
+
+
+
+&#x20;   ORDER BY
+
+&#x20;       CASE WHEN filterTerm = 'newest' THEN la.updated\_at END DESC,
+
+&#x20;       CASE WHEN filterTerm = 'oldest' THEN la.updated\_at END ASC,
+
+&#x20;       la.updated\_at DESC
+
+
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS myAcceptedTotal
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;   AND la.status = 'Accepted'
+
+
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR sz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.academic\_year LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   );
 
 
 
@@ -4388,9 +4636,9 @@ BEGIN
 
 &#x09;ac.semester,
 
-&#x20;       ac.start\_at,
+&#x20;       DATE\_FORMAT(ac.start\_at, '%M %d, %Y') AS start\_at,
 
-&#x20;       ac.end\_at,
+&#x20;       DATE\_FORMAT(ac.end\_at, '%M %d, %Y') AS end\_at,
 
 &#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
@@ -4419,6 +4667,170 @@ BEGIN
 &#x20;   SELECT COUNT(\*) AS myEndedTotal FROM locker\_applications
 
 &#x20;   WHERE user\_id = p\_user\_id AND status = 'Ended' AND payment = 'Unpaid';
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET SEARCH AND FILTER MY ENDED LOCKER APPLICATIONS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getSearchFilterMyEndedLockerApplications(
+
+&#x20;   IN p\_user\_id VARCHAR(255),
+
+&#x20;   IN searchTerm VARCHAR(255),
+
+&#x20;   IN filterTerm VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.status,
+
+&#x20;       la.payment,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       sz.size,
+
+&#x20;       sz.price,
+
+&#x20;       ac.academic\_year,
+
+&#x20;       ac.semester,
+
+&#x20;       DATE\_FORMAT(ac.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ac.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;   AND la.status = 'Ended' AND la.payment = 'Unpaid'
+
+
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR sz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.academic\_year LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
+
+
+
+&#x20;   ORDER BY
+
+&#x20;       CASE WHEN filterTerm = 'newest' THEN la.updated\_at END DESC,
+
+&#x20;       CASE WHEN filterTerm = 'oldest' THEN la.updated\_at END ASC,
+
+&#x20;       la.updated\_at DESC
+
+
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS myEndedTotal
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;   AND la.status = 'Ended' AND la.payment = 'Unpaid'
+
+
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR sz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.academic\_year LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   );
 
 
 
@@ -4472,9 +4884,9 @@ BEGIN
 
 &#x09;ac.semester,
 
-&#x20;       ac.start\_at,
+&#x20;       DATE\_FORMAT(ac.start\_at, '%M %d, %Y') AS start\_at,
 
-&#x20;       ac.end\_at,
+&#x20;       DATE\_FORMAT(ac.end\_at, '%M %d, %Y') AS end\_at,
 
 &#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
 
@@ -4501,6 +4913,170 @@ BEGIN
 &#x20;   SELECT COUNT(\*) AS myHistoryTotal FROM locker\_applications
 
 &#x20;   WHERE user\_id = p\_user\_id AND status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND payment IN ('Paid', 'Unpaid');
+
+
+
+END //
+
+
+
+DELIMITER ;
+
+
+
+##### \-- GET SEARCH AND FILTER MY HISTORY LOCKER APPLICATIONS (PROCEDURE)
+
+
+
+DELIMITER //
+
+
+
+CREATE OR REPLACE PROCEDURE getSearchFilterMyLockerApplicationHistory(
+
+&#x20;   IN p\_user\_id VARCHAR(255),
+
+&#x20;   IN searchTerm VARCHAR(255),
+
+&#x20;   IN filterTerm VARCHAR(255),
+
+&#x20;   IN p\_limit INT,
+
+&#x20;   IN p\_offset INT
+
+)
+
+
+
+BEGIN
+
+&#x20;   SELECT
+
+&#x20;       la.id AS application\_id,
+
+&#x20;       la.status,
+
+&#x20;       la.payment,
+
+&#x20;       ls.slot\_number,
+
+&#x20;       ll.location,
+
+&#x20;       sz.size,
+
+&#x20;       sz.price,
+
+&#x20;       ac.academic\_year,
+
+&#x20;       ac.semester,
+
+&#x20;       DATE\_FORMAT(ac.start\_at, '%M %d, %Y') AS start\_at,
+
+&#x20;       DATE\_FORMAT(ac.end\_at, '%M %d, %Y') AS end\_at,
+
+&#x20;       DATE\_FORMAT(la.updated\_at, '%M %d, %Y') AS updated\_at
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;   AND la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid')
+
+
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR sz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.academic\_year LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   )
+
+
+
+&#x20;   ORDER BY
+
+&#x20;       CASE WHEN filterTerm = 'newest' THEN la.updated\_at END DESC,
+
+&#x20;       CASE WHEN filterTerm = 'oldest' THEN la.updated\_at END ASC,
+
+&#x20;       la.updated\_at DESC
+
+
+
+&#x20;   LIMIT p\_limit OFFSET p\_offset;
+
+
+
+&#x20;   SELECT COUNT(\*) AS myHistoryTotal
+
+&#x20;   FROM locker\_applications la
+
+
+
+&#x20;   INNER JOIN locker\_slots ls ON la.slot\_id = ls.id
+
+&#x20;   INNER JOIN locker\_locations ll ON ls.location\_id = ll.id
+
+&#x20;   INNER JOIN locker\_sizes sz ON ls.size\_id = sz.id
+
+&#x20;   LEFT JOIN academic\_calendar ac ON ls.academic\_year\_id = ac.id
+
+
+
+&#x20;   WHERE la.user\_id = p\_user\_id
+
+&#x20;   AND la.status IN ('Cancelled', 'Rejected', 'Revoked', 'Ended') AND la.payment IN ('Paid', 'Unpaid')
+
+
+
+&#x20;   AND (
+
+&#x20;       searchTerm IS NULL
+
+&#x20;       OR searchTerm = ''
+
+
+
+&#x20;       OR la.id LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ls.slot\_number LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ll.location LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR sz.size LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.academic\_year LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;       OR ac.semester LIKE CONCAT('%', searchTerm, '%')
+
+&#x20;   );
 
 
 
@@ -4950,7 +5526,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5000,7 +5576,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5104,7 +5680,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5168,7 +5744,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5240,7 +5816,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5394,7 +5970,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5454,7 +6030,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5516,7 +6092,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5624,7 +6200,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5696,7 +6272,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5774,7 +6350,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5844,7 +6420,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -5922,7 +6498,7 @@ BEGIN
 
 
 
-&#x20;   INSERT INTO locker\_logs (
+&#x20;   INSERT INTO logs (
 
 &#x20;       action,
 
@@ -6006,7 +6582,7 @@ BEGIN
 
 
 
-&#x20;       INSERT INTO locker\_logs (
+&#x20;       INSERT INTO logs (
 
 &#x20;           action,
 
@@ -6100,7 +6676,7 @@ BEGIN
 
 
 
-&#x20;       INSERT INTO locker\_logs (action, description)
+&#x20;       INSERT INTO logs (action, description)
 
 &#x20;       VALUES (action, description);
 
@@ -6184,7 +6760,7 @@ BEGIN
 
 
 
-&#x20;       INSERT INTO locker\_logs (action, description)
+&#x20;       INSERT INTO logs (action, description)
 
 &#x20;       VALUES (action, description);
 
@@ -6268,7 +6844,7 @@ BEGIN
 
 
 
-&#x20;       INSERT INTO locker\_logs (action, description)
+&#x20;       INSERT INTO logs (action, description)
 
 &#x20;       VALUES (action, description);
 
@@ -6352,7 +6928,7 @@ BEGIN
 
 
 
-&#x20;       INSERT INTO locker\_logs (action, description)
+&#x20;       INSERT INTO logs (action, description)
 
 &#x20;       VALUES (action, description);
 
@@ -6378,7 +6954,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE updateLockerApplicationStatusDaily()
+CREATE OR REPLACE PROCEDURE endLockerApplication\_applicationStatus()
 
 
 
@@ -6436,7 +7012,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE EVENT update\_locker\_application\_status\_daily
+CREATE OR REPLACE EVENT endLockerApplication\_applicationStatus
 
 ON SCHEDULE EVERY 1 DAY
 
@@ -6448,7 +7024,7 @@ DO
 
 BEGIN
 
-&#x20;   CALL updateLockerApplicationStatusDaily();
+&#x20;   CALL endLockerApplication\_applicationStatus();
 
 END //
 
@@ -6466,7 +7042,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE PROCEDURE updateLockerStatusDaily()
+CREATE OR REPLACE PROCEDURE endLockerApplication\_lockerStatus()
 
 
 
@@ -6488,7 +7064,7 @@ BEGIN
 
 &#x20;   SET ls.status = 'Available'
 
-&#x20;   WHERE CURRENT\_DATE() >= ac.start\_at AND CURRENT\_DATE() < ac.end\_at AND ls.status <> 'Occupied';
+&#x20;   WHERE CURRENT\_DATE() >= ac.start\_at AND CURRENT\_DATE() <= ac.end\_at AND ls.status <> 'Occupied';
 
 
 
@@ -6518,7 +7094,7 @@ DELIMITER //
 
 
 
-CREATE OR REPLACE EVENT update\_locker\_status\_daily
+CREATE OR REPLACE EVENT endLockerApplication\_lockerStatus
 
 ON SCHEDULE EVERY 1 DAY
 
@@ -6530,7 +7106,7 @@ DO
 
 BEGIN
 
-&#x20;   CALL updateLockerStatusDaily();
+&#x20;   CALL endLockerApplication\_lockerStatus();
 
 END //
 
