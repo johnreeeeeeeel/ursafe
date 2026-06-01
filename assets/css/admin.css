@@ -852,6 +852,14 @@ section .content {
     gap: 12px;
 }  
 
+#lockers #historyApplicationsTab .table-container {
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
 #lockers #historyApplicationsTab .table-container .table,
 #lockers #historyApplicationsTab .table-container .table thead,
 #lockers #historyApplicationsTab .table-container .table tbody,

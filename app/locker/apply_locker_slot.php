@@ -27,14 +27,14 @@ try {
     $email = $_SESSION['email'];
     $username = $_SESSION['username'];
 
-    // sendLockerSlotApplication(
-    //     $email,
-    //     $username,
-    //     $slot['location'],
-    //     $slot['slot_number'],
-    //     $slot['size'],
-    //     $slot['price']
-    // );
+    sendLockerSlotApplication(
+        $email,
+        $username,
+        $slot['location'],
+        $slot['slot_number'],
+        $slot['size'],
+        $slot['price']
+    );
 
     $_SESSION['alert_message'] = [
         'type' => 'success',
